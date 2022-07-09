@@ -1,3 +1,6 @@
+import Cocoa
+import SwiftUI
+
 @_cdecl("plugin_is_GPL_compatible")
 public func isGPLCompatible() -> Int32 {
     return 1
@@ -95,12 +98,14 @@ class Environment {
     //
     // Make function
     //
-    class Wrapper {
+    class DefnImplementation {
         let function: (Environment, [EmacsValue]) -> EmacsValue
+        let arity: Int
         init<T: EmacsConvertible, R: EmacsConvertible>(_ original: @escaping (T) -> R) {
             function = { (env, args) in
                 original(T.convert(from: args[0], within: env)).convert(within: env)
             }
+            arity = 1
         }
     }
 
@@ -108,18 +113,36 @@ class Environment {
                      R: EmacsConvertible>(named name: String,
                                           with docstring: String = "",
                                           function: @escaping (T) -> R) {
-        let wrapped = Wrapper(function)
+        let wrapped = DefnImplementation(function)
+        defn(named: name, with: docstring, function: wrapped)
+    }
+    private func defn(named name: String,
+                      with docstring: String,
+                      function: DefnImplementation) {
         let actualFunction: RawFunctionType = { rawEnv, num, args, data in
             let env = Environment(from: rawEnv!)
             let arg = EmacsValue(from: args?.pointee)
-            let impl = Unmanaged<Wrapper>.fromOpaque(data!).takeUnretainedValue()
+            let impl = Unmanaged<DefnImplementation>.fromOpaque(data!).takeUnretainedValue()
             let result = impl.function(env, [arg])
             return result.raw
         }
-        let wrappedPtr = Unmanaged.passRetained(wrapped).toOpaque()
-        let funcValue = EmacsValue(from: raw.pointee.make_function(raw, 1, 1, actualFunction, docstring, wrappedPtr))
+        let wrappedPtr = Unmanaged.passRetained(function).toOpaque()
+        let funcValue = EmacsValue(from: raw.pointee.make_function(raw, function.arity, function.arity, actualFunction, docstring, wrappedPtr))
         let symbol = intern(name)
         let _ = funcall("fset", with: symbol, funcValue)
+    }
+}
+
+struct ContentView: View {
+    let callback: () -> Void
+    init(callback: @escaping () -> Void) {
+        self.callback = callback
+    }
+
+    var body: some View {
+        Button("OK", action: callback)
+          .padding()
+          .frame(width: 100.0)
     }
 }
 
@@ -127,5 +150,11 @@ class Environment {
 public func Init(_ runtimePtr: UnsafeMutablePointer<emacs_runtime>) -> Int32 {
     let env = Environment(from: runtimePtr)
     env.defn(named: "swift-test", with: "") { (arg: String) in "I received \(arg)!!" }
+    let newController = NSHostingController(
+      rootView: ContentView {})
+    if let view = NSApp.windows[0].contentView {
+        view.addSubview(newController.view)
+        newController.view.frame = NSMakeRect(300, 200, 100, 50)
+    }
     return 0
 }
