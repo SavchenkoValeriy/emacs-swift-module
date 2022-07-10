@@ -11,7 +11,7 @@ let package = Package(
     .library(
       name: "EmacsSwiftModule",
       type: .dynamic,
-      targets: ["EmacsSwiftModule"]),
+      targets: ["EmacsSwiftModule"])
   ],
   dependencies: [
     // Dependencies declare other packages that this package depends on.
@@ -30,6 +30,6 @@ let package = Package(
       dependencies: [],
       path: "Source/C",
       publicHeadersPath: "include"
-    )
+    ),
   ]
 )
