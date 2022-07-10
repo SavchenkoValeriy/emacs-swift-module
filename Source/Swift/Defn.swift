@@ -3,6 +3,22 @@ import EmacsModule
 private class DefnImplementation {
   let function: (Environment, [EmacsValue]) -> EmacsValue
   let arity: Int
+
+  init<R: EmacsConvertible>(_ original: @escaping () -> R) {
+    function = { (env, args) in
+      original().convert(within: env)
+    }
+    arity = 0
+  }
+  init<R: EmacsConvertible>(
+    _ original: @escaping (Environment) -> R
+  ) {
+    function = { (env, args) in
+      original(env).convert(within: env)
+    }
+    arity = 0
+  }
+
   init<T: EmacsConvertible, R: EmacsConvertible>(_ original: @escaping (T) -> R)
   {
     function = { (env, args) in
@@ -134,6 +150,27 @@ extension Environment {
   //
   // Make function
   //
+  public func defn<
+    R: EmacsConvertible
+  >(
+    named name: String,
+    with docstring: String = "",
+    function: @escaping () -> R
+  ) {
+    let wrapped = DefnImplementation(function)
+    defn(named: name, with: docstring, function: wrapped)
+  }
+  public func defn<
+    R: EmacsConvertible
+  >(
+    named name: String,
+    with docstring: String = "",
+    function: @escaping (Environment) -> R
+  ) {
+    let wrapped = DefnImplementation(function)
+    defn(named: name, with: docstring, function: wrapped)
+  }
+
   public func defn<
     T: EmacsConvertible,
     R: EmacsConvertible
