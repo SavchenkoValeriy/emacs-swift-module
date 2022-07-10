@@ -1,6 +1,8 @@
 import Cocoa
 import SwiftUI
 
+import EmacsModule
+
 @_cdecl("plugin_is_GPL_compatible")
 public func isGPLCompatible() -> Int32 {
     return 1
