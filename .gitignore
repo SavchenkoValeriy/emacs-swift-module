@@ -3,3 +3,4 @@
 
 # SPM build artifacts
 .build
+.swiftpm
