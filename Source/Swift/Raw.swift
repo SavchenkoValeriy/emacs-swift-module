@@ -6,3 +6,5 @@ typealias RawValuePointer = UnsafeMutablePointer<RawEmacsValue?>?
 typealias RawFunctionType = @convention(c) (
   RawEnvironment, Int, RawValuePointer, UnsafeMutableRawPointer?
 ) -> RawEmacsValue?
+typealias RawOpaquePointer = UnsafeMutableRawPointer
+typealias RawFinalizer = @convention(c) (RawOpaquePointer?) -> Void

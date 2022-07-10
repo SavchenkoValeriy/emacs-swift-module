@@ -17,8 +17,25 @@ extension String: EmacsConvertible {
     return env.make(self)
   }
 
-  static func convert(from: EmacsValue, within env: Environment) -> String {
+  static func convert(from: EmacsValue, within env: Environment) -> Self {
     return env.toString(from)
+  }
+}
+
+protocol OpaquelyEmacsConvertible: AnyObject, EmacsConvertible {}
+
+extension OpaquelyEmacsConvertible {
+  func convert(within env: Environment) -> EmacsValue {
+    env.make(Unmanaged.passRetained(self).toOpaque()) { ptr in
+      if let nonNullPtr = ptr {
+        Unmanaged<AnyObject>.fromOpaque(nonNullPtr).release()
+      }
+    }
+  }
+
+  static func convert(from value: EmacsValue, within env: Environment) -> Self {
+    return Unmanaged<Self>.fromOpaque(env.toOpaque(value))
+      .takeUnretainedValue()
   }
 }
 
@@ -28,6 +45,12 @@ extension Environment {
   //
   public func make(_ from: String) -> EmacsValue {
     return EmacsValue(from: raw.pointee.make_string(raw, from, from.count))
+  }
+  public func make(
+    _ value: RawOpaquePointer,
+    with finalizer: @escaping RawFinalizer = { _ in () }
+  ) -> EmacsValue {
+    return EmacsValue(from: raw.pointee.make_user_ptr(raw, finalizer, value))
   }
 
   //
@@ -39,5 +62,8 @@ extension Environment {
     var buf = [CChar](repeating: 0, count: len)
     let _ = raw.pointee.copy_string_contents(raw, value.raw, &buf, &len)
     return String(cString: buf)
+  }
+  public func toOpaque(_ value: EmacsValue) -> RawOpaquePointer {
+    return raw.pointee.get_user_ptr(raw, value.raw)!
   }
 }
