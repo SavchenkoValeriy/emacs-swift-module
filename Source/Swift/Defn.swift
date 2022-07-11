@@ -1,77 +1,77 @@
 import EmacsModule
 
 private class DefnImplementation {
-  let function: (Environment, [EmacsValue]) -> EmacsValue
+  let function: (Environment, [EmacsValue]) throws -> EmacsValue
   let arity: Int
 
-  init<R: EmacsConvertible>(_ original: @escaping () -> R) {
+  init<R: EmacsConvertible>(_ original: @escaping () throws -> R) {
     function = { (env, args) in
-      original().convert(within: env)
+      try original().convert(within: env)
     }
     arity = 0
   }
   init<R: EmacsConvertible>(
-    _ original: @escaping (Environment) -> R
+    _ original: @escaping (Environment) throws -> R
   ) {
     function = { (env, args) in
-      original(env).convert(within: env)
+      try original(env).convert(within: env)
     }
     arity = 0
   }
-  init(_ original: @escaping () -> Void) {
+  init(_ original: @escaping () throws -> Void) {
     function = { (env, args) in
-      original()
+      try original()
       return env.Nil
     }
     arity = 0
   }
   init(
-    _ original: @escaping (Environment) -> Void
+    _ original: @escaping (Environment) throws -> Void
   ) {
     function = { (env, args) in
-      original(env)
+      try original(env)
       return env.Nil
     }
     arity = 0
   }
 
-  init<T: EmacsConvertible, R: EmacsConvertible>(_ original: @escaping (T) -> R)
+  init<T: EmacsConvertible, R: EmacsConvertible>(_ original: @escaping (T) throws -> R)
   {
     function = { (env, args) in
-      original(T.convert(from: args[0], within: env)).convert(within: env)
+      try original(T.convert(from: args[0], within: env)).convert(within: env)
     }
     arity = 1
   }
   init<T: EmacsConvertible, R: EmacsConvertible>(
-    _ original: @escaping (Environment, T) -> R
+    _ original: @escaping (Environment, T) throws -> R
   ) {
     function = { (env, args) in
-      original(env, T.convert(from: args[0], within: env)).convert(within: env)
+      try original(env, T.convert(from: args[0], within: env)).convert(within: env)
     }
     arity = 1
   }
-  init<T: EmacsConvertible>(_ original: @escaping (T) -> Void) {
+  init<T: EmacsConvertible>(_ original: @escaping (T) throws -> Void) {
     function = { (env, args) in
-      original(T.convert(from: args[0], within: env))
+      try original(T.convert(from: args[0], within: env))
       return env.Nil
     }
     arity = 1
   }
   init<T: EmacsConvertible>(
-    _ original: @escaping (Environment, T) -> Void
+    _ original: @escaping (Environment, T) throws -> Void
   ) {
     function = { (env, args) in
-      original(env, T.convert(from: args[0], within: env))
+      try original(env, T.convert(from: args[0], within: env))
       return env.Nil
     }
     arity = 1
   }
 
   init<T1: EmacsConvertible, T2: EmacsConvertible, R: EmacsConvertible>(
-    _ original: @escaping (T1, T2) -> R
+    _ original: @escaping (T1, T2) throws -> R
   ) {
     function = { (env, args) in
-      original(
+      try original(
         T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env)
       ).convert(within: env)
@@ -79,10 +79,10 @@ private class DefnImplementation {
     arity = 2
   }
   init<T1: EmacsConvertible, T2: EmacsConvertible, R: EmacsConvertible>(
-    _ original: @escaping (Environment, T1, T2) -> R
+    _ original: @escaping (Environment, T1, T2) throws -> R
   ) {
     function = { (env, args) in
-      original(
+      try original(
         env, T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env)
       ).convert(within: env)
@@ -90,10 +90,10 @@ private class DefnImplementation {
     arity = 2
   }
   init<T1: EmacsConvertible, T2: EmacsConvertible>(
-    _ original: @escaping (T1, T2) -> Void
+    _ original: @escaping (T1, T2) throws -> Void
   ) {
     function = { (env, args) in
-      original(
+      try original(
         T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env)
       )
@@ -102,10 +102,10 @@ private class DefnImplementation {
     arity = 2
   }
   init<T1: EmacsConvertible, T2: EmacsConvertible>(
-    _ original: @escaping (Environment, T1, T2) -> Void
+    _ original: @escaping (Environment, T1, T2) throws -> Void
   ) {
     function = { (env, args) in
-      original(
+      try original(
         env, T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env)
       )
@@ -117,9 +117,9 @@ private class DefnImplementation {
   init<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     R: EmacsConvertible
-  >(_ original: @escaping (T1, T2, T3) -> R) {
+  >(_ original: @escaping (T1, T2, T3) throws -> R) {
     function = { (env, args) in
-      original(
+      try original(
         T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env),
         T3.convert(from: args[0], within: env)
@@ -130,9 +130,9 @@ private class DefnImplementation {
   init<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     R: EmacsConvertible
-  >(_ original: @escaping (Environment, T1, T2, T3) -> R) {
+  >(_ original: @escaping (Environment, T1, T2, T3) throws -> R) {
     function = { (env, args) in
-      original(
+      try original(
         env, T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env),
         T3.convert(from: args[0], within: env)
@@ -142,9 +142,9 @@ private class DefnImplementation {
   }
   init<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible
-  >(_ original: @escaping (T1, T2, T3) -> Void) {
+  >(_ original: @escaping (T1, T2, T3) throws -> Void) {
     function = { (env, args) in
-      original(
+      try original(
         T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env),
         T3.convert(from: args[0], within: env)
@@ -155,9 +155,9 @@ private class DefnImplementation {
   }
   init<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible
-  >(_ original: @escaping (Environment, T1, T2, T3) -> Void) {
+  >(_ original: @escaping (Environment, T1, T2, T3) throws -> Void) {
     function = { (env, args) in
-      original(
+      try original(
         env, T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env),
         T3.convert(from: args[0], within: env)
@@ -170,9 +170,9 @@ private class DefnImplementation {
   init<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     T4: EmacsConvertible, R: EmacsConvertible
-  >(_ original: @escaping (T1, T2, T3, T4) -> R) {
+  >(_ original: @escaping (T1, T2, T3, T4) throws -> R) {
     function = { (env, args) in
-      original(
+      try original(
         T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env),
         T3.convert(from: args[0], within: env),
@@ -184,9 +184,9 @@ private class DefnImplementation {
   init<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     T4: EmacsConvertible, R: EmacsConvertible
-  >(_ original: @escaping (Environment, T1, T2, T3, T4) -> R) {
+  >(_ original: @escaping (Environment, T1, T2, T3, T4) throws -> R) {
     function = { (env, args) in
-      original(
+      try original(
         env, T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env),
         T3.convert(from: args[0], within: env),
@@ -198,9 +198,9 @@ private class DefnImplementation {
   init<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     T4: EmacsConvertible
-  >(_ original: @escaping (T1, T2, T3, T4) -> Void) {
+  >(_ original: @escaping (T1, T2, T3, T4) throws -> Void) {
     function = { (env, args) in
-      original(
+      try original(
         T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env),
         T3.convert(from: args[0], within: env),
@@ -213,9 +213,9 @@ private class DefnImplementation {
   init<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     T4: EmacsConvertible
-  >(_ original: @escaping (Environment, T1, T2, T3, T4) -> Void) {
+  >(_ original: @escaping (Environment, T1, T2, T3, T4) throws -> Void) {
     function = { (env, args) in
-      original(
+      try original(
         env, T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env),
         T3.convert(from: args[0], within: env),
@@ -229,9 +229,9 @@ private class DefnImplementation {
   init<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     T4: EmacsConvertible, T5: EmacsConvertible, R: EmacsConvertible
-  >(_ original: @escaping (T1, T2, T3, T4, T5) -> R) {
+  >(_ original: @escaping (T1, T2, T3, T4, T5) throws -> R) {
     function = { (env, args) in
-      original(
+      try original(
         T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env),
         T3.convert(from: args[0], within: env),
@@ -244,9 +244,9 @@ private class DefnImplementation {
   init<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     T4: EmacsConvertible, T5: EmacsConvertible, R: EmacsConvertible
-  >(_ original: @escaping (Environment, T1, T2, T3, T4, T5) -> R) {
+  >(_ original: @escaping (Environment, T1, T2, T3, T4, T5) throws -> R) {
     function = { (env, args) in
-      original(
+      try original(
         env, T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env),
         T3.convert(from: args[0], within: env),
@@ -259,9 +259,9 @@ private class DefnImplementation {
   init<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     T4: EmacsConvertible, T5: EmacsConvertible
-  >(_ original: @escaping (T1, T2, T3, T4, T5) -> Void) {
+  >(_ original: @escaping (T1, T2, T3, T4, T5) throws -> Void) {
     function = { (env, args) in
-      original(
+      try original(
         T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env),
         T3.convert(from: args[0], within: env),
@@ -275,9 +275,9 @@ private class DefnImplementation {
   init<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     T4: EmacsConvertible, T5: EmacsConvertible
-  >(_ original: @escaping (Environment, T1, T2, T3, T4, T5) -> Void) {
+  >(_ original: @escaping (Environment, T1, T2, T3, T4, T5) throws -> Void) {
     function = { (env, args) in
-      original(
+      try original(
         env, T1.convert(from: args[0], within: env),
         T2.convert(from: args[0], within: env),
         T3.convert(from: args[0], within: env),
@@ -299,7 +299,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping () -> R
+    function: @escaping () throws -> R
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -309,7 +309,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (Environment) -> R
+    function: @escaping (Environment) throws -> R
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -317,7 +317,7 @@ extension Environment {
   public func defn(
     named name: String,
     with docstring: String = "",
-    function: @escaping () -> Void
+    function: @escaping () throws -> Void
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -325,7 +325,7 @@ extension Environment {
   public func defn(
     named name: String,
     with docstring: String = "",
-    function: @escaping (Environment) -> Void
+    function: @escaping (Environment) throws -> Void
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -337,7 +337,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (T) -> R
+    function: @escaping (T) throws -> R
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -348,7 +348,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (Environment, T) -> R
+    function: @escaping (Environment, T) throws -> R
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -358,7 +358,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (T) -> Void
+    function: @escaping (T) throws -> Void
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -368,7 +368,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (Environment, T) -> Void
+    function: @escaping (Environment, T) throws -> Void
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -381,7 +381,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (T1, T2) -> R
+    function: @escaping (T1, T2) throws -> R
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -393,7 +393,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (Environment, T1, T2) -> R
+    function: @escaping (Environment, T1, T2) throws -> R
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -404,7 +404,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (T1, T2) -> Void
+    function: @escaping (T1, T2) throws -> Void
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -415,7 +415,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (Environment, T1, T2) -> Void
+    function: @escaping (Environment, T1, T2) throws -> Void
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -429,7 +429,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (T1, T2, T3) -> R
+    function: @escaping (T1, T2, T3) throws -> R
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -442,7 +442,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (Environment, T1, T2, T3) -> R
+    function: @escaping (Environment, T1, T2, T3) throws -> R
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -454,7 +454,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (T1, T2, T3) -> Void
+    function: @escaping (T1, T2, T3) throws -> Void
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -466,7 +466,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (Environment, T1, T2, T3) -> Void
+    function: @escaping (Environment, T1, T2, T3) throws -> Void
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -481,7 +481,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (T1, T2, T3, T4) -> R
+    function: @escaping (T1, T2, T3, T4) throws -> R
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -495,7 +495,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (Environment, T1, T2, T3, T4) -> R
+    function: @escaping (Environment, T1, T2, T3, T4) throws -> R
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -508,7 +508,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (T1, T2, T3, T4) -> Void
+    function: @escaping (T1, T2, T3, T4) throws -> Void
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -521,7 +521,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (Environment, T1, T2, T3, T4) -> Void
+    function: @escaping (Environment, T1, T2, T3, T4) throws -> Void
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -537,7 +537,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (T1, T2, T3, T4, T5) -> R
+    function: @escaping (T1, T2, T3, T4, T5) throws -> R
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -552,7 +552,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (Environment, T1, T2, T3, T4, T5) -> R
+    function: @escaping (Environment, T1, T2, T3, T4, T5) throws -> R
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -566,7 +566,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (T1, T2, T3, T4, T5) -> Void
+    function: @escaping (T1, T2, T3, T4, T5) throws -> Void
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -580,7 +580,7 @@ extension Environment {
   >(
     named name: String,
     with docstring: String = "",
-    function: @escaping (Environment, T1, T2, T3, T4, T5) -> Void
+    function: @escaping (Environment, T1, T2, T3, T4, T5) throws -> Void
   ) throws {
     let wrapped = DefnImplementation(function)
     try defn(named: name, with: docstring, function: wrapped)
@@ -593,11 +593,17 @@ extension Environment {
   ) throws {
     let actualFunction: RawFunctionType = { rawEnv, num, args, data in
       let env = Environment(from: rawEnv!)
+      // TODO: unwrap all arguments
       let arg = EmacsValue(from: args?.pointee)
       let impl = Unmanaged<DefnImplementation>.fromOpaque(data!)
         .takeUnretainedValue()
-      let result = impl.function(env, [arg])
-      return result.raw
+      do {
+        let result = try impl.function(env, [arg])
+        return result.raw
+      } catch(_) {
+        // TODO: properly handle all exceptions here
+        return env.Nil.raw
+      }
     }
     let wrappedPtr = Unmanaged.passRetained(function).toOpaque()
     let funcValue = EmacsValue(

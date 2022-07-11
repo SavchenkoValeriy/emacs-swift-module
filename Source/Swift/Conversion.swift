@@ -8,13 +8,13 @@ struct EmacsValue {
 }
 
 protocol EmacsConvertible {
-  func convert(within env: Environment) -> EmacsValue
+  func convert(within env: Environment) throws -> EmacsValue
   static func convert(from: EmacsValue, within env: Environment) -> Self
 }
 
 extension String: EmacsConvertible {
-  func convert(within env: Environment) -> EmacsValue {
-    return env.make(self)
+  func convert(within env: Environment) throws -> EmacsValue {
+    return try env.make(self)
   }
 
   static func convert(from: EmacsValue, within env: Environment) -> Self {
@@ -23,7 +23,7 @@ extension String: EmacsConvertible {
 }
 
 extension Bool: EmacsConvertible {
-  func convert(within env: Environment) -> EmacsValue {
+  func convert(within env: Environment) throws -> EmacsValue {
     return self ? env.t : env.Nil
   }
 
@@ -33,8 +33,8 @@ extension Bool: EmacsConvertible {
 }
 
 extension Int: EmacsConvertible {
-  func convert(within env: Environment) -> EmacsValue {
-    return env.make(self)
+  func convert(within env: Environment) throws -> EmacsValue {
+    return try env.make(self)
   }
 
   static func convert(from value: EmacsValue, within env: Environment) -> Int {
@@ -43,8 +43,8 @@ extension Int: EmacsConvertible {
 }
 
 extension Double: EmacsConvertible {
-  func convert(within env: Environment) -> EmacsValue {
-    return env.make(self)
+  func convert(within env: Environment) throws -> EmacsValue {
+    return try env.make(self)
   }
 
   static func convert(from value: EmacsValue, within env: Environment) -> Double
@@ -56,8 +56,8 @@ extension Double: EmacsConvertible {
 protocol OpaquelyEmacsConvertible: AnyObject, EmacsConvertible {}
 
 extension OpaquelyEmacsConvertible {
-  func convert(within env: Environment) -> EmacsValue {
-    env.make(Unmanaged.passRetained(self).toOpaque()) { ptr in
+  func convert(within env: Environment) throws -> EmacsValue {
+    try env.make(Unmanaged.passRetained(self).toOpaque()) { ptr in
       if let nonNullPtr = ptr {
         Unmanaged<AnyObject>.fromOpaque(nonNullPtr).release()
       }
@@ -80,20 +80,20 @@ extension Environment {
   //
   // Value factories
   //
-  public func make(_ from: String) -> EmacsValue {
-    return EmacsValue(from: raw.pointee.make_string(raw, from, from.count))
+  public func make(_ from: String) throws -> EmacsValue {
+      return EmacsValue(from: try check(raw.pointee.make_string(raw, from, from.count)))
   }
-  public func make(_ from: Int) -> EmacsValue {
-    return EmacsValue(from: raw.pointee.make_integer(raw, from))
+  public func make(_ from: Int) throws -> EmacsValue {
+      return EmacsValue(from: try check(raw.pointee.make_integer(raw, from)))
   }
-  public func make(_ from: Double) -> EmacsValue {
-    return EmacsValue(from: raw.pointee.make_float(raw, from))
+  public func make(_ from: Double) throws -> EmacsValue {
+      return EmacsValue(from: try check(raw.pointee.make_float(raw, from)))
   }
   public func make(
     _ value: RawOpaquePointer,
     with finalizer: @escaping RawFinalizer = { _ in () }
-  ) -> EmacsValue {
-    return EmacsValue(from: raw.pointee.make_user_ptr(raw, finalizer, value))
+  ) throws -> EmacsValue {
+      return EmacsValue(from: try check(raw.pointee.make_user_ptr(raw, finalizer, value)))
   }
 
   //

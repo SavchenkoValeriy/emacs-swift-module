@@ -17,7 +17,7 @@ extension Environment {
   public func funcall(_ fun: EmacsValue, with args: [EmacsConvertible])
     throws -> EmacsValue
   {
-    return try funcall(fun, with: args.map { $0.convert(within: self) })
+    return try funcall(fun, with: args.map { try $0.convert(within: self) })
   }
   public func funcall(_ fun: EmacsValue, with args: EmacsConvertible...)
     throws -> EmacsValue
@@ -33,7 +33,7 @@ extension Environment {
   public func funcall(_ fun: String, with args: [EmacsConvertible])
     throws -> EmacsValue
   {
-    return try funcall(fun, with: args.map { $0.convert(within: self) })
+    return try funcall(fun, with: args.map { try $0.convert(within: self) })
   }
   public func funcall(_ fun: String, with args: EmacsConvertible...)
     throws -> EmacsValue
