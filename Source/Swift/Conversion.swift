@@ -40,6 +40,9 @@ extension OpaquelyEmacsConvertible {
 }
 
 extension Environment {
+  public var Nil: EmacsValue {
+    return intern("nil")
+  }
   //
   // Value factories
   //

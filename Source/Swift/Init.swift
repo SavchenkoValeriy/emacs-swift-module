@@ -38,10 +38,9 @@ public func Init(_ runtimePtr: UnsafeMutablePointer<emacs_runtime>) -> Int32 {
     return newController
   }
   env.defn(named: "swift-remove-button", with: "Remove fancy button") {
-    (toRemove: NSViewController) -> String in
+    (toRemove: NSViewController) in
     toRemove.removeFromParent()
     toRemove.view.removeFromSuperview()
-    return "Success"
   }
 
   return 0
