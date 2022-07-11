@@ -26,7 +26,7 @@ extension NSViewController: OpaquelyEmacsConvertible {}
 public func Init(_ runtimePtr: UnsafeMutablePointer<emacs_runtime>) -> Int32 {
   let env = Environment(from: runtimePtr)
   env.defn(named: "swift-test", with: "") { (arg: String) in
-    "I received \(arg)!!"
+    arg == "Hello"
   }
   env.defn(named: "swift-add-button", with: "Add fancy button") {
     (env: Environment) -> NSViewController in

@@ -22,6 +22,16 @@ extension String: EmacsConvertible {
   }
 }
 
+extension Bool: EmacsConvertible {
+  func convert(within env: Environment) -> EmacsValue {
+    return self ? env.t : env.Nil;
+  }
+
+  static func convert(from value: EmacsValue, within env: Environment) -> Bool {
+    return env.isNotNil(value)
+  }
+}
+
 protocol OpaquelyEmacsConvertible: AnyObject, EmacsConvertible {}
 
 extension OpaquelyEmacsConvertible {
@@ -42,6 +52,9 @@ extension OpaquelyEmacsConvertible {
 extension Environment {
   public var Nil: EmacsValue {
     return intern("nil")
+  }
+  public var t: EmacsValue {
+    return intern("t")
   }
   //
   // Value factories
@@ -68,5 +81,11 @@ extension Environment {
   }
   public func toOpaque(_ value: EmacsValue) -> RawOpaquePointer {
     return raw.pointee.get_user_ptr(raw, value.raw)!
+  }
+  public func isNil(_ value: EmacsValue) -> Bool {
+    return !isNotNil(value)
+  }
+  public func isNotNil(_ value: EmacsValue) -> Bool {
+    return raw.pointee.is_not_nil(raw, value.raw)
   }
 }
