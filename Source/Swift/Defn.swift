@@ -35,8 +35,9 @@ private class DefnImplementation {
     arity = 0
   }
 
-  init<T: EmacsConvertible, R: EmacsConvertible>(_ original: @escaping (T) throws -> R)
-  {
+  init<T: EmacsConvertible, R: EmacsConvertible>(
+    _ original: @escaping (T) throws -> R
+  ) {
     function = { (env, args) in
       try original(T.convert(from: args[0], within: env)).convert(within: env)
     }
@@ -46,7 +47,8 @@ private class DefnImplementation {
     _ original: @escaping (Environment, T) throws -> R
   ) {
     function = { (env, args) in
-      try original(env, T.convert(from: args[0], within: env)).convert(within: env)
+      try original(env, T.convert(from: args[0], within: env)).convert(
+        within: env)
     }
     arity = 1
   }
@@ -600,7 +602,7 @@ extension Environment {
       do {
         let result = try impl.function(env, [arg])
         return result.raw
-      } catch(_) {
+      } catch (_) {
         // TODO: properly handle all exceptions here
         return env.Nil.raw
       }

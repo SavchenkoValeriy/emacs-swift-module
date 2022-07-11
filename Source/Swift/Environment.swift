@@ -12,7 +12,7 @@ class Environment {
   }
 
   public func intern(_ name: String) throws -> EmacsValue {
-    if (!name.unicodeScalars.allSatisfy { $0.isASCII }) {
+    if !name.unicodeScalars.allSatisfy({ $0.isASCII }) {
       throw EmacsError.nonASCIISymbol(value: name)
     }
     return EmacsValue(from: raw.pointee.intern(raw, name))

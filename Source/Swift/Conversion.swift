@@ -81,19 +81,21 @@ extension Environment {
   // Value factories
   //
   public func make(_ from: String) throws -> EmacsValue {
-      return EmacsValue(from: try check(raw.pointee.make_string(raw, from, from.count)))
+    return EmacsValue(
+      from: try check(raw.pointee.make_string(raw, from, from.count)))
   }
   public func make(_ from: Int) throws -> EmacsValue {
-      return EmacsValue(from: try check(raw.pointee.make_integer(raw, from)))
+    return EmacsValue(from: try check(raw.pointee.make_integer(raw, from)))
   }
   public func make(_ from: Double) throws -> EmacsValue {
-      return EmacsValue(from: try check(raw.pointee.make_float(raw, from)))
+    return EmacsValue(from: try check(raw.pointee.make_float(raw, from)))
   }
   public func make(
     _ value: RawOpaquePointer,
     with finalizer: @escaping RawFinalizer = { _ in () }
   ) throws -> EmacsValue {
-      return EmacsValue(from: try check(raw.pointee.make_user_ptr(raw, finalizer, value)))
+    return EmacsValue(
+      from: try check(raw.pointee.make_user_ptr(raw, finalizer, value)))
   }
 
   //
