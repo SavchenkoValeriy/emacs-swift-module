@@ -73,7 +73,7 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env)
       ).convert(within: env)
     }
     arity = 2
@@ -84,7 +84,7 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env)
       ).convert(within: env)
     }
     arity = 2
@@ -95,7 +95,7 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env)
       )
       return env.Nil
     }
@@ -107,7 +107,7 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env)
       )
       return env.Nil
     }
@@ -121,8 +121,8 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env),
-        T3.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env),
+        T3.convert(from: args[2], within: env)
       ).convert(within: env)
     }
     arity = 3
@@ -134,8 +134,8 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env),
-        T3.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env),
+        T3.convert(from: args[2], within: env)
       ).convert(within: env)
     }
     arity = 3
@@ -146,8 +146,8 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env),
-        T3.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env),
+        T3.convert(from: args[2], within: env)
       )
       return env.Nil
     }
@@ -159,8 +159,8 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env),
-        T3.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env),
+        T3.convert(from: args[2], within: env)
       )
       return env.Nil
     }
@@ -174,9 +174,9 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env),
-        T3.convert(from: args[0], within: env),
-        T4.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env),
+        T3.convert(from: args[2], within: env),
+        T4.convert(from: args[3], within: env)
       ).convert(within: env)
     }
     arity = 4
@@ -188,9 +188,9 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env),
-        T3.convert(from: args[0], within: env),
-        T4.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env),
+        T3.convert(from: args[2], within: env),
+        T4.convert(from: args[3], within: env)
       ).convert(within: env)
     }
     arity = 4
@@ -202,9 +202,9 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env),
-        T3.convert(from: args[0], within: env),
-        T4.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env),
+        T3.convert(from: args[2], within: env),
+        T4.convert(from: args[3], within: env)
       )
       return env.Nil
     }
@@ -217,9 +217,9 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env),
-        T3.convert(from: args[0], within: env),
-        T4.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env),
+        T3.convert(from: args[2], within: env),
+        T4.convert(from: args[3], within: env)
       )
       return env.Nil
     }
@@ -233,10 +233,10 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env),
-        T3.convert(from: args[0], within: env),
-        T4.convert(from: args[0], within: env),
-        T5.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env),
+        T3.convert(from: args[2], within: env),
+        T4.convert(from: args[3], within: env),
+        T5.convert(from: args[4], within: env)
       ).convert(within: env)
     }
     arity = 5
@@ -248,10 +248,10 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env),
-        T3.convert(from: args[0], within: env),
-        T4.convert(from: args[0], within: env),
-        T5.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env),
+        T3.convert(from: args[2], within: env),
+        T4.convert(from: args[3], within: env),
+        T5.convert(from: args[4], within: env)
       ).convert(within: env)
     }
     arity = 5
@@ -263,10 +263,10 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env),
-        T3.convert(from: args[0], within: env),
-        T4.convert(from: args[0], within: env),
-        T5.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env),
+        T3.convert(from: args[2], within: env),
+        T4.convert(from: args[3], within: env),
+        T5.convert(from: args[4], within: env)
       )
       return env.Nil
     }
@@ -279,10 +279,10 @@ private class DefnImplementation {
     function = { (env, args) in
       try original(
         env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[0], within: env),
-        T3.convert(from: args[0], within: env),
-        T4.convert(from: args[0], within: env),
-        T5.convert(from: args[0], within: env)
+        T2.convert(from: args[1], within: env),
+        T3.convert(from: args[2], within: env),
+        T4.convert(from: args[3], within: env),
+        T5.convert(from: args[4], within: env)
       )
       return env.Nil
     }
