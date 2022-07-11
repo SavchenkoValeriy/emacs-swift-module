@@ -42,6 +42,17 @@ extension Int: EmacsConvertible {
   }
 }
 
+extension Double: EmacsConvertible {
+  func convert(within env: Environment) -> EmacsValue {
+    return env.make(self)
+  }
+
+  static func convert(from value: EmacsValue, within env: Environment) -> Double
+  {
+    return env.toDouble(value)
+  }
+}
+
 protocol OpaquelyEmacsConvertible: AnyObject, EmacsConvertible {}
 
 extension OpaquelyEmacsConvertible {
@@ -75,6 +86,9 @@ extension Environment {
   public func make(_ from: Int) -> EmacsValue {
     return EmacsValue(from: raw.pointee.make_integer(raw, from))
   }
+  public func make(_ from: Double) -> EmacsValue {
+    return EmacsValue(from: raw.pointee.make_float(raw, from))
+  }
   public func make(
     _ value: RawOpaquePointer,
     with finalizer: @escaping RawFinalizer = { _ in () }
@@ -94,6 +108,9 @@ extension Environment {
   }
   public func toInt(_ value: EmacsValue) -> Int {
     return Int(raw.pointee.extract_integer(raw, value.raw))
+  }
+  public func toDouble(_ value: EmacsValue) -> Double {
+    return Double(raw.pointee.extract_float(raw, value.raw))
   }
   public func toOpaque(_ value: EmacsValue) -> RawOpaquePointer {
     return raw.pointee.get_user_ptr(raw, value.raw)!
