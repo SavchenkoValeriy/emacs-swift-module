@@ -24,11 +24,21 @@ extension String: EmacsConvertible {
 
 extension Bool: EmacsConvertible {
   func convert(within env: Environment) -> EmacsValue {
-    return self ? env.t : env.Nil;
+    return self ? env.t : env.Nil
   }
 
   static func convert(from value: EmacsValue, within env: Environment) -> Bool {
     return env.isNotNil(value)
+  }
+}
+
+extension Int: EmacsConvertible {
+  func convert(within env: Environment) -> EmacsValue {
+    return env.make(self)
+  }
+
+  static func convert(from value: EmacsValue, within env: Environment) -> Int {
+    return env.toInt(value)
   }
 }
 
@@ -62,6 +72,9 @@ extension Environment {
   public func make(_ from: String) -> EmacsValue {
     return EmacsValue(from: raw.pointee.make_string(raw, from, from.count))
   }
+  public func make(_ from: Int) -> EmacsValue {
+    return EmacsValue(from: raw.pointee.make_integer(raw, from))
+  }
   public func make(
     _ value: RawOpaquePointer,
     with finalizer: @escaping RawFinalizer = { _ in () }
@@ -78,6 +91,9 @@ extension Environment {
     var buf = [CChar](repeating: 0, count: len)
     let _ = raw.pointee.copy_string_contents(raw, value.raw, &buf, &len)
     return String(cString: buf)
+  }
+  public func toInt(_ value: EmacsValue) -> Int {
+    return Int(raw.pointee.extract_integer(raw, value.raw))
   }
   public func toOpaque(_ value: EmacsValue) -> RawOpaquePointer {
     return raw.pointee.get_user_ptr(raw, value.raw)!
