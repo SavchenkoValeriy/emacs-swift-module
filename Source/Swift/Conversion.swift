@@ -72,10 +72,10 @@ extension OpaquelyEmacsConvertible {
 
 extension Environment {
   public var Nil: EmacsValue {
-    return intern("nil")
+    return try! intern("nil")
   }
   public var t: EmacsValue {
-    return intern("t")
+    return try! intern("t")
   }
   //
   // Value factories

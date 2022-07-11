@@ -300,9 +300,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping () -> R
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     R: EmacsConvertible
@@ -310,25 +310,25 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (Environment) -> R
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn(
     named name: String,
     with docstring: String = "",
     function: @escaping () -> Void
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn(
     named name: String,
     with docstring: String = "",
     function: @escaping (Environment) -> Void
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
 
   public func defn<
@@ -338,9 +338,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (T) -> R
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T: EmacsConvertible,
@@ -349,9 +349,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (Environment, T) -> R
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T: EmacsConvertible
@@ -359,9 +359,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (T) -> Void
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T: EmacsConvertible
@@ -369,9 +369,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (Environment, T) -> Void
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
 
   public func defn<
@@ -382,9 +382,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (T1, T2) -> R
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T1: EmacsConvertible,
@@ -394,9 +394,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2) -> R
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T1: EmacsConvertible,
@@ -405,9 +405,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (T1, T2) -> Void
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T1: EmacsConvertible,
@@ -416,9 +416,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2) -> Void
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
 
   public func defn<
@@ -430,9 +430,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (T1, T2, T3) -> R
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T1: EmacsConvertible,
@@ -443,9 +443,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2, T3) -> R
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T1: EmacsConvertible,
@@ -455,9 +455,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (T1, T2, T3) -> Void
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T1: EmacsConvertible,
@@ -467,9 +467,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2, T3) -> Void
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
 
   public func defn<
@@ -482,9 +482,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (T1, T2, T3, T4) -> R
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T1: EmacsConvertible,
@@ -496,9 +496,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2, T3, T4) -> R
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T1: EmacsConvertible,
@@ -509,9 +509,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (T1, T2, T3, T4) -> Void
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T1: EmacsConvertible,
@@ -522,9 +522,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2, T3, T4) -> Void
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
 
   public func defn<
@@ -538,9 +538,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (T1, T2, T3, T4, T5) -> R
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T1: EmacsConvertible,
@@ -553,9 +553,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2, T3, T4, T5) -> R
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T1: EmacsConvertible,
@@ -567,9 +567,9 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (T1, T2, T3, T4, T5) -> Void
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
   public func defn<
     T1: EmacsConvertible,
@@ -581,16 +581,16 @@ extension Environment {
     named name: String,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2, T3, T4, T5) -> Void
-  ) {
+  ) throws {
     let wrapped = DefnImplementation(function)
-    defn(named: name, with: docstring, function: wrapped)
+    try defn(named: name, with: docstring, function: wrapped)
   }
 
   private func defn(
     named name: String,
     with docstring: String,
     function: DefnImplementation
-  ) {
+  ) throws {
     let actualFunction: RawFunctionType = { rawEnv, num, args, data in
       let env = Environment(from: rawEnv!)
       let arg = EmacsValue(from: args?.pointee)
@@ -604,7 +604,7 @@ extension Environment {
       from: raw.pointee.make_function(
         raw, function.arity, function.arity, actualFunction, docstring,
         wrappedPtr))
-    let symbol = intern(name)
-    let _ = funcall("fset", with: symbol, funcValue)
+    let symbol = try intern(name)
+    let _ = try funcall("fset", with: symbol, funcValue)
   }
 }
