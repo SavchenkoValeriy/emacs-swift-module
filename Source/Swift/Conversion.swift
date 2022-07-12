@@ -12,6 +12,16 @@ protocol EmacsConvertible {
   static func convert(from: EmacsValue, within env: Environment) -> Self
 }
 
+extension EmacsValue: EmacsConvertible {
+  func convert(within env: Environment) throws -> EmacsValue {
+    return self
+  }
+
+  static func convert(from: EmacsValue, within env: Environment) -> EmacsValue {
+    return from
+  }
+}
+
 extension String: EmacsConvertible {
   func convert(within env: Environment) throws -> EmacsValue {
     return try env.make(self)

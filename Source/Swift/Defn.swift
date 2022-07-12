@@ -595,15 +595,28 @@ extension Environment {
   ) throws {
     let actualFunction: RawFunctionType = { rawEnv, num, args, data in
       let env = Environment(from: rawEnv!)
-      // TODO: unwrap all arguments
-      let arg = EmacsValue(from: args?.pointee)
+      let buffer = UnsafeBufferPointer<emacs_value?>(start: args, count: num)
       let impl = Unmanaged<DefnImplementation>.fromOpaque(data!)
         .takeUnretainedValue()
+      assert(
+        num == impl.arity,
+        "Emacs Lisp shouldn't've allowed a call with a wrong number of arguments!"
+      )
       do {
-        let result = try impl.function(env, [arg])
+        let result = try impl.function(env, buffer.map { EmacsValue(from: $0) })
         return result.raw
-      } catch (_) {
+      } catch (EmacsError.customError(let message)) {
+        env.error(with: message)
+        return env.Nil.raw
+      } catch (EmacsError.signal(let symbol, let data)) {
+        env.signal(symbol, with: data)
+        return env.Nil.raw
+      } catch (EmacsError.thrown(let tag, let value)) {
+        env.throwForTag(tag, with: value)
+        return env.Nil.raw
+      } catch {
         // TODO: properly handle all exceptions here
+        env.error(with: "Swift exception: \(error)")
         return env.Nil.raw
       }
     }
