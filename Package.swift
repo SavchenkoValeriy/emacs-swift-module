@@ -10,8 +10,11 @@ let package = Package(
     // Products define the executables and libraries a package produces, and make them visible to other packages.
     .library(
       name: "EmacsSwiftModule",
+      targets: ["EmacsSwiftModule"]),
+    .library(
+      name: "TestModule",
       type: .dynamic,
-      targets: ["EmacsSwiftModule"])
+      targets: ["TestModule"])
   ],
   dependencies: [
     // Dependencies declare other packages that this package depends on.
@@ -31,5 +34,10 @@ let package = Package(
       path: "Source/C",
       publicHeadersPath: "include"
     ),
+    .target(
+      name: "TestModule",
+      dependencies: ["EmacsSwiftModule"],
+      path: "Test/TestModule"
+    )
   ]
 )

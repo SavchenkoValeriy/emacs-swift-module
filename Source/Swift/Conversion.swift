@@ -1,72 +1,72 @@
 import EmacsModule
 
-struct EmacsValue {
-  let raw: emacs_value?
-  public init(from: emacs_value?) {
+public struct EmacsValue {
+  internal let raw: emacs_value?
+  internal init(from: emacs_value?) {
     raw = from
   }
 }
 
-protocol EmacsConvertible {
+public protocol EmacsConvertible {
   func convert(within env: Environment) throws -> EmacsValue
   static func convert(from: EmacsValue, within env: Environment) -> Self
 }
 
 extension EmacsValue: EmacsConvertible {
-  func convert(within env: Environment) throws -> EmacsValue {
+  public func convert(within env: Environment) throws -> EmacsValue {
     return self
   }
 
-  static func convert(from: EmacsValue, within env: Environment) -> EmacsValue {
+  public static func convert(from: EmacsValue, within env: Environment) -> EmacsValue {
     return from
   }
 }
 
 extension String: EmacsConvertible {
-  func convert(within env: Environment) throws -> EmacsValue {
+  public func convert(within env: Environment) throws -> EmacsValue {
     return try env.make(self)
   }
 
-  static func convert(from: EmacsValue, within env: Environment) -> Self {
+  public static func convert(from: EmacsValue, within env: Environment) -> Self {
     return env.toString(from)
   }
 }
 
 extension Bool: EmacsConvertible {
-  func convert(within env: Environment) throws -> EmacsValue {
+  public func convert(within env: Environment) throws -> EmacsValue {
     return self ? env.t : env.Nil
   }
 
-  static func convert(from value: EmacsValue, within env: Environment) -> Bool {
+  public static func convert(from value: EmacsValue, within env: Environment) -> Bool {
     return env.isNotNil(value)
   }
 }
 
 extension Int: EmacsConvertible {
-  func convert(within env: Environment) throws -> EmacsValue {
+  public func convert(within env: Environment) throws -> EmacsValue {
     return try env.make(self)
   }
 
-  static func convert(from value: EmacsValue, within env: Environment) -> Int {
+  public static func convert(from value: EmacsValue, within env: Environment) -> Int {
     return env.toInt(value)
   }
 }
 
 extension Double: EmacsConvertible {
-  func convert(within env: Environment) throws -> EmacsValue {
+  public func convert(within env: Environment) throws -> EmacsValue {
     return try env.make(self)
   }
 
-  static func convert(from value: EmacsValue, within env: Environment) -> Double
+  public static func convert(from value: EmacsValue, within env: Environment) -> Double
   {
     return env.toDouble(value)
   }
 }
 
-protocol OpaquelyEmacsConvertible: AnyObject, EmacsConvertible {}
+public protocol OpaquelyEmacsConvertible: AnyObject, EmacsConvertible {}
 
 extension OpaquelyEmacsConvertible {
-  func convert(within env: Environment) throws -> EmacsValue {
+  public func convert(within env: Environment) throws -> EmacsValue {
     try env.make(Unmanaged.passRetained(self).toOpaque()) { ptr in
       if let nonNullPtr = ptr {
         Unmanaged<AnyObject>.fromOpaque(nonNullPtr).release()
@@ -74,7 +74,7 @@ extension OpaquelyEmacsConvertible {
     }
   }
 
-  static func convert(from value: EmacsValue, within env: Environment) -> Self {
+  public static func convert(from value: EmacsValue, within env: Environment) -> Self {
     return Unmanaged<Self>.fromOpaque(env.toOpaque(value))
       .takeUnretainedValue()
   }
@@ -90,17 +90,17 @@ extension Environment {
   //
   // Value factories
   //
-  public func make(_ from: String) throws -> EmacsValue {
+  func make(_ from: String) throws -> EmacsValue {
     return EmacsValue(
       from: try check(raw.pointee.make_string(raw, from, from.count)))
   }
-  public func make(_ from: Int) throws -> EmacsValue {
+  func make(_ from: Int) throws -> EmacsValue {
     return EmacsValue(from: try check(raw.pointee.make_integer(raw, from)))
   }
-  public func make(_ from: Double) throws -> EmacsValue {
+  func make(_ from: Double) throws -> EmacsValue {
     return EmacsValue(from: try check(raw.pointee.make_float(raw, from)))
   }
-  public func make(
+  func make(
     _ value: RawOpaquePointer,
     with finalizer: @escaping RawFinalizer = { _ in () }
   ) throws -> EmacsValue {
@@ -111,20 +111,20 @@ extension Environment {
   //
   // Converter functions
   //
-  public func toString(_ value: EmacsValue) -> String {
+  func toString(_ value: EmacsValue) -> String {
     var len = 0
     let _ = raw.pointee.copy_string_contents(raw, value.raw, nil, &len)
     var buf = [CChar](repeating: 0, count: len)
     let _ = raw.pointee.copy_string_contents(raw, value.raw, &buf, &len)
     return String(cString: buf)
   }
-  public func toInt(_ value: EmacsValue) -> Int {
+  func toInt(_ value: EmacsValue) -> Int {
     return Int(raw.pointee.extract_integer(raw, value.raw))
   }
-  public func toDouble(_ value: EmacsValue) -> Double {
+  func toDouble(_ value: EmacsValue) -> Double {
     return Double(raw.pointee.extract_float(raw, value.raw))
   }
-  public func toOpaque(_ value: EmacsValue) -> RawOpaquePointer {
+  func toOpaque(_ value: EmacsValue) -> RawOpaquePointer {
     return raw.pointee.get_user_ptr(raw, value.raw)!
   }
   public func isNil(_ value: EmacsValue) -> Bool {

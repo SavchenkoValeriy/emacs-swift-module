@@ -1,6 +1,6 @@
 import EmacsModule
 
-enum EmacsError: Error {
+public enum EmacsError: Error {
   case nonASCIISymbol(value: String)
   case wrongTypeException(message: String)
   case customError(message: String)
@@ -10,7 +10,7 @@ enum EmacsError: Error {
 }
 
 extension Environment {
-  internal func check(_ rawValue: emacs_value?) throws -> emacs_value? {
+  func check(_ rawValue: emacs_value?) throws -> emacs_value? {
     var symbolOrTag: emacs_value?
     var dataOrValue: emacs_value?
     switch raw.pointee.non_local_exit_get(raw, &symbolOrTag, &dataOrValue) {
@@ -30,18 +30,18 @@ extension Environment {
       fatalError("Received unexpected exit status: \(status)")
     }
   }
-  internal func error(with message: String) {
+  public func error(with message: String) {
     error(tag: "error", with: message)
   }
-  internal func error(tag: String, with message: String) {
+  public func error(tag: String, with message: String) {
     signal(try! intern(tag), with: try! funcall("list", with: message))
   }
 
-  internal func signal(_ symbol: EmacsValue, with data: EmacsValue) {
+  public func signal(_ symbol: EmacsValue, with data: EmacsValue) {
     raw.pointee.non_local_exit_signal(raw, symbol.raw, data.raw)
   }
 
-  internal func throwForTag(_ tag: EmacsValue, with value: EmacsValue) {
+  public func throwForTag(_ tag: EmacsValue, with value: EmacsValue) {
     raw.pointee.non_local_exit_throw(raw, tag.raw, value.raw)
   }
 }

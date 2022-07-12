@@ -1,5 +1,6 @@
 import Cocoa
-import EmacsModule
+import EmacsSwiftModule
+import class EmacsSwiftModule.Environment
 import SwiftUI
 
 @_cdecl("plugin_is_GPL_compatible")
@@ -27,7 +28,7 @@ struct MyError: Error {
 }
 
 @_cdecl("emacs_module_init")
-public func Init(_ runtimePtr: UnsafeMutablePointer<emacs_runtime>) -> Int32 {
+public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
   let env = Environment(from: runtimePtr)
   try! env.defn(named: "swift-test", with: "") { (arg: String) in
     arg == "Hello"

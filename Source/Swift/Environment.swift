@@ -1,6 +1,6 @@
 import EmacsModule
 
-class Environment {
+public final class Environment {
   internal let raw: UnsafeMutablePointer<emacs_env>
 
   public init(from: UnsafeMutablePointer<emacs_env>) {
