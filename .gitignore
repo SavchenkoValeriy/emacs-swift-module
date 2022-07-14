@@ -1,6 +1,9 @@
 # Emacs tmp files
 *~
 
+# Cask artifacts
+.cask
+
 # SPM build artifacts
 .build
 .swiftpm

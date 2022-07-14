@@ -2,7 +2,6 @@ import EmacsModule
 
 public enum EmacsError: Error {
   case nonASCIISymbol(value: String)
-  case wrongTypeException(message: String)
   case customError(message: String)
   case signal(symbol: EmacsValue, data: EmacsValue)
   case thrown(tag: EmacsValue, value: EmacsValue)
@@ -31,10 +30,7 @@ extension Environment {
     }
   }
   public func error(with message: String) {
-    error(tag: "error", with: message)
-  }
-  public func error(tag: String, with message: String) {
-    signal(try! intern(tag), with: try! funcall("list", with: message))
+    signal(swiftError, with: try! funcall("list", with: message))
   }
 
   public func signal(_ symbol: EmacsValue, with data: EmacsValue) {

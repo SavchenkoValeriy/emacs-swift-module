@@ -615,7 +615,6 @@ extension Environment {
         env.throwForTag(tag, with: value)
         return env.Nil.raw
       } catch {
-        // TODO: properly handle all exceptions here
         env.error(with: "Swift exception: \(error)")
         return env.Nil.raw
       }
