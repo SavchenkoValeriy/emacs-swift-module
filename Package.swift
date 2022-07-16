@@ -14,7 +14,7 @@ let package = Package(
     .library(
       name: "TestModule",
       type: .dynamic,
-      targets: ["TestModule"])
+      targets: ["TestModule"]),
   ],
   dependencies: [
     // Dependencies declare other packages that this package depends on.
@@ -38,6 +38,6 @@ let package = Package(
       name: "TestModule",
       dependencies: ["EmacsSwiftModule"],
       path: "Test/TestModule"
-    )
+    ),
   ]
 )

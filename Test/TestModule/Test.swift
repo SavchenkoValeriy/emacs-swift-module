@@ -48,6 +48,11 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
     }
     try env.defn(named: "swift-set-a-y") { (a: MyClassA, y: String) in a.y = y }
     try env.defn(named: "swift-set-b-z") { (b: MyClassB, z: Double) in b.z = z }
+    try env.defn(named: "swift-sum-array") { (a: [Int]) in a.reduce(0, +) }
+    try env.defn(named: "swift-map-array") {
+      (env: Environment, a: [Int], fun: EmacsValue) throws -> [EmacsValue] in
+      try a.map { try env.funcall(fun, with: $0) }
+    }
   } catch {
     return 1
   }

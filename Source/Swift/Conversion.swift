@@ -72,6 +72,20 @@ extension Double: EmacsConvertible {
   }
 }
 
+extension Array: EmacsConvertible where Element: EmacsConvertible {
+  public func convert(within env: Environment) throws -> EmacsValue {
+    return try env.make(self.map { try $0.convert(within: env) })
+  }
+
+  public static func convert(from value: EmacsValue, within env: Environment)
+    throws -> [Element]
+  {
+    return try env.toArray(value).map {
+      try Element.convert(from: $0, within: env)
+    }
+  }
+}
+
 public protocol OpaquelyEmacsConvertible: AnyObject, EmacsConvertible {}
 
 extension OpaquelyEmacsConvertible {
@@ -117,6 +131,9 @@ extension Environment {
   func make(_ from: Double) throws -> EmacsValue {
     return EmacsValue(from: try check(raw.pointee.make_float(raw, from)))
   }
+  func make(_ from: [EmacsValue]) throws -> EmacsValue {
+    return try apply("vector", with: from)
+  }
   func make(
     _ value: RawOpaquePointer,
     with finalizer: @escaping RawFinalizer = { _ in () }
@@ -141,6 +158,17 @@ extension Environment {
   }
   func toDouble(_ value: EmacsValue) throws -> Double {
     return try Double(check(raw.pointee.extract_float(raw, value.raw)))
+  }
+  func toArray(_ value: EmacsValue) throws -> [EmacsValue] {
+    let size = try check(raw.pointee.vec_size(raw, value.raw))
+    var result = [EmacsValue](repeating: value, count: size)
+
+    for i in 0..<size {
+      result[i] = EmacsValue(
+        from: try check(raw.pointee.vec_get(raw, value.raw, i)))
+    }
+
+    return result
   }
   func toOpaque(_ value: EmacsValue) throws -> RawOpaquePointer {
     return try check(raw.pointee.get_user_ptr(raw, value.raw))!

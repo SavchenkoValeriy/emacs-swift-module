@@ -34,7 +34,7 @@ extension Environment {
     error(tag: swiftError, with: message)
   }
   public func error(tag: EmacsValue, with args: EmacsConvertible...) {
-    signal(tag, with: try! funcall("list", with: args))
+    signal(tag, with: try! apply("list", with: args))
   }
 
   public func signal(_ symbol: EmacsValue, with data: EmacsValue) {
