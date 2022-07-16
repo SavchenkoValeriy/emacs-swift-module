@@ -9,15 +9,17 @@ public struct EmacsValue {
 
 public protocol EmacsConvertible {
   func convert(within env: Environment) throws -> EmacsValue
-  static func convert(from: EmacsValue, within env: Environment) -> Self
+  static func convert(from: EmacsValue, within env: Environment) throws -> Self
 }
 
 extension EmacsValue: EmacsConvertible {
-  public func convert(within env: Environment) throws -> EmacsValue {
+  public func convert(within env: Environment) -> EmacsValue {
     return self
   }
 
-  public static func convert(from: EmacsValue, within env: Environment) -> EmacsValue {
+  public static func convert(from: EmacsValue, within env: Environment)
+    -> EmacsValue
+  {
     return from
   }
 }
@@ -27,17 +29,21 @@ extension String: EmacsConvertible {
     return try env.make(self)
   }
 
-  public static func convert(from: EmacsValue, within env: Environment) -> Self {
-    return env.toString(from)
+  public static func convert(from: EmacsValue, within env: Environment) throws
+    -> Self
+  {
+    return try env.toString(from)
   }
 }
 
 extension Bool: EmacsConvertible {
-  public func convert(within env: Environment) throws -> EmacsValue {
+  public func convert(within env: Environment) -> EmacsValue {
     return self ? env.t : env.Nil
   }
 
-  public static func convert(from value: EmacsValue, within env: Environment) -> Bool {
+  public static func convert(from value: EmacsValue, within env: Environment)
+    -> Bool
+  {
     return env.isNotNil(value)
   }
 }
@@ -47,8 +53,10 @@ extension Int: EmacsConvertible {
     return try env.make(self)
   }
 
-  public static func convert(from value: EmacsValue, within env: Environment) -> Int {
-    return env.toInt(value)
+  public static func convert(from value: EmacsValue, within env: Environment)
+    throws -> Int
+  {
+    return try env.toInt(value)
   }
 }
 
@@ -57,9 +65,10 @@ extension Double: EmacsConvertible {
     return try env.make(self)
   }
 
-  public static func convert(from value: EmacsValue, within env: Environment) -> Double
+  public static func convert(from value: EmacsValue, within env: Environment)
+    throws -> Double
   {
-    return env.toDouble(value)
+    return try env.toDouble(value)
   }
 }
 
@@ -74,9 +83,17 @@ extension OpaquelyEmacsConvertible {
     }
   }
 
-  public static func convert(from value: EmacsValue, within env: Environment) -> Self {
-    return Unmanaged<Self>.fromOpaque(env.toOpaque(value))
+  public static func convert(from value: EmacsValue, within env: Environment)
+    throws -> Self
+  {
+    let candidate = Unmanaged<AnyObject>.fromOpaque(try env.toOpaque(value))
       .takeUnretainedValue()
+    guard let result = candidate as? Self else {
+      throw EmacsError.wrongType(
+        expected: "\(Self.self)", actual: "\(type(of: candidate))", value: value
+      )
+    }
+    return result
   }
 }
 
@@ -111,21 +128,22 @@ extension Environment {
   //
   // Converter functions
   //
-  func toString(_ value: EmacsValue) -> String {
+  func toString(_ value: EmacsValue) throws -> String {
     var len = 0
-    let _ = raw.pointee.copy_string_contents(raw, value.raw, nil, &len)
+    let _ = try check(
+      raw.pointee.copy_string_contents(raw, value.raw, nil, &len))
     var buf = [CChar](repeating: 0, count: len)
     let _ = raw.pointee.copy_string_contents(raw, value.raw, &buf, &len)
     return String(cString: buf)
   }
-  func toInt(_ value: EmacsValue) -> Int {
-    return Int(raw.pointee.extract_integer(raw, value.raw))
+  func toInt(_ value: EmacsValue) throws -> Int {
+    return try Int(check(raw.pointee.extract_integer(raw, value.raw)))
   }
-  func toDouble(_ value: EmacsValue) -> Double {
-    return Double(raw.pointee.extract_float(raw, value.raw))
+  func toDouble(_ value: EmacsValue) throws -> Double {
+    return try Double(check(raw.pointee.extract_float(raw, value.raw)))
   }
-  func toOpaque(_ value: EmacsValue) -> RawOpaquePointer {
-    return raw.pointee.get_user_ptr(raw, value.raw)!
+  func toOpaque(_ value: EmacsValue) throws -> RawOpaquePointer {
+    return try check(raw.pointee.get_user_ptr(raw, value.raw))!
   }
   public func isNil(_ value: EmacsValue) -> Bool {
     return !isNotNil(value)

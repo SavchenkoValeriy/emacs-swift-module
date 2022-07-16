@@ -605,6 +605,11 @@ extension Environment {
       do {
         let result = try impl.function(env, buffer.map { EmacsValue(from: $0) })
         return result.raw
+      } catch (EmacsError.wrongType(let expected, let actual, let value)) {
+        env.error(
+          tag: try! env.intern("wrong-type-argument"), with: expected, actual,
+          value)
+        return env.Nil.raw
       } catch (EmacsError.customError(let message)) {
         env.error(with: message)
         return env.Nil.raw
