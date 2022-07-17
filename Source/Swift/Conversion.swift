@@ -86,6 +86,19 @@ extension Array: EmacsConvertible where Element: EmacsConvertible {
   }
 }
 
+extension Optional: EmacsConvertible where Wrapped: EmacsConvertible {
+  public func convert(within env: Environment) throws -> EmacsValue {
+    return try self?.convert(within: env) ?? env.Nil
+  }
+
+  public static func convert(from value: EmacsValue, within env: Environment)
+    throws -> Self
+  {
+    return env.isNil(value)
+      ? nil : try Wrapped.convert(from: value, within: env)
+  }
+}
+
 public protocol OpaquelyEmacsConvertible: AnyObject, EmacsConvertible {}
 
 extension OpaquelyEmacsConvertible {

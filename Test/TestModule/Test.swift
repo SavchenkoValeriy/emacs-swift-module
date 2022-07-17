@@ -55,6 +55,8 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
       (env: Environment, a: [Int], fun: EmacsValue) throws -> [EmacsValue] in
       try a.map { try env.funcall(fun, with: $0) }
     }
+    try env.defun(named: "swift-optional-arg") { (a: Int?) in return a ?? 42 }
+    try env.defun(named: "swift-optional-result") { (a: Int) -> Int? in return a == 42 ? nil : a * 2 }
   } catch {
     return 1
   }

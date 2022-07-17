@@ -40,7 +40,13 @@
     (should-error (swift-get-b-z "str") :type 'wrong-type-argument)
     (should-error (swift-get-b-z a1) :type 'wrong-type-argument)))
 
-(ert-deftest swift-module:check-array-argument ()
+(ert-deftest swift-module:check-array-conversion ()
   (should (eq (swift-sum-array [0 2 10 -1]) 11))
   (should-error (swift-sum-array 10) :type 'wrong-type-argument)
   (should (equal (swift-map-array [1 2 3] (lambda (x) (* x x))) [1 4 9])))
+
+(ert-deftest swift-module:check-optional-conversion ()
+  (should (eq (swift-optional-arg 10) 10))
+  (should (eq (swift-optional-arg nil) 42))
+  (should (eq (swift-optional-result 10) 20))
+  (should (eq (swift-optional-result 42) nil)))
