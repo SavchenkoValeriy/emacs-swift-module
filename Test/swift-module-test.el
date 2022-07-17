@@ -50,3 +50,8 @@
   (should (eq (swift-optional-arg nil) 42))
   (should (eq (swift-optional-result 10) 20))
   (should (eq (swift-optional-result 42) nil)))
+
+(ert-deftest swift-module:check-captures ()
+  (should (eq (swift-get-captured-a-x) 42))
+  (swift-set-captured-a-x 15)
+  (should (eq (swift-get-captured-a-x) 15)))

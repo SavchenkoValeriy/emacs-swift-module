@@ -56,7 +56,13 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
       try a.map { try env.funcall(fun, with: $0) }
     }
     try env.defun(named: "swift-optional-arg") { (a: Int?) in return a ?? 42 }
-    try env.defun(named: "swift-optional-result") { (a: Int) -> Int? in return a == 42 ? nil : a * 2 }
+    try env.defun(named: "swift-optional-result") { (a: Int) -> Int? in
+      return a == 42 ? nil : a * 2
+    }
+    let captured = MyClassA()
+    try env.defun(named: "swift-get-captured-a-x", function: { captured.x })
+    try env.defun(
+      named: "swift-set-captured-a-x", function: { (x: Int) in captured.x = x })
   } catch {
     return 1
   }
