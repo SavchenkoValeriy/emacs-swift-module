@@ -41,6 +41,44 @@ extension Environment {
   }
   /// Call Emacs Lisp function by its symbol or value.
   ///
+  /// It replicates the `apply` Emacs Lisp function by asking you to provide
+  /// all arguments in one array. The main difference between `funcall` and `apply`
+  /// is that if you pass an array of values to `funcall` it will be considered
+  /// as one argument, and if you pass it to `apply` it will be treated as a list
+  /// of separate arguments.
+  ///
+  /// - Parameters:
+  ///   - fun: the name of the function to call.
+  ///   - args: an array of arguments for the call.
+  /// - Returns: a value of the type inferred from the context.
+  /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side
+  /// or the value has incorrect type.
+  public func apply<R: EmacsConvertible>(
+    _ fun: EmacsValue, with args: [EmacsConvertible]
+  ) throws -> R {
+    return try R.convert(from: try apply(fun, with: args), within: self)
+  }
+  /// Call Emacs Lisp function by its name.
+  ///
+  /// It replicates the `apply` Emacs Lisp function by asking you to provide
+  /// all arguments in one array. The main difference between `funcall` and `apply`
+  /// is that if you pass an array of values to `funcall` it will be considered
+  /// as one argument, and if you pass it to `apply` it will be treated as a list
+  /// of separate arguments.
+  ///
+  /// - Parameters:
+  ///   - fun: the name of the function to call.
+  ///   - args: an array of arguments for the call.
+  /// - Returns: a value of the type inferred from the context.
+  /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side
+  /// or the value has incorrect type.
+  public func apply<R: EmacsConvertible>(
+    _ fun: String, with args: [EmacsConvertible]
+  ) throws -> R {
+    return try R.convert(from: try apply(fun, with: args), within: self)
+  }
+  /// Call Emacs Lisp function by its symbol or value.
+  ///
   /// It replicates the `funcall` Emacs Lisp function by asking you to provide
   /// all arguments separately. The main difference between `funcall` and `apply`
   /// is that if you pass an array of values to `funcall` it will be considered
@@ -74,5 +112,43 @@ extension Environment {
     throws -> EmacsValue
   {
     return try apply(fun, with: args)
+  }
+  /// Call Emacs Lisp function by its symbol or value.
+  ///
+  /// It replicates the `funcall` Emacs Lisp function by asking you to provide
+  /// all arguments separately. The main difference between `funcall` and `apply`
+  /// is that if you pass an array of values to `funcall` it will be considered
+  /// as one argument, and if you pass it to `apply` it will be treated as a list
+  /// of separate arguments.
+  ///
+  /// - Parameters:
+  ///   - fun: the name of the function to call.
+  ///   - args: the arguments for the call.
+  /// - Returns: a value of the type inferred from the context.
+  /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side
+  /// or the value has incorrect type.
+  public func funcall<R: EmacsConvertible>(
+    _ fun: EmacsValue, with args: EmacsConvertible...
+  ) throws -> R {
+    return try R.convert(from: try apply(fun, with: args), within: self)
+  }
+  /// Call Emacs Lisp function by its name.
+  ///
+  /// It replicates the `funcall` Emacs Lisp function by asking you to provide
+  /// all arguments separately. The main difference between `funcall` and `apply`
+  /// is that if you pass an array of values to `funcall` it will be considered
+  /// as one argument, and if you pass it to `apply` it will be treated as a list
+  /// of separate arguments.
+  ///
+  /// - Parameters:
+  ///   - fun: the name of the function to call.
+  ///   - args: the arguments for the call.
+  /// - Returns: a value of the type inferred from the context.
+  /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side
+  /// or the value has incorrect type.
+  public func funcall<R: EmacsConvertible>(
+    _ fun: String, with args: EmacsConvertible...
+  ) throws -> R {
+    return try R.convert(from: try apply(fun, with: args), within: self)
   }
 }

@@ -63,6 +63,14 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
     try env.defun(named: "swift-get-captured-a-x", function: { captured.x })
     try env.defun(
       named: "swift-set-captured-a-x", function: { (x: Int) in captured.x = x })
+    try env.defun(named: "swift-typed-funcall") {
+      (env: Environment, x: EmacsValue) throws -> String in
+      try env.funcall("format", with: "%S", x)
+    }
+    try env.defun(named: "swift-incorrect-typed-funcall") {
+      (env: Environment, x: EmacsValue) throws -> Int in
+      try env.funcall("format", with: "%S", x)
+    }
   } catch {
     return 1
   }

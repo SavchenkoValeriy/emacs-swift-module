@@ -55,3 +55,7 @@
   (should (eq (swift-get-captured-a-x) 42))
   (swift-set-captured-a-x 15)
   (should (eq (swift-get-captured-a-x) 15)))
+
+(ert-deftest swift-module:funcall-result-conversion ()
+  (should (equal (swift-typed-funcall 42) "42"))
+  (should-error (swift-incorrect-typed-funcall 42) :type 'wrong-type-argument))
