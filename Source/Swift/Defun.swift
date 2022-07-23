@@ -1,635 +1,119 @@
 import EmacsModule
 
-private class DefunImplementation {
+/// It is a helper function to change the signature of the given
+/// closure from (T1, T2, ...) -> R type into (Environment, [EmacsValue]) -> EmacsValue,
+/// which is way easier to handle uniformly.
+///
+/// Arity goes up to 5 and includes the following function signatures matrix:
+///    * returning Void or some EmacsConvertible
+///    * accepting or not accepting additional Environment argument
+///
+/// This means that each function of arities 0 to 5 has 4 variants making it
+/// 24 initializers in total. It's a lot of boilerplate that will keep growing
+/// if we won't come up with some sort of solution here. Either code generation,
+/// or Swift compiler for variadic templates or/and non-nominal types extensions.
+final class DefunImplementation {
   let function: (Environment, [EmacsValue]) throws -> EmacsValue
   let arity: Int
 
-  init<R: EmacsConvertible>(_ original: @escaping () throws -> R) {
-    function = { (env, args) in
-      try original().convert(within: env)
-    }
-    arity = 0
-  }
-  init<R: EmacsConvertible>(
-    _ original: @escaping (Environment) throws -> R
-  ) {
-    function = { (env, args) in
-      try original(env).convert(within: env)
-    }
-    arity = 0
-  }
-  init(_ original: @escaping () throws -> Void) {
-    function = { (env, args) in
-      try original()
-      return env.Nil
-    }
-    arity = 0
-  }
   init(
-    _ original: @escaping (Environment) throws -> Void
+    _ function: @escaping (Environment, [EmacsValue]) throws -> EmacsValue,
+    _ arity: Int
   ) {
-    function = { (env, args) in
-      try original(env)
-      return env.Nil
-    }
-    arity = 0
-  }
-
-  init<T: EmacsConvertible, R: EmacsConvertible>(
-    _ original: @escaping (T) throws -> R
-  ) {
-    function = { (env, args) in
-      try original(T.convert(from: args[0], within: env)).convert(within: env)
-    }
-    arity = 1
-  }
-  init<T: EmacsConvertible, R: EmacsConvertible>(
-    _ original: @escaping (Environment, T) throws -> R
-  ) {
-    function = { (env, args) in
-      try original(env, T.convert(from: args[0], within: env)).convert(
-        within: env)
-    }
-    arity = 1
-  }
-  init<T: EmacsConvertible>(_ original: @escaping (T) throws -> Void) {
-    function = { (env, args) in
-      try original(T.convert(from: args[0], within: env))
-      return env.Nil
-    }
-    arity = 1
-  }
-  init<T: EmacsConvertible>(
-    _ original: @escaping (Environment, T) throws -> Void
-  ) {
-    function = { (env, args) in
-      try original(env, T.convert(from: args[0], within: env))
-      return env.Nil
-    }
-    arity = 1
-  }
-
-  init<T1: EmacsConvertible, T2: EmacsConvertible, R: EmacsConvertible>(
-    _ original: @escaping (T1, T2) throws -> R
-  ) {
-    function = { (env, args) in
-      try original(
-        T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env)
-      ).convert(within: env)
-    }
-    arity = 2
-  }
-  init<T1: EmacsConvertible, T2: EmacsConvertible, R: EmacsConvertible>(
-    _ original: @escaping (Environment, T1, T2) throws -> R
-  ) {
-    function = { (env, args) in
-      try original(
-        env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env)
-      ).convert(within: env)
-    }
-    arity = 2
-  }
-  init<T1: EmacsConvertible, T2: EmacsConvertible>(
-    _ original: @escaping (T1, T2) throws -> Void
-  ) {
-    function = { (env, args) in
-      try original(
-        T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env)
-      )
-      return env.Nil
-    }
-    arity = 2
-  }
-  init<T1: EmacsConvertible, T2: EmacsConvertible>(
-    _ original: @escaping (Environment, T1, T2) throws -> Void
-  ) {
-    function = { (env, args) in
-      try original(
-        env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env)
-      )
-      return env.Nil
-    }
-    arity = 2
-  }
-
-  init<
-    T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-    R: EmacsConvertible
-  >(_ original: @escaping (T1, T2, T3) throws -> R) {
-    function = { (env, args) in
-      try original(
-        T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env),
-        T3.convert(from: args[2], within: env)
-      ).convert(within: env)
-    }
-    arity = 3
-  }
-  init<
-    T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-    R: EmacsConvertible
-  >(_ original: @escaping (Environment, T1, T2, T3) throws -> R) {
-    function = { (env, args) in
-      try original(
-        env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env),
-        T3.convert(from: args[2], within: env)
-      ).convert(within: env)
-    }
-    arity = 3
-  }
-  init<
-    T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible
-  >(_ original: @escaping (T1, T2, T3) throws -> Void) {
-    function = { (env, args) in
-      try original(
-        T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env),
-        T3.convert(from: args[2], within: env)
-      )
-      return env.Nil
-    }
-    arity = 3
-  }
-  init<
-    T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible
-  >(_ original: @escaping (Environment, T1, T2, T3) throws -> Void) {
-    function = { (env, args) in
-      try original(
-        env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env),
-        T3.convert(from: args[2], within: env)
-      )
-      return env.Nil
-    }
-    arity = 3
-  }
-
-  init<
-    T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-    T4: EmacsConvertible, R: EmacsConvertible
-  >(_ original: @escaping (T1, T2, T3, T4) throws -> R) {
-    function = { (env, args) in
-      try original(
-        T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env),
-        T3.convert(from: args[2], within: env),
-        T4.convert(from: args[3], within: env)
-      ).convert(within: env)
-    }
-    arity = 4
-  }
-  init<
-    T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-    T4: EmacsConvertible, R: EmacsConvertible
-  >(_ original: @escaping (Environment, T1, T2, T3, T4) throws -> R) {
-    function = { (env, args) in
-      try original(
-        env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env),
-        T3.convert(from: args[2], within: env),
-        T4.convert(from: args[3], within: env)
-      ).convert(within: env)
-    }
-    arity = 4
-  }
-  init<
-    T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-    T4: EmacsConvertible
-  >(_ original: @escaping (T1, T2, T3, T4) throws -> Void) {
-    function = { (env, args) in
-      try original(
-        T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env),
-        T3.convert(from: args[2], within: env),
-        T4.convert(from: args[3], within: env)
-      )
-      return env.Nil
-    }
-    arity = 4
-  }
-  init<
-    T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-    T4: EmacsConvertible
-  >(_ original: @escaping (Environment, T1, T2, T3, T4) throws -> Void) {
-    function = { (env, args) in
-      try original(
-        env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env),
-        T3.convert(from: args[2], within: env),
-        T4.convert(from: args[3], within: env)
-      )
-      return env.Nil
-    }
-    arity = 4
-  }
-
-  init<
-    T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-    T4: EmacsConvertible, T5: EmacsConvertible, R: EmacsConvertible
-  >(_ original: @escaping (T1, T2, T3, T4, T5) throws -> R) {
-    function = { (env, args) in
-      try original(
-        T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env),
-        T3.convert(from: args[2], within: env),
-        T4.convert(from: args[3], within: env),
-        T5.convert(from: args[4], within: env)
-      ).convert(within: env)
-    }
-    arity = 5
-  }
-  init<
-    T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-    T4: EmacsConvertible, T5: EmacsConvertible, R: EmacsConvertible
-  >(_ original: @escaping (Environment, T1, T2, T3, T4, T5) throws -> R) {
-    function = { (env, args) in
-      try original(
-        env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env),
-        T3.convert(from: args[2], within: env),
-        T4.convert(from: args[3], within: env),
-        T5.convert(from: args[4], within: env)
-      ).convert(within: env)
-    }
-    arity = 5
-  }
-  init<
-    T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-    T4: EmacsConvertible, T5: EmacsConvertible
-  >(_ original: @escaping (T1, T2, T3, T4, T5) throws -> Void) {
-    function = { (env, args) in
-      try original(
-        T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env),
-        T3.convert(from: args[2], within: env),
-        T4.convert(from: args[3], within: env),
-        T5.convert(from: args[4], within: env)
-      )
-      return env.Nil
-    }
-    arity = 5
-  }
-  init<
-    T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-    T4: EmacsConvertible, T5: EmacsConvertible
-  >(_ original: @escaping (Environment, T1, T2, T3, T4, T5) throws -> Void) {
-    function = { (env, args) in
-      try original(
-        env, T1.convert(from: args[0], within: env),
-        T2.convert(from: args[1], within: env),
-        T3.convert(from: args[2], within: env),
-        T4.convert(from: args[3], within: env),
-        T5.convert(from: args[4], within: env)
-      )
-      return env.Nil
-    }
-    arity = 5
+    self.function = function
+    self.arity = arity
   }
 }
 
 extension Environment {
-  //
-  // Make function
-  //
-  public func defun<
-    R: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping () throws -> R
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    R: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (Environment) throws -> R
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping () throws -> Void
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (Environment) throws -> Void
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-
-  public func defun<
-    T: EmacsConvertible,
-    R: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (T) throws -> R
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T: EmacsConvertible,
-    R: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (Environment, T) throws -> R
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (T) throws -> Void
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (Environment, T) throws -> Void
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    R: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (T1, T2) throws -> R
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    R: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (Environment, T1, T2) throws -> R
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (T1, T2) throws -> Void
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (Environment, T1, T2) throws -> Void
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    T3: EmacsConvertible,
-    R: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (T1, T2, T3) throws -> R
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    T3: EmacsConvertible,
-    R: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (Environment, T1, T2, T3) throws -> R
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    T3: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (T1, T2, T3) throws -> Void
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    T3: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (Environment, T1, T2, T3) throws -> Void
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    T3: EmacsConvertible,
-    T4: EmacsConvertible,
-    R: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (T1, T2, T3, T4) throws -> R
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    T3: EmacsConvertible,
-    T4: EmacsConvertible,
-    R: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (Environment, T1, T2, T3, T4) throws -> R
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    T3: EmacsConvertible,
-    T4: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (T1, T2, T3, T4) throws -> Void
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    T3: EmacsConvertible,
-    T4: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (Environment, T1, T2, T3, T4) throws -> Void
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    T3: EmacsConvertible,
-    T4: EmacsConvertible,
-    T5: EmacsConvertible,
-    R: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (T1, T2, T3, T4, T5) throws -> R
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    T3: EmacsConvertible,
-    T4: EmacsConvertible,
-    T5: EmacsConvertible,
-    R: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (Environment, T1, T2, T3, T4, T5) throws -> R
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    T3: EmacsConvertible,
-    T4: EmacsConvertible,
-    T5: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (T1, T2, T3, T4, T5) throws -> Void
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-  public func defun<
-    T1: EmacsConvertible,
-    T2: EmacsConvertible,
-    T3: EmacsConvertible,
-    T4: EmacsConvertible,
-    T5: EmacsConvertible
-  >(
-    named name: String,
-    with docstring: String = "",
-    function: @escaping (Environment, T1, T2, T3, T4, T5) throws -> Void
-  ) throws {
-    let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
-  }
-
-  private func defun(
+  /// The actual implementation of `defun`.
+  ///
+  /// This function accepts a name, a docstring, and a wrapped Swift closure
+  /// and declares an Emacs Lisp function out of it.
+  func defun(
     named name: String,
     with docstring: String,
     function: DefunImplementation
   ) throws {
+    // It's yet another function that wraps the user provided implementation,
+    // but this time it accepts everything Emacs expects it to accept.
+    //
+    // Additionally, it conforms to everything you need to be in order to convert
+    // to a pure C function pointer. One should understand that ALL Swift-declared
+    // functions share this implementation. Not even different copies of it, just
+    // one copy of the same thing.
+    //
+    // The main trick with how we can pull it off is the last parameter of this
+    // function. In C, it is a plain `void *` where you can put anything you wish.
+    // And this is where each function's Swift implementation will be coming from.
     let actualFunction: RawFunctionType = { rawEnv, num, args, data in
+      // Wrap environment with a Swift convenience wrapper
       let env = Environment(from: rawEnv!)
+      // Bundle `args` pointer and the `num` argument into one sized buffer.
+      // Now we can iterate over it like it is a regular container of `emacs_value?>.
       let buffer = UnsafeBufferPointer<emacs_value?>(start: args, count: num)
+      // Cast data to `DefunImplementation`. Please note, that it is crucial for us
+      // not even capturing generic types in this callback. That's why `DefunImplementation`
+      // has a very simple interface to it.
       let impl = Unmanaged<DefunImplementation>.fromOpaque(data!)
-        .takeUnretainedValue()
+        .takeUnretainedValue()  // We take unretained value because we probably want to
+      // allow users calling the same function multiple times. And this also means that
+      // the captured functions will NEVER get retained, even if we decide to redefine this
+      // name to be a different function. Unlike user_ptr, Emacs doesn't provide us with a
+      // finalizer for function data. Probably, it's not a problem if we won't generate
+      // more and more functions.
       assert(
         num == impl.arity,
         "Emacs Lisp shouldn't've allowed a call with a wrong number of arguments!"
       )
+      // This function should never ever throw. When it throws, Emacs crashes.
+      // That's why we need to catch anything coming from the Swift side and surface
+      // it properly on the Emacs side.
       do {
+        // And here's the last step, call `DefunImplementation` with the given
+        // environment and a list of arguments appropriately wrapped in `EmacsValue`.
         let result = try impl.function(env, buffer.map { EmacsValue(from: $0) })
+        // Since our function returns back `EmacsValue`, we need to unwrap it and
+        // pass Emacs a raw pointer it knows about.
         return result.raw
+
       } catch (EmacsError.wrongType(let expected, let actual, let value)) {
+        // For `EmacsError.wrongType` exceptions, we use `wrong-type-argument` since
+        // it is an already defined error and it fits us like a glove.
         env.error(
           tag: try! env.intern("wrong-type-argument"), with: expected, actual,
           value)
-        return env.Nil.raw
+
       } catch (EmacsError.customError(let message)) {
         env.error(with: message)
-        return env.Nil.raw
+
       } catch (EmacsError.signal(let symbol, let data)) {
         env.signal(symbol, with: data)
-        return env.Nil.raw
+
       } catch (EmacsError.thrown(let tag, let value)) {
         env.throwForTag(tag, with: value)
-        return env.Nil.raw
+
       } catch {
+        // As mentioned earlier, we cannot let any of the Swift exceptions to get
+        // away or it'll crash Emacs.
         env.error(with: "Swift exception: \(error)")
-        return env.Nil.raw
       }
+
+      // We still need to return something even if we had an error. Emacs will most likely
+      // ignore this value, but `nil` still seems appropriate.
+      return env.Nil.raw
     }
+    // And here is how we turn our `DefunImplementation` into a `void *` that can
+    // be thought of as a function's context or persistent data.
     let wrappedPtr = Unmanaged.passRetained(function).toOpaque()
+    // Here we create the anonymous function that carries our implementation.
     let funcValue = EmacsValue(
       from: raw.pointee.make_function(
         raw, function.arity, function.arity, actualFunction, docstring,
         wrappedPtr))
+    // Create a symbol for it.
     let symbol = try intern(name)
+    // And tie them together nicely.
     let _ = try funcall("fset", with: symbol, funcValue)
   }
 }
