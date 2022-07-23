@@ -1,5 +1,6 @@
 import EmacsModule
 
+/// A raw C pointer type from Emacs for the runtime.
 public typealias RuntimePointer = UnsafeMutablePointer<emacs_runtime>
 
 typealias RawEmacsValue = emacs_value
