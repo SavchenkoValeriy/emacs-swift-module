@@ -1,3 +1,5 @@
+(require 'ert-async)
+
 (intern "swift-error")
 
 (ert-deftest swift-module:check-basic-conversion ()
@@ -66,5 +68,8 @@
 
 (ert-deftest swift-module:check-lambda ()
   (should (equal (swift-call-lambda "hello") "Received hello"))
-  ;(should (equal (funcall (swift-get-lambda) "hello") "Received hello"))
+                                        ;(should (equal (funcall (swift-get-lambda) "hello") "Received hello"))
   )
+
+(ert-deftest-async swift-module:check-async (done)
+  (swift-async-channel done))

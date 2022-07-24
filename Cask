@@ -5,4 +5,5 @@
 (files (:default "*.el" ".build/debug/libTestModule.dylib"))
 
 (development
- (depends-on "ert-runner"))
+ (depends-on "ert-runner")
+ (depends-on "ert-async"))

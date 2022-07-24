@@ -16,6 +16,11 @@ class MyClassB: OpaquelyEmacsConvertible {
   public var z: Double = 36.6
 }
 
+func someAsyncTask(completion: () -> Void) async throws {
+  try await Task.sleep(nanoseconds: 50_000_000)
+  completion()
+}
+
 @_cdecl("emacs_module_init")
 public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
   let env = Environment(from: runtimePtr)
@@ -81,6 +86,16 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
       try env.funcall(try makeLambda(env), with: arg)
     }
     try env.defun("swift-get-lambda") { try makeLambda(env) }
+    let channel = try env.openChannel(name: "test")
+    try env.defun("swift-async-channel") {
+      (completion: EmacsValue) in
+      Task.detached {
+        try await someAsyncTask(
+          completion: channel.callback {
+            (env: Environment) throws in try env.funcall(completion)
+          })
+      }
+    }
   } catch {
     return 1
   }
