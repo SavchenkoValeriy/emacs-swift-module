@@ -164,7 +164,9 @@ public struct Symbol: EmacsConvertible {
     return try env.intern(name)
   }
 
-  public static func convert(from value: EmacsValue, within env: Environment) throws -> Symbol {
+  public static func convert(from value: EmacsValue, within env: Environment)
+    throws -> Symbol
+  {
     return Symbol(name: try env.funcall("symbol-name", with: value))
   }
 }
