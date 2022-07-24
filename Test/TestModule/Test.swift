@@ -20,60 +20,67 @@ class MyClassB: OpaquelyEmacsConvertible {
 public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
   let env = Environment(from: runtimePtr)
   do {
-    try env.defun(named: "swift-int") { (arg: Int) in arg * 2 }
-    try env.defun(named: "swift-float") { (arg: Double) in arg * 2 }
-    try env.defun(named: "swift-bool") { (arg: Bool) in !arg }
-    try env.defun(named: "swift-call") {
+    try env.defun("swift-int") { (arg: Int) in arg * 2 }
+    try env.defun("swift-float") { (arg: Double) in arg * 2 }
+    try env.defun("swift-bool") { (arg: Bool) in !arg }
+    try env.defun("swift-call") {
       (env: Environment, arg: String) throws in
       return try env.funcall("format", with: "'%s'", arg)
     }
-    try env.defun(named: "swift-calls-bad-function") {
+    try env.defun("swift-calls-bad-function") {
       (env: Environment) throws in try env.funcall("iwuvjdnc", with: 42)
     }
-    try env.defun(named: "swift-throws", with: "") { (x: Int) throws -> Int in
+    try env.defun("swift-throws", with: "") { (x: Int) throws -> Int in
       throw MyError(x: x)
     }
-    try env.defun(named: "swift-throws-sometimes") { (x: Int) -> Int in
+    try env.defun("swift-throws-sometimes") { (x: Int) -> Int in
       if x == 42 {
         throw EmacsError.customError(message: "Got 42!")
       }
       return x
     }
-    try env.defun(named: "swift-create-a") { return MyClassA() }
-    try env.defun(named: "swift-create-b") { return MyClassB() }
-    try env.defun(named: "swift-get-a-x") { (a: MyClassA) in a.x }
-    try env.defun(named: "swift-get-a-y") { (a: MyClassA) in a.y }
-    try env.defun(named: "swift-get-b-z") { (b: MyClassB) in b.z }
-    try env.defun(named: "swift-set-a-x") { (a: MyClassA, x: Int) in a.x = x
+    try env.defun("swift-create-a") { return MyClassA() }
+    try env.defun("swift-create-b") { return MyClassB() }
+    try env.defun("swift-get-a-x") { (a: MyClassA) in a.x }
+    try env.defun("swift-get-a-y") { (a: MyClassA) in a.y }
+    try env.defun("swift-get-b-z") { (b: MyClassB) in b.z }
+    try env.defun("swift-set-a-x") { (a: MyClassA, x: Int) in a.x = x
     }
-    try env.defun(named: "swift-set-a-y") { (a: MyClassA, y: String) in a.y = y
+    try env.defun("swift-set-a-y") { (a: MyClassA, y: String) in a.y = y
     }
-    try env.defun(named: "swift-set-b-z") { (b: MyClassB, z: Double) in b.z = z
+    try env.defun("swift-set-b-z") { (b: MyClassB, z: Double) in b.z = z
     }
-    try env.defun(named: "swift-sum-array") { (a: [Int]) in a.reduce(0, +) }
-    try env.defun(named: "swift-map-array") {
+    try env.defun("swift-sum-array") { (a: [Int]) in a.reduce(0, +) }
+    try env.defun("swift-map-array") {
       (env: Environment, a: [Int], fun: EmacsValue) throws -> [EmacsValue] in
       try a.map { try env.funcall(fun, with: $0) }
     }
-    try env.defun(named: "swift-optional-arg") { (a: Int?) in return a ?? 42 }
-    try env.defun(named: "swift-optional-result") { (a: Int) -> Int? in
+    try env.defun("swift-optional-arg") { (a: Int?) in return a ?? 42 }
+    try env.defun("swift-optional-result") { (a: Int) -> Int? in
       return a == 42 ? nil : a * 2
     }
     let captured = MyClassA()
-    try env.defun(named: "swift-get-captured-a-x", function: { captured.x })
+    try env.defun("swift-get-captured-a-x", function: { captured.x })
     try env.defun(
-      named: "swift-set-captured-a-x", function: { (x: Int) in captured.x = x })
-    try env.defun(named: "swift-typed-funcall") {
+      "swift-set-captured-a-x", function: { (x: Int) in captured.x = x })
+    try env.defun("swift-typed-funcall") {
       (env: Environment, x: EmacsValue) throws -> String in
       try env.funcall("format", with: "%S", x)
     }
-    try env.defun(named: "swift-incorrect-typed-funcall") {
+    try env.defun("swift-incorrect-typed-funcall") {
       (env: Environment, x: EmacsValue) throws -> Int in
       try env.funcall("format", with: "%S", x)
     }
-    try env.defun(named: "swift-symbol-name") { (x: Symbol) in
+    try env.defun("swift-symbol-name") { (x: Symbol) in
       x.name
     }
+    let makeLambda = { (env: Environment) throws in
+      try env.defun { (x: String) in "Received \(x)" }
+    }
+    try env.defun("swift-call-lambda") { (env: Environment, arg: String) in
+      try env.funcall(try makeLambda(env), with: arg)
+    }
+    try env.defun("swift-get-lambda") { try makeLambda(env) }
   } catch {
     return 1
   }

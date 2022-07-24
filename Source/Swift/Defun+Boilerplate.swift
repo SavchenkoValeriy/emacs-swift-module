@@ -294,184 +294,199 @@ extension DefunImplementation {
 }
 
 extension Environment {
+  @discardableResult
   public func defun<
     R: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping () throws -> R
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     R: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (Environment) throws -> R
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
-  public func defun(
-    named name: String,
+  @discardableResult public func defun(
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping () throws -> Void
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
-  public func defun(
-    named name: String,
+  @discardableResult public func defun(
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (Environment) throws -> Void
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
 
+  @discardableResult
   public func defun<
     T: EmacsConvertible,
     R: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (T) throws -> R
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T: EmacsConvertible,
     R: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (Environment, T) throws -> R
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (T) throws -> Void
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (Environment, T) throws -> Void
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
 
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
     R: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (T1, T2) throws -> R
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
     R: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2) throws -> R
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (T1, T2) throws -> Void
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2) throws -> Void
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
 
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
     T3: EmacsConvertible,
     R: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (T1, T2, T3) throws -> R
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
     T3: EmacsConvertible,
     R: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2, T3) throws -> R
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
     T3: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (T1, T2, T3) throws -> Void
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
     T3: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2, T3) throws -> Void
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
 
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
@@ -479,13 +494,14 @@ extension Environment {
     T4: EmacsConvertible,
     R: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (T1, T2, T3, T4) throws -> R
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
@@ -493,40 +509,43 @@ extension Environment {
     T4: EmacsConvertible,
     R: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2, T3, T4) throws -> R
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
     T3: EmacsConvertible,
     T4: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (T1, T2, T3, T4) throws -> Void
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
     T3: EmacsConvertible,
     T4: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2, T3, T4) throws -> Void
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
 
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
@@ -535,13 +554,14 @@ extension Environment {
     T5: EmacsConvertible,
     R: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (T1, T2, T3, T4, T5) throws -> R
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
@@ -550,13 +570,14 @@ extension Environment {
     T5: EmacsConvertible,
     R: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2, T3, T4, T5) throws -> R
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
@@ -564,13 +585,14 @@ extension Environment {
     T4: EmacsConvertible,
     T5: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (T1, T2, T3, T4, T5) throws -> Void
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
+  @discardableResult
   public func defun<
     T1: EmacsConvertible,
     T2: EmacsConvertible,
@@ -578,11 +600,11 @@ extension Environment {
     T4: EmacsConvertible,
     T5: EmacsConvertible
   >(
-    named name: String,
+    _ name: String? = nil,
     with docstring: String = "",
     function: @escaping (Environment, T1, T2, T3, T4, T5) throws -> Void
-  ) throws {
+  ) throws -> EmacsValue {
     let wrapped = DefunImplementation(function)
-    try defun(named: name, with: docstring, function: wrapped)
+    return try defun(named: name, with: docstring, function: wrapped)
   }
 }

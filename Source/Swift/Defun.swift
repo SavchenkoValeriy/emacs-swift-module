@@ -30,11 +30,11 @@ extension Environment {
   ///
   /// This function accepts a name, a docstring, and a wrapped Swift closure
   /// and declares an Emacs Lisp function out of it.
-  func defun(
-    named name: String,
+  @discardableResult func defun(
+    named name: String?,
     with docstring: String,
     function: DefunImplementation
-  ) throws {
+  ) throws -> EmacsValue {
     // It's yet another function that wraps the user provided implementation,
     // but this time it accepts everything Emacs expects it to accept.
     //
@@ -111,9 +111,12 @@ extension Environment {
       from: raw.pointee.make_function(
         raw, function.arity, function.arity, actualFunction, docstring,
         wrappedPtr))
-    // Create a symbol for it.
-    let symbol = try intern(name)
-    // And tie them together nicely.
-    let _ = try funcall("fset", with: symbol, funcValue)
+    if let name = name {
+      // Create a symbol for it.
+      let symbol = try intern(name)
+      // And tie them together nicely.
+      let _ = try funcall("fset", with: symbol, funcValue)
+    }
+    return funcValue
   }
 }

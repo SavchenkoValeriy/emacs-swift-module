@@ -63,3 +63,8 @@
 (ert-deftest swift-module:check-symbol-conversion ()
   (should (equal (swift-symbol-name 'hello) "hello"))
   (should-error (swift-symbol-name 10) :type 'wrong-type-argument))
+
+(ert-deftest swift-module:check-lambda ()
+  (should (equal (swift-call-lambda "hello") "Received hello"))
+  ;(should (equal (funcall (swift-get-lambda) "hello") "Received hello"))
+  )
