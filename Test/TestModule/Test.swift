@@ -71,6 +71,9 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
       (env: Environment, x: EmacsValue) throws -> Int in
       try env.funcall("format", with: "%S", x)
     }
+    try env.defun(named: "swift-symbol-name") { (x: Symbol) in
+      x.name
+    }
   } catch {
     return 1
   }

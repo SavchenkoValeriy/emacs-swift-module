@@ -59,3 +59,7 @@
 (ert-deftest swift-module:funcall-result-conversion ()
   (should (equal (swift-typed-funcall 42) "42"))
   (should-error (swift-incorrect-typed-funcall 42) :type 'wrong-type-argument))
+
+(ert-deftest swift-module:check-symbol-conversion ()
+  (should (equal (swift-symbol-name 'hello) "hello"))
+  (should-error (swift-symbol-name 10) :type 'wrong-type-argument))
