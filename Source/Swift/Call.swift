@@ -14,7 +14,9 @@ extension Environment {
   ///   - args: an array of arguments for the call.
   /// - Returns: an opaque Emacs value representing the result of the call.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side.
-  public func apply(_ fun: EmacsValue, with args: [EmacsConvertible]) throws
+  @discardableResult public func apply(
+    _ fun: EmacsValue, with args: [EmacsConvertible]
+  ) throws
     -> EmacsValue
   {
     var rawArgs = try args.map { try $0.convert(within: self).raw }
@@ -34,7 +36,9 @@ extension Environment {
   ///   - args: an array of arguments for the call.
   /// - Returns: an opaque Emacs value representing the result of the call.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side.
-  public func apply(_ fun: String, with args: [EmacsConvertible]) throws
+  @discardableResult public func apply(
+    _ fun: String, with args: [EmacsConvertible]
+  ) throws
     -> EmacsValue
   {
     return try apply(try intern(fun), with: args)
@@ -53,7 +57,7 @@ extension Environment {
   /// - Returns: a value of the type inferred from the context.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side
   /// or the value has incorrect type.
-  public func apply<R: EmacsConvertible>(
+  @discardableResult public func apply<R: EmacsConvertible>(
     _ fun: EmacsValue, with args: [EmacsConvertible]
   ) throws -> R {
     return try R.convert(from: try apply(fun, with: args), within: self)
@@ -72,7 +76,7 @@ extension Environment {
   /// - Returns: a value of the type inferred from the context.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side
   /// or the value has incorrect type.
-  public func apply<R: EmacsConvertible>(
+  @discardableResult public func apply<R: EmacsConvertible>(
     _ fun: String, with args: [EmacsConvertible]
   ) throws -> R {
     return try R.convert(from: try apply(fun, with: args), within: self)
@@ -90,7 +94,9 @@ extension Environment {
   ///   - args: the arguments for the call.
   /// - Returns: an opaque Emacs value representing the result of the call.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side.
-  public func funcall(_ fun: EmacsValue, with args: EmacsConvertible...) throws
+  @discardableResult public func funcall(
+    _ fun: EmacsValue, with args: EmacsConvertible...
+  ) throws
     -> EmacsValue
   {
     return try apply(fun, with: args)
@@ -108,7 +114,9 @@ extension Environment {
   ///   - args: the arguments for the call.
   /// - Returns: an opaque Emacs value representing the result of the call.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side.
-  public func funcall(_ fun: String, with args: EmacsConvertible...)
+  @discardableResult public func funcall(
+    _ fun: String, with args: EmacsConvertible...
+  )
     throws -> EmacsValue
   {
     return try apply(fun, with: args)
@@ -127,7 +135,7 @@ extension Environment {
   /// - Returns: a value of the type inferred from the context.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side
   /// or the value has incorrect type.
-  public func funcall<R: EmacsConvertible>(
+  @discardableResult public func funcall<R: EmacsConvertible>(
     _ fun: EmacsValue, with args: EmacsConvertible...
   ) throws -> R {
     return try R.convert(from: try apply(fun, with: args), within: self)
@@ -146,7 +154,7 @@ extension Environment {
   /// - Returns: a value of the type inferred from the context.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side
   /// or the value has incorrect type.
-  public func funcall<R: EmacsConvertible>(
+  @discardableResult public func funcall<R: EmacsConvertible>(
     _ fun: String, with args: EmacsConvertible...
   ) throws -> R {
     return try R.convert(from: try apply(fun, with: args), within: self)
