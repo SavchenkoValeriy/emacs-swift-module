@@ -1,4 +1,4 @@
-class LazyCallback0: AnyLazyCallback {
+class LazySwiftCallback0: AnyLazyCallback {
   let function: (Environment) throws -> Void
   init(function: @escaping (Environment) throws -> Void) {
     self.function = function
@@ -8,7 +8,7 @@ class LazyCallback0: AnyLazyCallback {
   }
 }
 
-class LazyCallback1<T>: AnyLazyCallback {
+class LazySwiftCallback1<T>: AnyLazyCallback {
   let function: (Environment, T) throws -> Void
   init(function: @escaping (Environment, T) throws -> Void) {
     self.function = function
@@ -20,7 +20,7 @@ class LazyCallback1<T>: AnyLazyCallback {
   }
 }
 
-class LazyCallback2<T1, T2>: AnyLazyCallback {
+class LazySwiftCallback2<T1, T2>: AnyLazyCallback {
   let function: (Environment, T1, T2) throws -> Void
   init(function: @escaping (Environment, T1, T2) throws -> Void) {
     self.function = function
@@ -32,7 +32,7 @@ class LazyCallback2<T1, T2>: AnyLazyCallback {
   }
 }
 
-class LazyCallback3<T1, T2, T3>: AnyLazyCallback {
+class LazySwiftCallback3<T1, T2, T3>: AnyLazyCallback {
   let function: (Environment, T1, T2, T3) throws -> Void
   init(function: @escaping (Environment, T1, T2, T3) throws -> Void) {
     self.function = function
@@ -44,7 +44,7 @@ class LazyCallback3<T1, T2, T3>: AnyLazyCallback {
   }
 }
 
-class LazyCallback4<T1, T2, T3, T4>: AnyLazyCallback {
+class LazySwiftCallback4<T1, T2, T3, T4>: AnyLazyCallback {
   let function: (Environment, T1, T2, T3, T4) throws -> Void
   init(function: @escaping (Environment, T1, T2, T3, T4) throws -> Void) {
     self.function = function
@@ -56,7 +56,7 @@ class LazyCallback4<T1, T2, T3, T4>: AnyLazyCallback {
   }
 }
 
-class LazyCallback5<T1, T2, T3, T4, T5>: AnyLazyCallback {
+class LazySwiftCallback5<T1, T2, T3, T4, T5>: AnyLazyCallback {
   let function: (Environment, T1, T2, T3, T4, T5) throws -> Void
   init(function: @escaping (Environment, T1, T2, T3, T4, T5) throws -> Void) {
     self.function = function
@@ -74,8 +74,8 @@ extension Channel {
   {
     return { [self] in
       let index = stack.push(
-        callback: LazyCallback0(function: function), args: ())
-      write("\(index):callback\n")
+        callback: LazySwiftCallback0(function: function), args: ())
+      write(index)
     }
   }
   public func callback<T>(function: @escaping (Environment, T) throws -> Void)
@@ -83,8 +83,8 @@ extension Channel {
   {
     return { [self] arg in
       let index = stack.push(
-        callback: LazyCallback1(function: function), args: arg)
-      write("\(index):callback\n")
+        callback: LazySwiftCallback1(function: function), args: arg)
+      write(index)
     }
   }
   public func callback<T1, T2>(
@@ -92,8 +92,8 @@ extension Channel {
   ) -> (T1, T2) -> Void {
     return { [self] (arg1, arg2) in
       let index = stack.push(
-        callback: LazyCallback2(function: function), args: (arg1, arg2))
-      write("\(index):callback\n")
+        callback: LazySwiftCallback2(function: function), args: (arg1, arg2))
+      write(index)
     }
   }
   public func callback<T1, T2, T3>(
@@ -101,8 +101,9 @@ extension Channel {
   ) -> (T1, T2, T3) -> Void {
     return { [self] (arg1, arg2, arg3) in
       let index = stack.push(
-        callback: LazyCallback3(function: function), args: (arg1, arg2, arg3))
-      write("\(index):callback\n")
+        callback: LazySwiftCallback3(function: function),
+        args: (arg1, arg2, arg3))
+      write(index)
     }
   }
   public func callback<T1, T2, T3, T4>(
@@ -110,9 +111,9 @@ extension Channel {
   ) -> (T1, T2, T3, T4) -> Void {
     return { [self] (arg1, arg2, arg3, arg4) in
       let index = stack.push(
-        callback: LazyCallback4(function: function),
+        callback: LazySwiftCallback4(function: function),
         args: (arg1, arg2, arg3, arg4))
-      write("\(index):callback\n")
+      write(index)
     }
   }
   public func callback<T1, T2, T3, T4, T5>(
@@ -120,9 +121,9 @@ extension Channel {
   ) -> (T1, T2, T3, T4, T5) -> Void {
     return { [self] (arg1, arg2, arg3, arg4, arg5) in
       let index = stack.push(
-        callback: LazyCallback5(function: function),
+        callback: LazySwiftCallback5(function: function),
         args: (arg1, arg2, arg3, arg4, arg5))
-      write("\(index):callback\n")
+      write(index)
     }
   }
 }

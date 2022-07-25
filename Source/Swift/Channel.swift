@@ -1,4 +1,5 @@
 import Foundation
+import os.lock
 
 protocol AnyLazyCallback {
   func call(_ env: Environment, with args: Any) throws
@@ -7,23 +8,28 @@ protocol AnyLazyCallback {
 struct CallbackStack {
   typealias Element = (callback: AnyLazyCallback, args: Any)
   typealias Index = Int
-  var elements: [Element?] = []
+  private var elements: [Element?] = []
+  private var lock = os_unfair_lock()
 
   mutating func push(callback: AnyLazyCallback, args: Any) -> Index {
+    os_unfair_lock_lock(&lock)
+    defer { os_unfair_lock_unlock(&lock) }
+
     elements.append((callback, args))
     return elements.count - 1
   }
 
-  mutating func pop(at index: Index, with env: Environment) {
+  mutating func pop(at index: Index, with env: Environment) throws {
+    os_unfair_lock_lock(&lock)
+    defer { os_unfair_lock_unlock(&lock) }
+
     guard let element = elements[index] else {
       print("Tried to call already called element!")
       return
     }
-    do {
-      try element.callback.call(env, with: element.args)
-    } catch {
-      print("Callback encountered error: \(error)")
-    }
+
+    try element.callback.call(env, with: element.args)
+
     elements[index] = nil
     if elements.allSatisfy({ $0 == nil }) {
       elements.removeAll()
@@ -44,12 +50,12 @@ public class Channel {
     self.pipe = FileHandle(fileDescriptor: fileDescriptor)
   }
 
-  private func call(_ index: Int, with env: Environment) {
-    stack.pop(at: index, with: env)
+  private func call(_ index: Int, with env: Environment) throws {
+    try self.stack.pop(at: index, with: env)
   }
 
-  func write(_ message: String) {
-    if let data = message.data(using: String.Encoding.utf8) {
+  func write(_ index: Int) {
+    if let data = "\(index)\n".data(using: String.Encoding.utf8) {
       do {
         try pipe?.write(contentsOf: data)
       } catch {
@@ -72,14 +78,14 @@ public class Channel {
       try env.funcall("insert", with: message)
       try env.funcall("goto-char", with: 1)
       while try env.funcall(
-        "re-search-forward", with: "\\([[:digit:]]+\\):\\([[:alpha:]]+\\)\n",
+        "re-search-forward", with: "\\([[:digit:]]+\\)\n",
         env.Nil, env.t)
       {
         let indexStr: String = try env.funcall("match-string", with: 1)
         guard let index = Int(indexStr) else {
           fatalError("Found unexpected match in the channel!")
         }
-        call(index, with: env)
+        try call(index, with: env)
         try env.funcall(
           "delete-region", with: 1, try env.funcall("match-end", with: 0))
       }

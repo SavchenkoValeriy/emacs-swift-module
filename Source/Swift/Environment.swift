@@ -43,4 +43,19 @@ public final class Environment {
     }
     return EmacsValue(from: raw.pointee.intern(raw, name))
   }
+
+  public func retain(_ value: EmacsValue) throws -> EmacsValue {
+    guard let ptr = value.raw else {
+      fatalError("Null pointer in Emacs value!")
+    }
+    return EmacsValue(
+      from: try check(raw.pointee.make_global_ref(raw, ptr)))
+  }
+
+  public func release(_ value: EmacsValue) throws {
+    guard let ptr = value.raw else {
+      fatalError("Null pointer in Emacs value!")
+    }
+    let _ = try check(raw.pointee.free_global_ref(raw, ptr))
+  }
 }

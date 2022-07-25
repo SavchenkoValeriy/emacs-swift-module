@@ -71,5 +71,8 @@
                                         ;(should (equal (funcall (swift-get-lambda) "hello") "Received hello"))
   )
 
-(ert-deftest-async swift-module:check-async (done)
-  (swift-async-channel done))
+
+(ert-deftest-async swift-module:check-async (done1 done2 done3)
+  (swift-async-channel done1)
+  (swift-async-lisp-callback done2)
+  (swift-async-lisp-callback done3))
