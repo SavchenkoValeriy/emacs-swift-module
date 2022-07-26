@@ -86,12 +86,11 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
     try env.defun("swift-get-lambda") { lambda }
     let channel = try env.openChannel(name: "test")
     try env.defun("swift-async-channel") {
-      (env: Environment, callback: EmacsValue) in
-      let completion = try env.retain(callback)
+      (env: Environment, callback: PersistentEmacsValue) in
       Task {
         try await someAsyncTask(
           completion: channel.callback {
-            (env: Environment) throws in try env.funcall(completion)
+            (env: Environment) throws in try env.funcall(callback)
           })
       }
     }
