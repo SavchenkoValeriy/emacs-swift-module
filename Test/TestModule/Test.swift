@@ -79,13 +79,11 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
     try env.defun("swift-symbol-name") { (x: Symbol) in
       x.name
     }
-    let makeLambda = { (env: Environment) throws in
-      try env.defun { (x: String) in "Received \(x)" }
-    }
+    let lambda = try env.preserve(env.defun { (x: String) in "Received \(x)" })
     try env.defun("swift-call-lambda") { (env: Environment, arg: String) in
-      try env.funcall(try makeLambda(env), with: arg)
+      try env.funcall(lambda, with: arg)
     }
-    try env.defun("swift-get-lambda") { try makeLambda(env) }
+    try env.defun("swift-get-lambda") { lambda }
     let channel = try env.openChannel(name: "test")
     try env.defun("swift-async-channel") {
       (env: Environment, callback: EmacsValue) in

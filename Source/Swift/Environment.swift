@@ -49,6 +49,10 @@ public final class Environment {
     return LocalEmacsValue(from: raw.pointee.intern(raw, name))
   }
 
+  public func preserve(_ value: EmacsValue) throws -> PersistentEmacsValue {
+    return try PersistentEmacsValue(from: value, within: self)
+  }
+
   public func retain(_ value: EmacsValue) throws -> EmacsValue {
     return LocalEmacsValue(
       from: try check(raw.pointee.make_global_ref(raw, value.raw)))

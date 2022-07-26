@@ -68,7 +68,7 @@
 
 (ert-deftest swift-module:check-lambda ()
   (should (equal (swift-call-lambda "hello") "Received hello"))
-                                        ;(should (equal (funcall (swift-get-lambda) "hello") "Received hello"))
+  (should (equal (funcall (swift-get-lambda) "hello") "Received hello"))
   )
 
 
