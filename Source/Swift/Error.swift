@@ -75,14 +75,14 @@ extension Environment {
     case emacs_funcall_exit_signal:
       raw.pointee.non_local_exit_clear(raw)
       throw EmacsError.signal(
-        symbol: EmacsValue(from: symbolOrTag),
-        data: EmacsValue(from: dataOrValue))
+        symbol: LocalEmacsValue(from: symbolOrTag),
+        data: LocalEmacsValue(from: dataOrValue))
 
     case emacs_funcall_exit_throw:
       raw.pointee.non_local_exit_clear(raw)
       throw EmacsError.thrown(
-        tag: EmacsValue(from: symbolOrTag),
-        value: EmacsValue(from: dataOrValue))
+        tag: LocalEmacsValue(from: symbolOrTag),
+        value: LocalEmacsValue(from: dataOrValue))
 
     case let status:
       // Shouldn't get here, but just in case let's stop early.

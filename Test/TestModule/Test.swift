@@ -98,12 +98,16 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
       }
     }
     try env.defun("swift-async-lisp-callback") {
-      (env: Environment, callback: EmacsValue) in
-      let completion = try env.retain(callback)
+      (env: Environment, callback: PersistentEmacsValue) in
       Task {
-        try await someAsyncTask(completion: channel.callback(completion))
+        try await someAsyncTask(completion: channel.callback(callback))
       }
     }
+    var persistentArray = [EmacsValue]()
+    try env.defun("swift-add-to-array") {
+      (x: PersistentEmacsValue) in persistentArray.append(x)
+    }
+    try env.defun("swift-get-array") { persistentArray }
   } catch {
     return 1
   }

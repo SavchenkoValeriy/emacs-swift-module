@@ -72,7 +72,7 @@ extension Environment {
       do {
         // And here's the last step, call `DefunImplementation` with the given
         // environment and a list of arguments appropriately wrapped in `EmacsValue`.
-        let result = try impl.function(env, buffer.map { EmacsValue(from: $0) })
+        let result = try impl.function(env, buffer.map { LocalEmacsValue(from: $0) })
         // Since our function returns back `EmacsValue`, we need to unwrap it and
         // pass Emacs a raw pointer it knows about.
         return result.raw
@@ -107,7 +107,7 @@ extension Environment {
     // be thought of as a function's context or persistent data.
     let wrappedPtr = Unmanaged.passRetained(function).toOpaque()
     // Here we create the anonymous function that carries our implementation.
-    let funcValue = EmacsValue(
+    let funcValue = LocalEmacsValue(
       from: raw.pointee.make_function(
         raw, function.arity, function.arity, actualFunction, docstring,
         wrappedPtr))

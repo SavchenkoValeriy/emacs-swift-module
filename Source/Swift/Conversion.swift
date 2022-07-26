@@ -1,16 +1,5 @@
 import EmacsModule
 
-/// An opaque Emacs value representing something from the Emacs Lisp world.
-///
-/// Please, don't assume anything based on this object and treat it as a
-/// black box. `EmacsValue` is only useful together with `Environment`.
-public struct EmacsValue {
-  internal let raw: emacs_value?
-  internal init(from: emacs_value?) {
-    raw = from
-  }
-}
-
 /// The main protocol for value conversions between Emacs Lisp and Swift.
 ///
 /// This protocol allows us to create a seamless integration between the two
@@ -39,10 +28,10 @@ extension EmacsValue: EmacsConvertible {
     return self
   }
 
-  public static func convert(from: EmacsValue, within env: Environment)
-    -> EmacsValue
+  public static func convert(from: EmacsValue, within env: Environment) throws
+    -> Self
   {
-    return from
+    return try Self(from: from, within: env)
   }
 }
 
@@ -239,14 +228,14 @@ extension Environment {
   // Value factories
   //
   func make(_ from: String) throws -> EmacsValue {
-    return EmacsValue(
+    return LocalEmacsValue(
       from: try check(raw.pointee.make_string(raw, from, from.count)))
   }
   func make(_ from: Int) throws -> EmacsValue {
-    return EmacsValue(from: try check(raw.pointee.make_integer(raw, from)))
+    return LocalEmacsValue(from: try check(raw.pointee.make_integer(raw, from)))
   }
   func make(_ from: Double) throws -> EmacsValue {
-    return EmacsValue(from: try check(raw.pointee.make_float(raw, from)))
+    return LocalEmacsValue(from: try check(raw.pointee.make_float(raw, from)))
   }
   func make(_ from: [EmacsValue]) throws -> EmacsValue {
     return try apply("vector", with: from)
@@ -255,7 +244,7 @@ extension Environment {
     _ value: RawOpaquePointer,
     with finalizer: @escaping RawFinalizer = { _ in () }
   ) throws -> EmacsValue {
-    return EmacsValue(
+    return LocalEmacsValue(
       from: try check(raw.pointee.make_user_ptr(raw, finalizer, value)))
   }
 
@@ -289,7 +278,7 @@ extension Environment {
     var result = [EmacsValue](repeating: value, count: size)
 
     for i in 0..<size {
-      result[i] = EmacsValue(
+      result[i] = LocalEmacsValue(
         from: try check(raw.pointee.vec_get(raw, value.raw, i)))
     }
 

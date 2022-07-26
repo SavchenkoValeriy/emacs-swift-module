@@ -20,7 +20,7 @@ extension Environment {
     -> EmacsValue
   {
     var rawArgs = try args.map { try $0.convert(within: self).raw }
-    return EmacsValue(
+    return LocalEmacsValue(
       from: try check(raw.pointee.funcall(raw, fun.raw, args.count, &rawArgs)))
   }
   /// Call Emacs Lisp function by its name.

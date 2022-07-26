@@ -20,13 +20,18 @@ public final class Environment {
   }()
 
   /// Construct the environment from raw C pointer.
-  public init(from: UnsafeMutablePointer<emacs_env>) {
+  required init(from: UnsafeMutablePointer<emacs_env>) {
     raw = from
+    cleanup()
   }
 
   /// Construct the environment from the raw runtime C pointer.
-  public init(from: UnsafeMutablePointer<emacs_runtime>) {
-    raw = from.pointee.get_environment(from)!
+  public convenience init(from: UnsafeMutablePointer<emacs_runtime>) {
+    self.init(from: from.pointee.get_environment(from)!)
+  }
+
+  deinit {
+    cleanup()
   }
 
   /// Return the canonical Emacs symbol with the given name.
@@ -41,21 +46,15 @@ public final class Environment {
     if !name.unicodeScalars.allSatisfy({ $0.isASCII }) {
       throw EmacsError.nonASCIISymbol(value: name)
     }
-    return EmacsValue(from: raw.pointee.intern(raw, name))
+    return LocalEmacsValue(from: raw.pointee.intern(raw, name))
   }
 
   public func retain(_ value: EmacsValue) throws -> EmacsValue {
-    guard let ptr = value.raw else {
-      fatalError("Null pointer in Emacs value!")
-    }
-    return EmacsValue(
-      from: try check(raw.pointee.make_global_ref(raw, ptr)))
+    return LocalEmacsValue(
+      from: try check(raw.pointee.make_global_ref(raw, value.raw)))
   }
 
   public func release(_ value: EmacsValue) throws {
-    guard let ptr = value.raw else {
-      fatalError("Null pointer in Emacs value!")
-    }
-    let _ = try check(raw.pointee.free_global_ref(raw, ptr))
+    let _ = try check(raw.pointee.free_global_ref(raw, value.raw))
   }
 }

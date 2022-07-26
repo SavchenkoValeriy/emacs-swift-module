@@ -76,3 +76,7 @@
   (swift-async-channel done1)
   (swift-async-lisp-callback done2)
   (swift-async-lisp-callback done3))
+
+(ert-deftest swift-module:check-persistence ()
+  (mapc (lambda (x) (swift-add-to-array x)) (number-sequence 1 5))
+  (should (equal (swift-get-array) (vconcat (number-sequence 1 5)))))
