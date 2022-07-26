@@ -21,6 +21,11 @@ func someAsyncTask(completion: () -> Void) async throws {
   completion()
 }
 
+func someAsyncTaskWithResult(completion: (Int) -> Void) async throws {
+  try await Task.sleep(nanoseconds: 50_000_000)
+  completion(42)
+}
+
 @_cdecl("emacs_module_init")
 public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
   let env = Environment(from: runtimePtr)
@@ -86,7 +91,7 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
     try env.defun("swift-get-lambda") { lambda }
     let channel = try env.openChannel(name: "test")
     try env.defun("swift-async-channel") {
-      (env: Environment, callback: PersistentEmacsValue) in
+      (callback: PersistentEmacsValue) in
       Task {
         try await someAsyncTask(
           completion: channel.callback {
@@ -95,9 +100,19 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
       }
     }
     try env.defun("swift-async-lisp-callback") {
-      (env: Environment, callback: PersistentEmacsValue) in
+      (callback: PersistentEmacsValue) in
       Task {
         try await someAsyncTask(completion: channel.callback(callback))
+      }
+    }
+    try env.defun("swift-async-normal-hook") {
+      Task {
+        try await someAsyncTask(completion: channel.hook("normal-hook"))
+      }
+    }
+    try env.defun("swift-async-abnormal-hook") {
+      Task {
+        try await someAsyncTaskWithResult(completion: channel.hook("abnormal-hook"))
       }
     }
     var persistentArray = [EmacsValue]()

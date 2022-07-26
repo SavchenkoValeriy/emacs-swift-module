@@ -68,9 +68,7 @@
 
 (ert-deftest swift-module:check-lambda ()
   (should (equal (swift-call-lambda "hello") "Received hello"))
-  (should (equal (funcall (swift-get-lambda) "hello") "Received hello"))
-  )
-
+  (should (equal (funcall (swift-get-lambda) "hello") "Received hello")))
 
 (ert-deftest-async swift-module:check-async (done1 done2 done3)
   (swift-async-channel done1)
@@ -80,3 +78,11 @@
 (ert-deftest swift-module:check-persistence ()
   (mapc (lambda (x) (swift-add-to-array x)) (number-sequence 1 5))
   (should (equal (swift-get-array) (vconcat (number-sequence 1 5)))))
+
+(ert-deftest-async swift-module:check-async-hook (done1 done2)
+  (setq normal-hook nil)
+  (add-hook 'normal-hook done1)
+  (setq abnormal-hook nil)
+  (add-hook 'abnormal-hook (lambda (x) (when (eq x 42) (funcall done2))))
+  (swift-async-normal-hook)
+  (swift-async-abnormal-hook))
