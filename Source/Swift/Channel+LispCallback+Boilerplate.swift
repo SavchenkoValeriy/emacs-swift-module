@@ -83,28 +83,25 @@ extension Channel {
     -> () -> Void
   {
     return { [self] in
-      let index = stack.push(
+      register(
         callback: LazyLispCallback0(function: function), args: ())
-      write(index)
     }
   }
   public func callback<T: EmacsConvertible>(_ function: EmacsValue)
     -> (T) -> Void
   {
     return { [self] arg in
-      let index = stack.push(
+      register(
         callback: LazyLispCallback1<T>(function: function), args: arg)
-      write(index)
     }
   }
   public func callback<T1: EmacsConvertible, T2: EmacsConvertible>(
     _ function: EmacsValue
   ) -> (T1, T2) -> Void {
     return { [self] (arg1, arg2) in
-      let index = self.stack.push(
+      register(
         callback: LazyLispCallback2<T1, T2>(function: function),
         args: (arg1, arg2))
-      write(index)
     }
   }
   public func callback<
@@ -113,10 +110,9 @@ extension Channel {
     _ function: EmacsValue
   ) -> (T1, T2, T3) -> Void {
     return { [self] (arg1, arg2, arg3) in
-      let index = stack.push(
+      register(
         callback: LazyLispCallback3<T1, T2, T3>(function: function),
         args: (arg1, arg2, arg3))
-      write(index)
     }
   }
   public func callback<
@@ -126,10 +122,9 @@ extension Channel {
     _ function: EmacsValue
   ) -> (T1, T2, T3, T4) -> Void {
     return { [self] (arg1, arg2, arg3, arg4) in
-      let index = stack.push(
+      register(
         callback: LazyLispCallback4<T1, T2, T3, T4>(function: function),
         args: (arg1, arg2, arg3, arg4))
-      write(index)
     }
   }
   public func callback<
@@ -139,10 +134,9 @@ extension Channel {
     _ function: EmacsValue
   ) -> (T1, T2, T3, T4, T5) -> Void {
     return { [self] (arg1, arg2, arg3, arg4, arg5) in
-      let index = stack.push(
+      register(
         callback: LazyLispCallback5<T1, T2, T3, T4, T5>(function: function),
         args: (arg1, arg2, arg3, arg4, arg5))
-      write(index)
     }
   }
 }

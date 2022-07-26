@@ -112,7 +112,8 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
     }
     try env.defun("swift-async-abnormal-hook") {
       Task {
-        try await someAsyncTaskWithResult(completion: channel.hook("abnormal-hook"))
+        try await someAsyncTaskWithResult(
+          completion: channel.hook("abnormal-hook"))
       }
     }
     var persistentArray = [EmacsValue]()

@@ -73,57 +73,51 @@ extension Channel {
     -> () -> Void
   {
     return { [self] in
-      let index = stack.push(
+      register(
         callback: LazySwiftCallback0(function: function), args: ())
-      write(index)
     }
   }
   public func callback<T>(function: @escaping (Environment, T) throws -> Void)
     -> (T) -> Void
   {
     return { [self] arg in
-      let index = stack.push(
+      register(
         callback: LazySwiftCallback1(function: function), args: arg)
-      write(index)
     }
   }
   public func callback<T1, T2>(
     function: @escaping (Environment, T1, T2) throws -> Void
   ) -> (T1, T2) -> Void {
     return { [self] (arg1, arg2) in
-      let index = stack.push(
+      register(
         callback: LazySwiftCallback2(function: function), args: (arg1, arg2))
-      write(index)
     }
   }
   public func callback<T1, T2, T3>(
     function: @escaping (Environment, T1, T2, T3) throws -> Void
   ) -> (T1, T2, T3) -> Void {
     return { [self] (arg1, arg2, arg3) in
-      let index = stack.push(
+      register(
         callback: LazySwiftCallback3(function: function),
         args: (arg1, arg2, arg3))
-      write(index)
     }
   }
   public func callback<T1, T2, T3, T4>(
     function: @escaping (Environment, T1, T2, T3, T4) throws -> Void
   ) -> (T1, T2, T3, T4) -> Void {
     return { [self] (arg1, arg2, arg3, arg4) in
-      let index = stack.push(
+      register(
         callback: LazySwiftCallback4(function: function),
         args: (arg1, arg2, arg3, arg4))
-      write(index)
     }
   }
   public func callback<T1, T2, T3, T4, T5>(
     function: @escaping (Environment, T1, T2, T3, T4, T5) throws -> Void
   ) -> (T1, T2, T3, T4, T5) -> Void {
     return { [self] (arg1, arg2, arg3, arg4, arg5) in
-      let index = stack.push(
+      register(
         callback: LazySwiftCallback5(function: function),
         args: (arg1, arg2, arg3, arg4, arg5))
-      write(index)
     }
   }
 }
