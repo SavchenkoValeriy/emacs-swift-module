@@ -228,14 +228,14 @@ extension Environment {
   // Value factories
   //
   func make(_ from: String) throws -> EmacsValue {
-    return LocalEmacsValue(
+    return EmacsValue(
       from: try check(raw.pointee.make_string(raw, from, from.count)))
   }
   func make(_ from: Int) throws -> EmacsValue {
-    return LocalEmacsValue(from: try check(raw.pointee.make_integer(raw, from)))
+    return EmacsValue(from: try check(raw.pointee.make_integer(raw, from)))
   }
   func make(_ from: Double) throws -> EmacsValue {
-    return LocalEmacsValue(from: try check(raw.pointee.make_float(raw, from)))
+    return EmacsValue(from: try check(raw.pointee.make_float(raw, from)))
   }
   func make(_ from: [EmacsValue]) throws -> EmacsValue {
     return try apply("vector", with: from)
@@ -244,7 +244,7 @@ extension Environment {
     _ value: RawOpaquePointer,
     with finalizer: @escaping RawFinalizer = { _ in () }
   ) throws -> EmacsValue {
-    return LocalEmacsValue(
+    return EmacsValue(
       from: try check(raw.pointee.make_user_ptr(raw, finalizer, value)))
   }
 
@@ -278,7 +278,7 @@ extension Environment {
     var result = [EmacsValue](repeating: value, count: size)
 
     for i in 0..<size {
-      result[i] = LocalEmacsValue(
+      result[i] = EmacsValue(
         from: try check(raw.pointee.vec_get(raw, value.raw, i)))
     }
 

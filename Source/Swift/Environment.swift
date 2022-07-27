@@ -50,7 +50,7 @@ public final class Environment {
     if !name.unicodeScalars.allSatisfy({ $0.isASCII }) {
       throw EmacsError.nonASCIISymbol(value: name)
     }
-    return LocalEmacsValue(from: raw.pointee.intern(raw, name))
+    return EmacsValue(from: raw.pointee.intern(raw, name))
   }
 
   /// Return a persistent version of the given value.
@@ -78,7 +78,7 @@ public final class Environment {
   ///  - Returns: retained copy of the value.
   ///  - Throws: ``EmacsError`` if something on the Emacs side goes wrong.
   public func retain(_ value: EmacsValue) throws -> EmacsValue {
-    return LocalEmacsValue(
+    return EmacsValue(
       from: try check(raw.pointee.make_global_ref(raw, value.raw)))
   }
 

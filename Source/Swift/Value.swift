@@ -14,7 +14,6 @@ public class EmacsValue {
 
 var freedPersistentValues = [RawEmacsValue]()
 
-public final class LocalEmacsValue: EmacsValue {}
 public final class PersistentEmacsValue: EmacsValue {
   required init(from: RawEmacsValue) {
     super.init(from: from)
