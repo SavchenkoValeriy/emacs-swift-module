@@ -1,4 +1,4 @@
-# ``EmacsSwiftModule``
+# `EmacsSwiftModule`
 
 A Swift library to write Emacs plugins in Swift!
 
@@ -55,23 +55,3 @@ The same happens when a type requirement expected in Swift is not met.
 ```emacs-lisp
 (foo "Hello" "World") ;; => raises (wrong-type-argument numberp "Hello")
 ```
-
-
-## Topics
-
-### Environment
-
-- ``Environment``
-- ``RuntimePointer``
-
-### Type conversions
-
-- ``EmacsConvertible``
-- ``OpaquelyEmacsConvertible``
-- ``EmacsValue``
-- ``PersistentEmacsValue``
-- ``Symbol``
-
-### Error handling
-
-- ``EmacsError``
