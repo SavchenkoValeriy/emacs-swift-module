@@ -12,8 +12,13 @@ public class EmacsValue {
   }
 }
 
-var freedPersistentValues = [RawEmacsValue]()
+fileprivate var freedPersistentValues = [RawEmacsValue]()
 
+/// An emacs value that can be safely copied and stored.
+///
+/// Unlike a regular ``EmacsValue``, it has a lifetime controlled
+/// by the Swift side and is guaranteed to be valid while the object
+/// has references to it.
 public final class PersistentEmacsValue: EmacsValue {
   required init(from: RawEmacsValue) {
     super.init(from: from)

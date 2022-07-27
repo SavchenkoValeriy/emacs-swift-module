@@ -294,6 +294,16 @@ extension DefunImplementation {
 }
 
 extension Environment {
+  /// Define a Lisp function without parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     R: EmacsConvertible
@@ -305,6 +315,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function without parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     R: EmacsConvertible
@@ -316,6 +336,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function without parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult public func defun(
     _ name: String? = nil,
     with docstring: String = "",
@@ -324,6 +354,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function without parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult public func defun(
     _ name: String? = nil,
     with docstring: String = "",
@@ -333,6 +373,16 @@ extension Environment {
     return try defun(named: name, with: docstring, function: wrapped)
   }
 
+  /// Define a Lisp function with one parameter out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T: EmacsConvertible,
@@ -345,6 +395,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with one parameter out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T: EmacsConvertible,
@@ -357,6 +417,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with one parameter out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T: EmacsConvertible
@@ -368,6 +438,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with one parameter out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T: EmacsConvertible
@@ -380,6 +460,16 @@ extension Environment {
     return try defun(named: name, with: docstring, function: wrapped)
   }
 
+  /// Define a Lisp function with two parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -393,6 +483,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with two parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -406,6 +506,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with two parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -418,6 +528,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with two parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -431,6 +551,16 @@ extension Environment {
     return try defun(named: name, with: docstring, function: wrapped)
   }
 
+  /// Define a Lisp function with three parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -445,6 +575,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with three parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -459,6 +599,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with three parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -472,6 +622,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with three parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -486,6 +646,16 @@ extension Environment {
     return try defun(named: name, with: docstring, function: wrapped)
   }
 
+  /// Define a Lisp function with four parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -501,6 +671,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with four parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -516,6 +696,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with four parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -530,6 +720,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with four parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -545,6 +745,16 @@ extension Environment {
     return try defun(named: name, with: docstring, function: wrapped)
   }
 
+  /// Define a Lisp function with five parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -561,6 +771,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with five parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -577,6 +797,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with five parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -592,6 +822,16 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  /// Define a Lisp function with five parameters out of the given closure.
+  ///
+  ///  - Parameters:
+  ///    - name: the name of a new function, can be `nil` for lambda functions
+  ///    - with: the docstring for the new function
+  ///    - function: the actual Swift implementation of a new function
+  ///
+  ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
+  ///
+  ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,

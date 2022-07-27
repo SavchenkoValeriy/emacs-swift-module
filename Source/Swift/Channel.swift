@@ -12,7 +12,7 @@ protocol AnyLazyCallback {
   func call(_ env: Environment, with args: Any) throws
 }
 
-struct CallbackStack {
+fileprivate struct CallbackStack {
   typealias Element = (callback: AnyLazyCallback, args: Any)
   typealias Index = Int
   private var elements: [Element?] = []
@@ -81,7 +81,7 @@ public class Channel {
   private var pipe: FileHandle? = nil
   /// This is our internal thread-safe data-structure to keep track
   /// of all registered calls and their arguments.
-  var stack = CallbackStack()
+  private var stack = CallbackStack()
 
   // We need a lock to prevent races writing to the pipe.
   private var lock = os_unfair_lock()
@@ -103,7 +103,7 @@ public class Channel {
   /// Call the callback stored under the given index.
   private func call(_ index: CallbackStack.Index, with env: Environment) throws
   {
-    try self.stack.pop(at: index, with: env)
+    try stack.pop(at: index, with: env)
   }
 
   /// Register a callback to be called with the given arguments.

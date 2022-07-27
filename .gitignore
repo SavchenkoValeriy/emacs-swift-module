@@ -1,5 +1,7 @@
-# Emacs tmp files
+# Emacs files
 *~
+.dir-locals.el
+    
 
 # Cask artifacts
 .cask
