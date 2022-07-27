@@ -46,11 +46,12 @@ struct CallbackStack {
 
 /// A communication channel that can be used at all times.
 ///
-/// While `Environment` is available when Emacs actively calls
+/// While ``Environment`` is available when Emacs actively calls
 /// into a module code, we might still want to ping Emacs from
 /// the Swift side and have an asynchronous callback, for example.
-/// Channel allows exactly that. After opening a channel via
-/// `Environment.openChannel(name:)`, it maintains a live connection
+///
+/// `Channel` allows exactly that. After opening a channel via
+/// ``Environment/openChannel(name:)``, it maintains a live connection
 /// to Emacs runtime.
 public class Channel {
   // Emacs doesn't allow dynamic modules to keep their environments,
@@ -185,11 +186,11 @@ extension Environment {
   /// The only way to communicate back to Emacs and call back
   /// into Emacs is to open a channel. Channels don't have any
   /// lifetime restrictions associated with environments.
-  /// For more details, see `Channel`.
+  /// For more details, see ``Channel``.
   ///
   /// - Parameter name: the name to identify the channel.
   /// - Returns: a new communication channel with the given name.
-  /// - Throws: an `EmacsError` if something goes wrong.
+  /// - Throws: an ``EmacsError`` if something goes wrong.
   public func openChannel(name: String) throws -> Channel {
     // Please see Channel comments for additional information
     // on the dark magic happening here.

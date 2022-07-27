@@ -45,7 +45,7 @@ public final class Environment {
   /// its name first.
   ///  - Parameter name: the name of the symbol to get or create.
   ///  - Returns: the opaque Emacs value representing a Lisp symbol for the given name.
-  ///  - Throws: `EmacsError.nonASCIISymbol` if the name has non-ASCII symbols (not allowed by Lisp).
+  ///  - Throws: ``EmacsError.nonASCIISymbol`` if the name has non-ASCII symbols (not allowed by Lisp).
   public func intern(_ name: String) throws -> EmacsValue {
     if !name.unicodeScalars.allSatisfy({ $0.isASCII }) {
       throw EmacsError.nonASCIISymbol(value: name)
@@ -59,22 +59,24 @@ public final class Environment {
   /// and store it for some time after this environment is gone.
   ///  - Parameter value: the value to preserve.
   ///  - Returns: the same value, but with prolongued lifetime.
-  ///  - Throws: `EmacsError` if something on the Emacs side goes wrong.
+  ///  - Throws: ``EmacsError`` if something on the Emacs side goes wrong.
   public func preserve(_ value: EmacsValue) throws -> PersistentEmacsValue {
     return try PersistentEmacsValue(from: value, within: self)
   }
 
   /// Retain the given value.
   ///
-  /// The semantics of this function are similar to Obj-C's own retain.
+  /// The semantics of this function are similar to Obj-C's own `retain`.
   /// Multiple `retain` calls will require as many `release` calls to follow
   /// in order to free the object.
   ///
-  /// > Warning: Please, try not to use this directly. Use `PersistentEmacsValue` or `preserve` instead.
+  /// (See ``release(_:)``)
+  ///
+  /// > Warning: Please, try not to use this directly. Use ``PersistentEmacsValue`` or ``preserve(_:)`` instead.
   ///
   ///  - Parameter value: the value to be retained.
   ///  - Returns: retained copy of the value.
-  ///  - Throws: `EmacsError` if something on the Emacs side goes wrong.
+  ///  - Throws: ``EmacsError`` if something on the Emacs side goes wrong.
   public func retain(_ value: EmacsValue) throws -> EmacsValue {
     return LocalEmacsValue(
       from: try check(raw.pointee.make_global_ref(raw, value.raw)))
@@ -82,14 +84,16 @@ public final class Environment {
 
   /// Release the given value.
   ///
-  /// The semantics of this function are similar to Obj-C's own release.
+  /// The semantics of this function are similar to Obj-C's own `release`.
   /// Multiple `retain` calls will require as many `release` calls to follow
   /// in order to free the object.
   ///
-  /// > Warning: Please, try not to use this directly. Use `PersistentEmacsValue` or `preserve` instead.
+  /// (See ``retain(_:)``)
+  ///
+  /// > Warning: Please, try not to use this directly. Use ``PersistentEmacsValue`` or ``preserve(_:)`` instead.
   ///
   ///  - Parameter value: the value to be released.
-  ///  - Throws: `EmacsError` if something on the Emacs side goes wrong.
+  ///  - Throws: ``EmacsError`` if something on the Emacs side goes wrong.
   public func release(_ value: EmacsValue) throws {
     let _ = try check(raw.pointee.free_global_ref(raw, value.raw))
   }
