@@ -57,11 +57,8 @@ extension Environment {
       // has a very simple interface to it.
       let impl = Unmanaged<DefunImplementation>.fromOpaque(data!)
         .takeUnretainedValue()  // We take unretained value because we probably want to
-      // allow users calling the same function multiple times. And this also means that
-      // the captured functions will NEVER get retained, even if we decide to redefine this
-      // name to be a different function. Unlike user_ptr, Emacs doesn't provide us with a
-      // finalizer for function data. Probably, it's not a problem if we won't generate
-      // more and more functions.
+      // allow users calling the same function multiple times. We only clean it up in
+      // a function's finalizer (see below).
       assert(
         num == impl.arity,
         "Emacs Lisp shouldn't've allowed a call with a wrong number of arguments!"
@@ -112,6 +109,15 @@ extension Environment {
       from: raw.pointee.make_function(
         raw, function.arity, function.arity, actualFunction, docstring,
         wrappedPtr))
+
+    // When the function value is garbage collected, we also
+    // need to cleanup on our side. Function `data` pointer keeps alive
+    // quite a large chunk of data (nested closures and their captures).
+    raw.pointee.set_function_finalizer(raw, funcValue.raw) {
+      (data: RawOpaquePointer?) in
+      Unmanaged<DefunImplementation>.fromOpaque(data!).release()
+    }
+
     if let name = name {
       // Create a symbol for it.
       let symbol = try intern(name)
