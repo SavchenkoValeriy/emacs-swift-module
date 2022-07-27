@@ -100,7 +100,8 @@ public class Channel {
   }
 
   /// Call the callback stored under the given index.
-  private func call(_ index: Int, with env: Environment) throws {
+  private func call(_ index: CallbackStack.Index, with env: Environment) throws
+  {
     try self.stack.pop(at: index, with: env)
   }
 
@@ -109,7 +110,7 @@ public class Channel {
     write(stack.push(callback: callback, args: args))
   }
 
-  private func write(_ index: Int) {
+  private func write(_ index: CallbackStack.Index) {
     os_unfair_lock_lock(&lock)
     defer { os_unfair_lock_unlock(&lock) }
 
