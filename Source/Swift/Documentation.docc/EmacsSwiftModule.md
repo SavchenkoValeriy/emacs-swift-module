@@ -59,6 +59,13 @@ The same happens when a type requirement expected in Swift is not met.
 
 ## Topics
 
+### Getting started
+
+- <doc:DefiningAModule>
+- <doc:CallingLispFunctions>
+- <doc:DefiningLispFunctions>
+- <doc:TypeConversions>
+
 ### Environment
 
 - ``Environment``

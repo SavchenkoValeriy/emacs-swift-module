@@ -1,11 +1,8 @@
 # ``EmacsSwiftModule/Environment``
 
-## Overview
-
-Environment is the one and only way to communicate with Emacs. This mainly includes
-any interactions with Emacs Lisp or Emacs Lisp values.
-
 ## Topics
+
+### Introducing environment
 
 ### Calling Emacs Lisp functions
 

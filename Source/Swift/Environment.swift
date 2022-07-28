@@ -1,6 +1,6 @@
 import EmacsModule
 
-/// Environment is **the** interaction point with Emacs. If you want to do anything on the Emacs side, you need to have an Environment.
+/// Environment is the interaction point with Emacs. If you want to do anything on the Emacs side, you need to have an Environment.
 ///
 /// Environment acts as a mediator for:
 ///  - calling Emacs Lisp functions
@@ -8,6 +8,8 @@ import EmacsModule
 ///  - exposing Swift functions to Emacs
 ///  - handling Emacs errors on the Swift side
 ///  - handling Swift errors on the Emacs side
+///
+/// > Warning: Don't copy and don't capture `Environment` objects. It becomes invalid the second your module initialization or function finishes execution.
 public final class Environment {
   internal let raw: UnsafeMutablePointer<emacs_env>
   /// This is a symbol we use for surfacing Swift exceptions to Emacs Lisp.
