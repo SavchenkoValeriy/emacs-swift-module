@@ -4,6 +4,8 @@ import EmacsModule
 ///
 /// This protocol allows us to create a seamless integration between the two
 /// worlds and bring strongly typed signatures into the mix.
+///
+/// See <doc:TypeConversions> for more detail.
 public protocol EmacsConvertible {
   /// Convert current Swift value into `EmacsValue` within the given environment.
   ///

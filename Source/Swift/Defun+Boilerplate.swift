@@ -304,6 +304,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     R: EmacsConvertible
@@ -325,6 +327,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     R: EmacsConvertible
@@ -346,6 +350,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult public func defun(
     _ name: String? = nil,
     with docstring: String = "",
@@ -364,6 +370,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult public func defun(
     _ name: String? = nil,
     with docstring: String = "",
@@ -383,6 +391,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T: EmacsConvertible,
@@ -405,6 +415,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T: EmacsConvertible,
@@ -427,6 +439,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T: EmacsConvertible
@@ -448,6 +462,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T: EmacsConvertible
@@ -470,6 +486,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -493,6 +511,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -516,6 +536,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -538,6 +560,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -561,6 +585,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -585,6 +611,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -609,6 +637,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -632,6 +662,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -656,6 +688,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -681,6 +715,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -706,6 +742,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -730,6 +768,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -755,6 +795,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -781,6 +823,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -807,6 +851,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,
@@ -832,6 +878,8 @@ extension Environment {
   ///  - Returns: a new function as ``EmacsValue`` that can be called via `funcall` or `apply`.
   ///
   ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
+  ///
+  /// See <doc:DefiningLispFunctions> for examples.
   @discardableResult
   public func defun<
     T1: EmacsConvertible,

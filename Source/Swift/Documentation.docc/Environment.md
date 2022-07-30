@@ -6,6 +6,7 @@
 
 ### Calling Emacs Lisp functions
 
+- <doc:CallingLispFunctions>
 - ``apply(_:with:)-9alg5``
 - ``apply(_:with:)-4wizo``
 - ``apply(_:with:)-7b6xj``
@@ -24,6 +25,7 @@
 
 ### Defining Emacs Lisp functions
 
+- <doc:DefiningLispFunctions>
 - ``defun(_:with:function:)-6nzo0``
 - ``defun(_:with:function:)-5d2z6``
 - ``defun(_:with:function:)-7qigd``
@@ -51,6 +53,7 @@
 
 ### Lifetime management
 
+- <doc:Lifetimes>
 - ``preserve(_:)``
 - ``PersistentEmacsValue``
 - ``retain(_:)``
@@ -58,6 +61,7 @@
 
 ### Channel creation
 
+- <doc:AsyncCallbacks>
 - ``openChannel(name:)``
 - ``Channel``
 

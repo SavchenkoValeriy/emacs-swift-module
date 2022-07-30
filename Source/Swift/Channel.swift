@@ -53,6 +53,8 @@ fileprivate struct CallbackStack {
 /// `Channel` allows exactly that. After opening a channel via
 /// ``Environment/openChannel(name:)``, it maintains a live connection
 /// to Emacs runtime.
+///
+/// See <doc:AsyncCallbacks> for more detail.
 public class Channel {
   // Emacs doesn't allow dynamic modules to keep their environments,
   // and the only thing that is allowed is to signal Emacs somehowe
@@ -186,7 +188,7 @@ extension Environment {
   /// The only way to communicate back to Emacs and call back
   /// into Emacs is to open a channel. Channels don't have any
   /// lifetime restrictions associated with environments.
-  /// For more details, see ``Channel``.
+  /// For more details, see <doc:AsyncCallbacks> and ``Channel``.
   ///
   /// - Parameter name: the name to identify the channel.
   /// - Returns: a new communication channel with the given name.
