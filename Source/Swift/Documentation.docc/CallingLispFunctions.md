@@ -2,7 +2,7 @@
 
 Calling Lisp functions from your Swift code.
 
-## `funcall` and `apply`
+## funcall and apply
 
 Similarly to Emacs Lisp functions `funcall` and `apply`, ``Environment`` provides methods with the same names with similar semantics. In 99% of the cases you'll need `funcall`, which accepts a function to call and whatever arguments you pass with it. Every function has a structure.
 

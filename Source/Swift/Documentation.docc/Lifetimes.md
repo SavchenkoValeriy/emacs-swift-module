@@ -1,0 +1,3 @@
+# Lifetimes
+
+Emacs internals lifetimes.

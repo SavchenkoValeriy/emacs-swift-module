@@ -65,6 +65,12 @@ The same happens when a type requirement expected in Swift is not met.
 - <doc:CallingLispFunctions>
 - <doc:DefiningLispFunctions>
 - <doc:TypeConversions>
+- <doc:ErrorHandling>
+
+### Advanced
+
+- <doc:Lifetimes>
+- <doc:AsyncCallbacks>
 
 ### Environment
 
@@ -73,6 +79,7 @@ The same happens when a type requirement expected in Swift is not met.
 
 ### Type conversions
 
+- <doc:TypeConversions>
 - ``EmacsConvertible``
 - ``OpaquelyEmacsConvertible``
 - ``EmacsValue``
@@ -81,4 +88,11 @@ The same happens when a type requirement expected in Swift is not met.
 
 ### Error handling
 
+- <doc:ErrorHandling>
 - ``EmacsError``
+
+### Asynchronous callbacks
+
+- <doc:AsyncCallbacks>
+- ``Channel``
+- ``Environment/openChannel(name:)``
