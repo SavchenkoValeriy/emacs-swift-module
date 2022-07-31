@@ -45,6 +45,13 @@ public enum EmacsError: Error {
   ///   - tag: the symbol categorizing this exception.
   ///   - value: supplementary value.
   case thrown(tag: EmacsValue, value: EmacsValue)
+  /// Emacs user interruption (C-g).
+  ///
+  /// User can request execution interruption at any time, if you are trying to do something
+  /// with environment after that, this exception will be thrown.
+  ///
+  /// It is recommended to stop any work as soon as possible upon receiving user interruptions.
+  case interrupted
   /// If everything went to hell...
   case unknown
 }
@@ -65,6 +72,10 @@ extension Environment {
   ///  - Returns: the checked value if we encountered no errors.
   ///  - Throws: an instance of `EmacsError` if Emacs was in error state.
   func check<T>(_ result: T) throws -> T {
+    if (interrupted()) {
+      throw EmacsError.interrupted
+    }
+
     var symbolOrTag: emacs_value?
     var dataOrValue: emacs_value?
 
@@ -111,5 +122,15 @@ extension Environment {
 
   func throwForTag(_ tag: EmacsValue, with value: EmacsValue) {
     raw.pointee.non_local_exit_throw(raw, tag.raw, value.raw)
+  }
+
+  /// Checks whether the user interrupted execution of the current function.
+  ///
+  /// It is recommended to stop work as soon as possible, and check this condition
+  /// in long-running tasks.
+  ///
+  /// - Returns: `true` if the environment received interruption signal from the user.
+  public func interrupted() -> Bool {
+    return raw.pointee.should_quit(raw)
   }
 }

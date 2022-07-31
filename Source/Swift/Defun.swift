@@ -91,6 +91,9 @@ extension Environment {
       } catch (EmacsError.thrown(let tag, let value)) {
         env.throwForTag(tag, with: value)
 
+      } catch EmacsError.interrupted {
+        // do nothing, just return
+
       } catch {
         // As mentioned earlier, we cannot let any of the Swift exceptions to get
         // away or it'll crash Emacs.
