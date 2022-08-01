@@ -121,6 +121,15 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
       (x: PersistentEmacsValue) in persistentArray.append(x)
     }
     try env.defun("swift-get-array") { persistentArray }
+    try env.defun("swift-with-environment") {
+      (callback: PersistentEmacsValue) in
+      Task {
+        channel.withEnvironment {
+          (env:Environment) throws in
+          try env.funcall(callback)
+        }
+      }
+    }
   } catch {
     return 1
   }

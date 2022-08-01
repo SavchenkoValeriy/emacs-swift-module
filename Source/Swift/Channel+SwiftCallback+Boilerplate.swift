@@ -120,4 +120,8 @@ extension Channel {
         args: (arg1, arg2, arg3, arg4, arg5))
     }
   }
+
+  public func withEnvironment(_ function: @escaping (Environment) throws -> Void) {
+    register(callback: LazySwiftCallback0(function: function), args: ())
+  }
 }

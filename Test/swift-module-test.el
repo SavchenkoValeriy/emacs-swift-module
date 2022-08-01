@@ -70,10 +70,11 @@
   (should (equal (swift-call-lambda "hello") "Received hello"))
   (should (equal (funcall (swift-get-lambda) "hello") "Received hello")))
 
-(ert-deftest-async swift-module:check-async (done1 done2 done3)
+(ert-deftest-async swift-module:check-async (done1 done2 done3 done4)
   (swift-async-channel done1)
   (swift-async-lisp-callback done2)
-  (swift-async-lisp-callback done3))
+  (swift-async-lisp-callback done3)
+  (swift-with-environment done4))
 
 (ert-deftest swift-module:check-persistence ()
   (mapc (lambda (x) (swift-add-to-array x)) (number-sequence 1 5))
