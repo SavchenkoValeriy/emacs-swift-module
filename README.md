@@ -55,3 +55,29 @@ The same happens when a type requirement expected in Swift is not met.
 ```emacs-lisp
 (foo "Hello" "World") ;; => raises (wrong-type-argument numberp "Hello")
 ```
+
+## Documentation
+
+Full documentation of the package can be found here: https://savchenkovaleriy.github.io/emacs-swift-module/documentation/emacsswiftmodule/
+
+## Installation
+
+### Swift Package Manager
+
+Add the following line to you package dependencies:
+
+```swift
+.package("https://github.com/SavchenkoValeriy/emacs-swift-module.git", from: "1.0.0")
+```
+
+Or add `"https://github.com/SavchenkoValeriy/emacs-swift-module.git"` directly via Xcode.
+
+## Contribute
+
+All contributions are most welcome!
+
+It might include any help: bug reports, questions on how to use it, feature suggestions, and documentation updates.
+
+## License
+
+[GPL-3.0](./LICENSE)
