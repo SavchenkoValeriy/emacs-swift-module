@@ -79,6 +79,13 @@ class LazyLispCallback5<
 }
 
 extension Channel {
+  /// Make a Swift callback out of an Emacs function.
+  ///
+  /// This allows us to use Emacs functions as callbacks in Swift APIs.
+  /// Please, see <doc:AsyncCallbacks> for more details on that.
+  ///
+  /// - Parameter function: a Lisp function to turn into a callback.
+  /// - Returns: a callback that if called, will eventually call the given function.
   public func callback(_ function: EmacsValue)
     -> () -> Void
   {
@@ -87,6 +94,13 @@ extension Channel {
         callback: LazyLispCallback0(function: function), args: ())
     }
   }
+  /// Make a Swift callback out of an Emacs function.
+  ///
+  /// This allows us to use Emacs functions as callbacks in Swift APIs.
+  /// Please, see <doc:AsyncCallbacks> for more details on that.
+  ///
+  /// - Parameter function: a Lisp function to turn into a callback.
+  /// - Returns: a callback that if called, will eventually call the given function.
   public func callback<T: EmacsConvertible>(_ function: EmacsValue)
     -> (T) -> Void
   {
@@ -95,6 +109,13 @@ extension Channel {
         callback: LazyLispCallback1<T>(function: function), args: arg)
     }
   }
+  /// Make a Swift callback out of an Emacs function.
+  ///
+  /// This allows us to use Emacs functions as callbacks in Swift APIs.
+  /// Please, see <doc:AsyncCallbacks> for more details on that.
+  ///
+  /// - Parameter function: a Lisp function to turn into a callback.
+  /// - Returns: a callback that if called, will eventually call the given function.
   public func callback<T1: EmacsConvertible, T2: EmacsConvertible>(
     _ function: EmacsValue
   ) -> (T1, T2) -> Void {
@@ -104,6 +125,13 @@ extension Channel {
         args: (arg1, arg2))
     }
   }
+  /// Make a Swift callback out of an Emacs function.
+  ///
+  /// This allows us to use Emacs functions as callbacks in Swift APIs.
+  /// Please, see <doc:AsyncCallbacks> for more details on that.
+  ///
+  /// - Parameter function: a Lisp function to turn into a callback.
+  /// - Returns: a callback that if called, will eventually call the given function.
   public func callback<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible
   >(
@@ -115,6 +143,13 @@ extension Channel {
         args: (arg1, arg2, arg3))
     }
   }
+  /// Make a Swift callback out of an Emacs function.
+  ///
+  /// This allows us to use Emacs functions as callbacks in Swift APIs.
+  /// Please, see <doc:AsyncCallbacks> for more details on that.
+  ///
+  /// - Parameter function: a Lisp function to turn into a callback.
+  /// - Returns: a callback that if called, will eventually call the given function.
   public func callback<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     T4: EmacsConvertible
@@ -127,6 +162,13 @@ extension Channel {
         args: (arg1, arg2, arg3, arg4))
     }
   }
+  /// Make a Swift callback out of an Emacs function.
+  ///
+  /// This allows us to use Emacs functions as callbacks in Swift APIs.
+  /// Please, see <doc:AsyncCallbacks> for more details on that.
+  ///
+  /// - Parameter function: a Lisp function to turn into a callback.
+  /// - Returns: a callback that if called, will eventually call the given function.
   public func callback<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     T4: EmacsConvertible, T5: EmacsConvertible

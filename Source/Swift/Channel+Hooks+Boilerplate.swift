@@ -85,6 +85,13 @@ class LazyHook5<
 }
 
 extension Channel {
+  /// Make a Swift callback out of an Emacs hook's name.
+  ///
+  /// This allows us to use Emacs hooks as callbacks in Swift APIs.
+  /// Please, see <doc:AsyncCallbacks> for more details on that.
+  ///
+  /// - Parameter function: a name of a Lisp hook to turn into callback.
+  /// - Returns: a callback that if called, will eventually run the hook.
   public func hook(_ hook: String)
     -> () -> Void
   {
@@ -93,6 +100,13 @@ extension Channel {
         callback: LazyHook0(hook: hook), args: ())
     }
   }
+  /// Make a Swift callback out of an Emacs hook's name.
+  ///
+  /// This allows us to use Emacs hooks as callbacks in Swift APIs.
+  /// Please, see <doc:AsyncCallbacks> for more details on that.
+  ///
+  /// - Parameter function: a name of a Lisp hook to turn into callback.
+  /// - Returns: a callback that if called, will eventually run the hook.
   public func hook<T: EmacsConvertible>(_ hook: String)
     -> (T) -> Void
   {
@@ -101,6 +115,13 @@ extension Channel {
         callback: LazyHook1<T>(hook: hook), args: arg)
     }
   }
+  /// Make a Swift callback out of an Emacs hook's name.
+  ///
+  /// This allows us to use Emacs hooks as callbacks in Swift APIs.
+  /// Please, see <doc:AsyncCallbacks> for more details on that.
+  ///
+  /// - Parameter function: a name of a Lisp hook to turn into callback.
+  /// - Returns: a callback that if called, will eventually run the hook.
   public func hook<T1: EmacsConvertible, T2: EmacsConvertible>(
     _ hook: String
   ) -> (T1, T2) -> Void {
@@ -110,6 +131,13 @@ extension Channel {
         args: (arg1, arg2))
     }
   }
+  /// Make a Swift callback out of an Emacs hook's name.
+  ///
+  /// This allows us to use Emacs hooks as callbacks in Swift APIs.
+  /// Please, see <doc:AsyncCallbacks> for more details on that.
+  ///
+  /// - Parameter function: a name of a Lisp hook to turn into callback.
+  /// - Returns: a callback that if called, will eventually run the hook.
   public func hook<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible
   >(
@@ -121,6 +149,13 @@ extension Channel {
         args: (arg1, arg2, arg3))
     }
   }
+  /// Make a Swift callback out of an Emacs hook's name.
+  ///
+  /// This allows us to use Emacs hooks as callbacks in Swift APIs.
+  /// Please, see <doc:AsyncCallbacks> for more details on that.
+  ///
+  /// - Parameter function: a name of a Lisp hook to turn into callback.
+  /// - Returns: a callback that if called, will eventually run the hook.
   public func hook<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     T4: EmacsConvertible
@@ -133,6 +168,13 @@ extension Channel {
         args: (arg1, arg2, arg3, arg4))
     }
   }
+  /// Make a Swift callback out of an Emacs hook's name.
+  ///
+  /// This allows us to use Emacs hooks as callbacks in Swift APIs.
+  /// Please, see <doc:AsyncCallbacks> for more details on that.
+  ///
+  /// - Parameter function: a name of a Lisp hook to turn into callback.
+  /// - Returns: a callback that if called, will eventually run the hook.
   public func hook<
     T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
     T4: EmacsConvertible, T5: EmacsConvertible
