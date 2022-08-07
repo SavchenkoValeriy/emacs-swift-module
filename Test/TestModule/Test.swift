@@ -145,6 +145,10 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
     try env.defun("swift-list-length") {
       (arg: List<EmacsValue>) in arg.reduce(0) { (x, _) in x + 1 }
     }
+    try env.defun("swift-alist") {
+      (arg: [Int: String]) in
+      arg.filter { $0.key == 42 }
+    }
   } catch {
     return 1
   }

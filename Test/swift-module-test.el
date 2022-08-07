@@ -95,3 +95,7 @@
 (ert-deftest swift-module:check-list-conversion ()
   (should (equal (swift-list '(1 2 3 4)) '(2 4 6 8)))
   (should (equal (swift-list-length (number-sequence 1 50000)) 50000)))
+
+(ert-deftest swift-module:check-alist-conversion ()
+  (let ((result (swift-alist '((10 . "a") (42 . "matters") (43 . "b")))))
+    (should (equal (length result) 1))))

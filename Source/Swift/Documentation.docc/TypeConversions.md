@@ -58,6 +58,7 @@ and the code above will work as expected.
  - Swift `Bool` into Lisp as `t/nil`. When converting from Lisp, any value but `nil` is considered to be `true`. `Bool` is the only native type that doesn't throw during conversion.
  - Swift `Optional` if the underlying type is ``EmacsConvertible``. Swift `nil` into/from Lisp `nil`, and other cases match the underlying type conversion.
  - Swift `Array` if the element type is ``EmacsConvertible``, into/from Lisp `vector` (not `list`). Maybe one day, we'll decide to support `list` conversions as well, but one-to-many conversion can get pretty tricky and `vector` seems like a better match.
+ - Swift `Dictionary` if the key and value types are both ``EmacsConvertible``, into/from Lisp `alist`.
  - ``Symbol`` into/from Lisp `symbol`
  - ``ConsCell`` into/from Lisp `cons`
  - ``List`` into/from Lisp `list`

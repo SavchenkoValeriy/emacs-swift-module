@@ -127,6 +127,27 @@ extension Array: EmacsConvertible where Element: EmacsConvertible {
   }
 }
 
+/// Dictionary conversions to and from Emacs values.
+///
+/// It only works for dictionaries with both keys and values being `EmacsConvertible`.
+/// Dictionaries are constructed to and from Lisp alists. Other candidates,
+/// plists and hash tables are not yet supported.
+extension Dictionary: EmacsConvertible where Key: EmacsConvertible,
+                                             Value: EmacsConvertible {
+  public func convert(within env: Environment) throws -> EmacsValue {
+    let cells = self.map { ConsCell(car: $0, cdr: $1) }
+    return try List(from: cells).convert(within: env)
+  }
+
+  public static func convert(from value: EmacsValue, within env: Environment)
+    throws -> [Key: Value]
+  {
+    let raw = try List<ConsCell<Key, Value>>.convert(from: value, within: env)
+    return Dictionary(uniqueKeysWithValues: raw.map { cons in (cons.car, cons.cdr) })
+  }
+}
+
+
 /// Optional conversions to and from Emacs values.
 ///
 /// It only works for optional types, where the underlying type itself
