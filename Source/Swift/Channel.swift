@@ -26,21 +26,21 @@ fileprivate struct CallbackStack {
     return elements.count - 1
   }
 
-  mutating func pop(at index: Index, with env: Environment) throws {
+  mutating func pop(at index: Index) -> Element? {
     os_unfair_lock_lock(&lock)
     defer { os_unfair_lock_unlock(&lock) }
 
     guard let element = elements[index] else {
       print("Tried to call already called element!")
-      return
+      return nil
     }
-
-    try element.callback.call(env, with: element.args)
 
     elements[index] = nil
     if elements.allSatisfy({ $0 == nil }) {
       elements.removeAll()
     }
+
+    return element
   }
 }
 
@@ -105,7 +105,9 @@ public class Channel {
   /// Call the callback stored under the given index.
   private func call(_ index: CallbackStack.Index, with env: Environment) throws
   {
-    try stack.pop(at: index, with: env)
+    if let element = stack.pop(at: index) {
+      try element.callback.call(env, with: element.args)
+    }
   }
 
   /// Register a callback to be called with the given arguments.

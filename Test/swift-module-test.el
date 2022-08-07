@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (require 'ert-async)
 
 (intern "swift-error")
@@ -99,3 +100,16 @@
 (ert-deftest swift-module:check-alist-conversion ()
   (let ((result (swift-alist '((10 . "a") (42 . "matters") (43 . "b")))))
     (should (equal (length result) 1))))
+
+(ert-deftest-async swift-module:check-async-nested-1 (done1 done2)
+  (swift-async-channel-with-result
+   (lambda (x)
+     (swift-async-channel-with-result
+      (lambda (y) (should (equal x y)) (funcall done1)))
+     (swift-async-channel done2))))
+
+(ert-deftest-async swift-module:check-async-nested-2 (done1)
+  (swift-nested-async-with-result
+   (lambda (x)
+     (should (equal x 42))
+     (funcall done1))))

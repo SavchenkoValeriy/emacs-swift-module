@@ -99,6 +99,20 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
           })
       }
     }
+    try env.defun("swift-async-channel-with-result") {
+      (callback: PersistentEmacsValue) in
+      Task {
+        try await someAsyncTaskWithResult(completion: channel.callback(callback))
+      }
+    }
+    try env.defun("swift-nested-async-with-result") {
+      (callback: PersistentEmacsValue) in
+      Task {
+        try await someAsyncTaskWithResult(completion: channel.callback {
+                                            (_, x) in channel.callback(callback)(x)
+                                          })
+      }
+    }
     try env.defun("swift-async-lisp-callback") {
       (callback: PersistentEmacsValue) in
       Task {
