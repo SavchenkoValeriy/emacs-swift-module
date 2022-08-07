@@ -60,3 +60,4 @@ and the code above will work as expected.
  - Swift `Array` if the element type is ``EmacsConvertible``, into/from Lisp `vector` (not `list`). Maybe one day, we'll decide to support `list` conversions as well, but one-to-many conversion can get pretty tricky and `vector` seems like a better match.
  - ``Symbol`` into/from Lisp `symbol`
  - ``ConsCell`` into/from Lisp `cons`
+ - ``List`` into/from Lisp `list`

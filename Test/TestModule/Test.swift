@@ -138,6 +138,13 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
       (arg: [Int]) in
       arg.map { x in ConsCell(car: x, cdr: x * x) }
     }
+    try env.defun("swift-list") {
+      (arg: List<Int>) in
+      List(from: arg.map { $0 * 2 })
+    }
+    try env.defun("swift-list-length") {
+      (arg: List<EmacsValue>) in arg.reduce(0) { (x, _) in x + 1 }
+    }
   } catch {
     return 1
   }
