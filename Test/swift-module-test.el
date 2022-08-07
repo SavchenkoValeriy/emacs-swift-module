@@ -87,3 +87,7 @@
   (add-hook 'abnormal-hook (lambda (x) (when (eq x 42) (funcall done2))))
   (swift-async-normal-hook)
   (swift-async-abnormal-hook))
+
+(ert-deftest swift-module:check-cons-conversion ()
+  (should (equal (swift-cons-arg '(10 . "String")) "(10 . String)"))
+  (should (equal (swift-cons-return [1 2 3 4]) [(1 . 1) (2 . 4) (3 . 9) (4 . 16)])))

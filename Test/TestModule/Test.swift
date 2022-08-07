@@ -130,6 +130,14 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
         }
       }
     }
+    try env.defun("swift-cons-arg") {
+      (arg: ConsCell<Int, String>) in
+      "(\(arg.car) . \(arg.cdr))"
+    }
+    try env.defun("swift-cons-return") {
+      (arg: [Int]) in
+      arg.map { x in ConsCell(car: x, cdr: x * x) }
+    }
   } catch {
     return 1
   }

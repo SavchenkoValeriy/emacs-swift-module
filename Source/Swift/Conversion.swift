@@ -147,21 +147,6 @@ extension Optional: EmacsConvertible where Wrapped: EmacsConvertible {
   }
 }
 
-/// Emacs named symbol
-public struct Symbol: EmacsConvertible {
-  public let name: String
-
-  public func convert(within env: Environment) throws -> EmacsValue {
-    return try env.intern(name)
-  }
-
-  public static func convert(from value: EmacsValue, within env: Environment)
-    throws -> Symbol
-  {
-    return Symbol(name: try env.funcall("symbol-name", with: value))
-  }
-}
-
 /// The protocol for converting custom Swift object into opaque Emacs values.
 ///
 /// When using this conversion, the result would be absolutely opaque on the
