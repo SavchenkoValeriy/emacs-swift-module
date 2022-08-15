@@ -19,7 +19,7 @@ public struct Symbol: EmacsConvertible {
 
 /// Emacs cons cell
 public struct ConsCell<CarType, CdrType>: EmacsConvertible
-  where CarType: EmacsConvertible, CdrType: EmacsConvertible {
+where CarType: EmacsConvertible, CdrType: EmacsConvertible {
   public var car: CarType
   public var cdr: CdrType
 
@@ -32,7 +32,9 @@ public struct ConsCell<CarType, CdrType>: EmacsConvertible
     try env.funcall("cons", with: car, cdr)
   }
 
-  public static func convert(from: EmacsValue, within env: Environment) throws -> ConsCell {
+  public static func convert(from: EmacsValue, within env: Environment) throws
+    -> ConsCell
+  {
     let car: CarType = try env.funcall("car", with: from)
     let cdr: CdrType = try env.funcall("cdr", with: from)
     return ConsCell(car: car, cdr: cdr)
@@ -80,7 +82,9 @@ extension List: EmacsConvertible where Element: EmacsConvertible {
     try env.apply("list", with: toArray())
   }
 
-  public static func convert(from: EmacsValue, within env: Environment) throws -> List<Element> {
+  public static func convert(from: EmacsValue, within env: Environment) throws
+    -> List<Element>
+  {
     var array: [Element] = []
     var list = from
     // We could've constructed it recursively, but lists can get pretty long, so it's better

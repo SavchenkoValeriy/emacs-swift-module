@@ -90,3 +90,32 @@ try env.defun("create-form") {
 ```
 
 Essentially, it does the same thing as the `callback` method in the earlier snippet, but it runs a hook instead.
+
+## Asynchronous Results
+
+There is one scenario, however, that the callbacks in this form couldn't cover - getting data from the Lisp side.
+
+Let's consider the following scenario, we are writing an integration with some web API and need to do quite a lot of work in the background. We do this asynchronously, so we don't block Emacs. At some point, we find out that authentication cookies had expired and need to ask the user to put in their password again.
+
+```swift
+if cookies.isInvalid() {
+  var userPassword = ""
+  channel.withEnvironment {
+    env in userPassword = try env.funcall("password-read", with: "Password: ")
+  }
+  // use userPassword?
+}
+```
+
+The problem with this code is that we don't know when `passord-read` is going to get executed and when we can actually use `userPassword`. Of course, we can implement some form of busy waiting and check `userPassword` from time to time, but this doesn't seem very appealing.
+
+Instead, `EmacsSwiftModule` leverages `async/await` model of Swift in ``Channel/withAsyncEnvironment(_:)`` to efficiently and seamlessly request data from Emacs and the user.
+
+```swift
+if cookies.isInvalid() {
+  let userPassword: String = try await channel.withAsyncEnvironment {
+    env in try env.funcall("password-read", with: "Password: ")
+  }
+  // use userPassword
+}
+```

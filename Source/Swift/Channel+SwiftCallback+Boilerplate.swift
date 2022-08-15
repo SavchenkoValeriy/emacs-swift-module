@@ -170,7 +170,32 @@ extension Channel {
   /// updates.
   ///
   /// - Parameter function: a callback to execute with Emacs environment
-  public func withEnvironment(_ function: @escaping (Environment) throws -> Void) {
+  public func withEnvironment(
+    _ function: @escaping (Environment) throws -> Void
+  ) {
     register(callback: LazySwiftCallback0(function: function), args: ())
+  }
+
+  /// Execute the given closure with Emacs environment and return its result.
+  ///
+  /// This function allows us to asynchronously use environment to request
+  /// information from the Emacs side and wait for it using Swift async/await
+  /// mechanisms.
+  ///
+  /// - Parameter function: a code calculating some value with Emacs environment
+  public func withAsyncEnvironment<R: EmacsConvertible>(
+    _ function: @escaping (Environment) throws -> R
+  ) async throws -> R {
+    try await withCheckedThrowingContinuation {
+      continuation in
+      withEnvironment {
+        env in
+        do {
+          continuation.resume(returning: try function(env))
+        } catch {
+          continuation.resume(throwing: error)
+        }
+      }
+    }
   }
 }

@@ -12,7 +12,7 @@ protocol AnyLazyCallback {
   func call(_ env: Environment, with args: Any) throws
 }
 
-fileprivate struct CallbackStack {
+private struct CallbackStack {
   typealias Element = (callback: AnyLazyCallback, args: Any)
   typealias Index = Int
   private var elements: [Element?] = []

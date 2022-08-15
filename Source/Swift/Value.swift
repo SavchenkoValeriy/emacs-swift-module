@@ -14,7 +14,7 @@ public class EmacsValue {
   }
 }
 
-fileprivate var freedPersistentValues = [RawEmacsValue]()
+private var freedPersistentValues = [RawEmacsValue]()
 
 /// An Emacs value that can be safely copied and stored.
 ///

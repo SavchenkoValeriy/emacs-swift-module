@@ -72,7 +72,7 @@ extension Environment {
   ///  - Returns: the checked value if we encountered no errors.
   ///  - Throws: an instance of `EmacsError` if Emacs was in error state.
   func check<T>(_ result: T) throws -> T {
-    if (interrupted()) {
+    if interrupted() {
       throw EmacsError.interrupted
     }
 

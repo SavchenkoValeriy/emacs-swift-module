@@ -113,3 +113,9 @@
    (lambda (x)
      (should (equal x 42))
      (funcall done1))))
+
+(ert-deftest-async swift-module:check-async-with-result (done)
+  (swift-with-async-environment
+   10 (lambda (x)
+        (should (equal x 32))
+        (funcall done))))
