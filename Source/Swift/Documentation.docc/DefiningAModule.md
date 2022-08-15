@@ -9,7 +9,7 @@ Defining a new Emacs module from Swift.
 Add the following line to you package dependencies:
 
 ```swift
-.package("https://github.com/SavchenkoValeriy/emacs-swift-module.git", from: "1.0.0")
+.package("https://github.com/SavchenkoValeriy/emacs-swift-module.git", from: "1.2.0")
 ```
 
 Or add `"https://github.com/SavchenkoValeriy/emacs-swift-module.git"` directly via Xcode.
