@@ -66,7 +66,7 @@ public final class Environment {
   /// its name first.
   ///  - Parameter name: the name of the symbol to get or create.
   ///  - Returns: the opaque Emacs value representing a Lisp symbol for the given name.
-  ///  - Throws: ``EmacsError.nonASCIISymbol`` if the name has non-ASCII symbols (not allowed by Lisp).
+  ///  - Throws: ``EmacsError/nonASCIISymbol(value:)`` if the name has non-ASCII symbols (not allowed by Lisp).
   public func intern(_ name: String) throws -> EmacsValue {
     if !name.unicodeScalars.allSatisfy({ $0.isASCII }) {
       throw EmacsError.nonASCIISymbol(value: name)

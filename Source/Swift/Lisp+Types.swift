@@ -17,6 +17,7 @@
 // You should have received a copy of the GNU General Public License along with
 // EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
 //
+
 /// Emacs named symbol
 public struct Symbol: EmacsConvertible {
   public let name: String

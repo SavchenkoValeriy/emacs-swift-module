@@ -17,6 +17,7 @@
 // You should have received a copy of the GNU General Public License along with
 // EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
 //
+
 /// An opaque Emacs value representing something from the Emacs Lisp world.
 ///
 /// Please, don't assume anything based on this object and treat it as a
