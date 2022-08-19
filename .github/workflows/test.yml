@@ -16,10 +16,18 @@ jobs:
     strategy:
       matrix:
         emacs-version:
+          - 25.3
+          - 26.3
+          - 27.2
           - 28.1
         configuration:
           - release
           - debug
+    env:
+      EMACS_VERSION: ${{ matrix.emacs-version }}
+      EMACS_MAJOR_VERSION: "${EMACS_VERSION%.*}"
+      BUILD_DIR: .build/${{ matrix.configuration }}
+      TEST_LIB: $BUILD_DIR/libTestModule.${{ matrix.emacs-version == 28.1 && 'dylib' || 'so' }}
     steps:
       - uses: actions/checkout@v2
       - uses: purcell/setup-emacs@master
@@ -41,5 +49,7 @@ jobs:
           version: snapshot
       - run: echo "$HOME/.cask/bin" >> $GITHUB_PATH
       - run: swift build -c ${{ matrix.configuration }}
+      - run: cp $BUILD_DIR/libTestModule.dylib $BUILD_DIR/libTestModule.so
+        if: matrix.emacs-version != 28.1
       - run: cask install
-      - run: cask exec ert-runner -l .build/${{ matrix.configuration }}/libTestModule.dylib
+      - run: cask exec ert-runner -l $TEST_LIB -t emacs-$EMACS_MAJOR_VERSION,emacs-all

@@ -217,6 +217,9 @@ extension Environment {
   public func openChannel(name: String) throws -> Channel {
     // Please see Channel comments for additional information
     // on the dark magic happening here.
+    if version < .Emacs28 {
+      throw EmacsError.unsupported(what: "channels are only available for Emacs 28 and later")
+    }
     let channel = Channel(name: name)
     let pipeFD = raw.pointee.open_channel(
       raw, try channel.makeProcess(in: self).raw)
