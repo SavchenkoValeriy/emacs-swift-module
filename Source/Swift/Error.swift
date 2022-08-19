@@ -71,6 +71,10 @@ public enum EmacsError: Error {
   ///
   /// It is recommended to stop any work as soon as possible upon receiving user interruptions.
   case interrupted
+  /// Trying to use feature not available in the current version of Emacs.
+  ///
+  /// - Parameter what: description of the unsupported operation.
+  case unsupported(what: String)
   /// If everything went to hell...
   case unknown
 }
@@ -150,6 +154,9 @@ extension Environment {
   ///
   /// - Returns: `true` if the environment received interruption signal from the user.
   public func interrupted() -> Bool {
+    if version == .Emacs25 {
+      return false
+    }
     return raw.pointee.should_quit(raw)
   }
 }

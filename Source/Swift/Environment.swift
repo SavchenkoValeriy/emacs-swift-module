@@ -19,6 +19,24 @@
 //
 import EmacsModule
 
+public enum EmacsVersion: Int, Comparable {
+  case Emacs25 = 25
+  case Emacs26 = 26
+  case Emacs27 = 27
+  case Emacs28 = 28
+  case Emacs29 = 29
+
+  public static func <(lhs: EmacsVersion, rhs: EmacsVersion) -> Bool {
+    return lhs.rawValue < rhs.rawValue
+  }
+}
+
+private let Emacs25Size = MemoryLayout<emacs_env_25>.size
+private let Emacs26Size = MemoryLayout<emacs_env_26>.size
+private let Emacs27Size = MemoryLayout<emacs_env_27>.size
+private let Emacs28Size = MemoryLayout<emacs_env_28>.size
+private let Emacs29Size = MemoryLayout<emacs_env_29>.size
+
 /// Environment is the interaction point with Emacs. If you want to do anything on the Emacs side, you need to have an Environment.
 ///
 /// Environment acts as a mediator for:
@@ -30,7 +48,10 @@ import EmacsModule
 ///
 /// > Warning: Don't copy and don't capture `Environment` objects. It becomes invalid the second your module initialization or function finishes execution.
 public final class Environment {
-  internal let raw: UnsafeMutablePointer<emacs_env>
+  let raw: UnsafeMutablePointer<emacs_env>
+  /// Version of the Emacs binary that issued this environment.
+  public let version: EmacsVersion
+
   /// This is a symbol we use for surfacing Swift exceptions to Emacs Lisp.
   internal lazy var swiftError: EmacsValue = {
     let symbol = try! intern("swift-error")
@@ -41,8 +62,23 @@ public final class Environment {
   }()
 
   /// Construct the environment from raw C pointer.
-  required init(from: UnsafeMutablePointer<emacs_env>) {
-    raw = from
+  required init(from env: UnsafeMutablePointer<emacs_env>) {
+    raw = env
+    switch env.pointee.size {
+    case 0 ..< Emacs25Size:
+      fatalError("Emacs is too old!")
+    case Emacs25Size ..< Emacs26Size:
+      version = .Emacs25
+    case Emacs26Size ..< Emacs27Size:
+      version = .Emacs26
+    case Emacs27Size ..< Emacs28Size:
+      version = .Emacs27
+    case Emacs28Size ..< Emacs29Size:
+      version = .Emacs28
+    default:
+      version = .Emacs29
+    }
+
     // While we didn't have any environments live, we could've accumulated
     // a few things to clean, let's do it!
     cleanup()

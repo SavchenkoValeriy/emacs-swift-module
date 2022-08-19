@@ -89,78 +89,7 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
       try env.funcall(lambda, with: arg)
     }
     try env.defun("swift-get-lambda") { lambda }
-    let channel = try env.openChannel(name: "test")
-    try env.defun("swift-async-channel") {
-      (callback: PersistentEmacsValue) in
-      Task {
-        try await someAsyncTask(
-          completion: channel.callback {
-            (env: Environment) throws in try env.funcall(callback)
-          })
-      }
-    }
-    try env.defun("swift-async-channel-with-result") {
-      (callback: PersistentEmacsValue) in
-      Task {
-        try await someAsyncTaskWithResult(
-          completion: channel.callback(callback))
-      }
-    }
-    try env.defun("swift-nested-async-with-result") {
-      (callback: PersistentEmacsValue) in
-      Task {
-        try await someAsyncTaskWithResult(
-          completion: channel.callback {
-            (_, x) in channel.callback(callback)(x)
-          })
-      }
-    }
-    try env.defun("swift-async-lisp-callback") {
-      (callback: PersistentEmacsValue) in
-      Task {
-        try await someAsyncTask(completion: channel.callback(callback))
-      }
-    }
-    try env.defun("swift-async-normal-hook") {
-      Task {
-        try await someAsyncTask(completion: channel.hook("normal-hook"))
-      }
-    }
-    try env.defun("swift-async-abnormal-hook") {
-      Task {
-        try await someAsyncTaskWithResult(
-          completion: channel.hook("abnormal-hook"))
-      }
-    }
-    var persistentArray = [EmacsValue]()
-    try env.defun("swift-add-to-array") {
-      (x: PersistentEmacsValue) in persistentArray.append(x)
-    }
-    try env.defun("swift-get-array") { persistentArray }
-    try env.defun("swift-with-environment") {
-      (callback: PersistentEmacsValue) in
-      Task {
-        channel.withEnvironment {
-          (env: Environment) throws in
-          try env.funcall(callback)
-        }
-      }
-    }
-    try env.defun("swift-with-async-environment") {
-      (x: Int, callback: PersistentEmacsValue) in
-      Task {
-        async let a: Int = channel.withAsyncEnvironment {
-          env in try env.funcall("+", with: x, 42)
-        }
-        async let b: Int = channel.withAsyncEnvironment {
-          env in try env.funcall("*", with: x, 2)
-        }
-        let result = try await a - b
-        channel.withEnvironment {
-          env in try env.funcall(callback, with: result)
-        }
-      }
-    }
+
     try env.defun("swift-cons-arg") {
       (arg: ConsCell<Int, String>) in
       "(\(arg.car) . \(arg.cdr))"
@@ -179,6 +108,81 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
     try env.defun("swift-alist") {
       (arg: [Int: String]) in
       arg.filter { $0.key == 42 }
+    }
+
+    if env.version >= .Emacs28 {
+      let channel = try env.openChannel(name: "test")
+      try env.defun("swift-async-channel") {
+        (callback: PersistentEmacsValue) in
+        Task {
+          try await someAsyncTask(
+            completion: channel.callback {
+              (env: Environment) throws in try env.funcall(callback)
+            })
+        }
+      }
+      try env.defun("swift-async-channel-with-result") {
+        (callback: PersistentEmacsValue) in
+        Task {
+          try await someAsyncTaskWithResult(
+            completion: channel.callback(callback))
+        }
+      }
+      try env.defun("swift-nested-async-with-result") {
+        (callback: PersistentEmacsValue) in
+        Task {
+          try await someAsyncTaskWithResult(
+            completion: channel.callback {
+              (_, x) in channel.callback(callback)(x)
+            })
+        }
+      }
+      try env.defun("swift-async-lisp-callback") {
+        (callback: PersistentEmacsValue) in
+        Task {
+          try await someAsyncTask(completion: channel.callback(callback))
+        }
+      }
+      try env.defun("swift-async-normal-hook") {
+        Task {
+          try await someAsyncTask(completion: channel.hook("normal-hook"))
+        }
+      }
+      try env.defun("swift-async-abnormal-hook") {
+        Task {
+          try await someAsyncTaskWithResult(
+            completion: channel.hook("abnormal-hook"))
+        }
+      }
+      var persistentArray = [EmacsValue]()
+      try env.defun("swift-add-to-array") {
+        (x: PersistentEmacsValue) in persistentArray.append(x)
+      }
+      try env.defun("swift-get-array") { persistentArray }
+      try env.defun("swift-with-environment") {
+        (callback: PersistentEmacsValue) in
+        Task {
+          channel.withEnvironment {
+            (env: Environment) throws in
+            try env.funcall(callback)
+          }
+        }
+      }
+      try env.defun("swift-with-async-environment") {
+        (x: Int, callback: PersistentEmacsValue) in
+        Task {
+          async let a: Int = channel.withAsyncEnvironment {
+            env in try env.funcall("+", with: x, 42)
+          }
+            async let b: Int = channel.withAsyncEnvironment {
+              env in try env.funcall("*", with: x, 2)
+            }
+          let result = try await a - b
+          channel.withEnvironment {
+            env in try env.funcall(callback, with: result)
+          }
+        }
+      }
     }
   } catch {
     return 1

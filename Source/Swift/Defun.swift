@@ -132,12 +132,17 @@ extension Environment {
         raw, function.arity, function.arity, actualFunction, docstring,
         wrappedPtr))
 
-    // When the function value is garbage collected, we also
-    // need to cleanup on our side. Function `data` pointer keeps alive
-    // quite a large chunk of data (nested closures and their captures).
-    raw.pointee.set_function_finalizer(raw, funcValue.raw) {
-      (data: RawOpaquePointer?) in
-      Unmanaged<DefunImplementation>.fromOpaque(data!).release()
+    // Only starting from Emacs 28 there are finalizers for functions.
+    // For earlier versions, we have to live with the fact that there is
+    // no way to garbage collect them.
+    if version >= .Emacs28 {
+      // When the function value is garbage collected, we also
+      // need to cleanup on our side. Function `data` pointer keeps alive
+      // quite a large chunk of data (nested closures and their captures).
+      raw.pointee.set_function_finalizer(raw, funcValue.raw) {
+        (data: RawOpaquePointer?) in
+        Unmanaged<DefunImplementation>.fromOpaque(data!).release()
+      }
     }
 
     if let name = name {
