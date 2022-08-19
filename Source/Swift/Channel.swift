@@ -140,7 +140,11 @@ public class Channel {
 
     if let data = "\(index)\n".data(using: String.Encoding.utf8) {
       do {
-        try pipe?.write(contentsOf: data)
+        if #available(macOS 10.15.4, *) {
+          try pipe?.write(contentsOf: data)
+        } else {
+          pipe?.write(data)
+        }
       } catch {
         fatalError("Error writing to a pipe")
       }
