@@ -106,6 +106,9 @@ class TestModule: Module {
       (arg: [Int: String]) in
       arg.filter { $0.key == 42 }
     }
+    try env.defun("swift-env-misuse-lifetime") {
+      try env.funcall("message", with: "Some message")
+    }
 
     if env.version >= .Emacs28 {
       let channel = try env.openChannel(name: "test")

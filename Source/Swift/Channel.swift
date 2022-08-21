@@ -225,8 +225,8 @@ extension Environment {
       throw EmacsError.unsupported(what: "channels are only available for Emacs 28 and later")
     }
     let channel = Channel(name: name)
-    let pipeFD = raw.pointee.open_channel(
-      raw, try channel.makeProcess(in: self).raw)
+    let pipeFD = try pointee.open_channel(
+      raw, channel.makeProcess(in: self).raw)
     channel.setFileDescriptor(pipeFD)
     return channel
   }

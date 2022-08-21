@@ -25,6 +25,7 @@ public struct ModuleInitializerInjector {
           }
           let env = Environment(from: runtimePtr)
           try module.Init(env)
+          env.invalidate()
         } catch {
           return 1
         }

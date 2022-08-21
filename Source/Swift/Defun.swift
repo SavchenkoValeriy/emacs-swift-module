@@ -90,6 +90,7 @@ extension Environment {
         // environment and a list of arguments appropriately wrapped in `EmacsValue`.
         let result = try impl.function(
           env, buffer.map { EmacsValue(from: $0) })
+        defer { env.invalidate() }
         // Since our function returns back `EmacsValue`, we need to unwrap it and
         // pass Emacs a raw pointer it knows about.
         return result.raw
@@ -127,8 +128,9 @@ extension Environment {
     // be thought of as a function's context or persistent data.
     let wrappedPtr = Unmanaged.passRetained(function).toOpaque()
     // Here we create the anonymous function that carries our implementation.
+    let env = try pointee
     let funcValue = EmacsValue(
-      from: raw.pointee.make_function(
+      from: env.make_function(
         raw, function.arity, function.arity, actualFunction, docstring,
         wrappedPtr))
 
@@ -139,7 +141,7 @@ extension Environment {
       // When the function value is garbage collected, we also
       // need to cleanup on our side. Function `data` pointer keeps alive
       // quite a large chunk of data (nested closures and their captures).
-      raw.pointee.set_function_finalizer(raw, funcValue.raw) {
+      env.set_function_finalizer(raw, funcValue.raw) {
         (data: RawOpaquePointer?) in
         Unmanaged<DefunImplementation>.fromOpaque(data!).release()
       }

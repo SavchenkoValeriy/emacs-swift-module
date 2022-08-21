@@ -75,6 +75,10 @@ public enum EmacsError: Error {
   ///
   /// - Parameter what: description of the unsupported operation.
   case unsupported(what: String)
+  /// Using ``Environment`` outside of its scope.
+  ///
+  /// See <doc:Lifetimes> for more details.
+  case lifetimeViolation
   /// If everything went to hell...
   case unknown
 }

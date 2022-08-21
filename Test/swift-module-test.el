@@ -148,3 +148,7 @@
    10 (lambda (x)
         (should (equal x 32))
         (funcall done))))
+
+(ert-deftest swift-module:lifetime-checks ()
+  :tags '(emacs-all)
+  (should-error (swift-env-misuse-lifetime) :type 'swift-error))
