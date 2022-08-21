@@ -86,9 +86,9 @@ extension Bool: EmacsConvertible {
   }
 
   public static func convert(from value: EmacsValue, within env: Environment)
-    -> Bool
+    throws -> Bool
   {
-    return env.isNotNil(value)
+    return try env.isNotNil(value)
   }
 }
 
@@ -185,7 +185,7 @@ extension Optional: EmacsConvertible where Wrapped: EmacsConvertible {
   public static func convert(from value: EmacsValue, within env: Environment)
     throws -> Self
   {
-    return env.isNil(value)
+    return try env.isNil(value)
       ? nil : try Wrapped.convert(from: value, within: env)
   }
 }
@@ -240,42 +240,42 @@ extension OpaquelyEmacsConvertible {
 extension Environment {
   /// Emacs `nil` value.
   public var Nil: EmacsValue {
-    return try! intern("nil")
+    try! intern("nil")
   }
   /// Emacs `t` value.
   public var t: EmacsValue {
-    return try! intern("t")
+    try! intern("t")
   }
   /// Check if the given Emacs value is `nil`.
-  public func isNil(_ value: EmacsValue) -> Bool {
-    return !isNotNil(value)
+  public func isNil(_ value: EmacsValue) throws -> Bool {
+    try !isNotNil(value)
   }
   /// Check if the given Emacs value is not `nil`.
-  public func isNotNil(_ value: EmacsValue) -> Bool {
-    return raw.pointee.is_not_nil(raw, value.raw)
+  public func isNotNil(_ value: EmacsValue) throws -> Bool {
+    try pointee.is_not_nil(raw, value.raw)
   }
   //
   // Value factories
   //
   func make(_ from: String) throws -> EmacsValue {
-    return EmacsValue(
-      from: try check(raw.pointee.make_string(raw, from, from.count)))
+    EmacsValue(
+      from: try check(pointee.make_string(raw, from, from.count)))
   }
   func make(_ from: Int) throws -> EmacsValue {
-    return EmacsValue(from: try check(raw.pointee.make_integer(raw, from)))
+    EmacsValue(from: try check(pointee.make_integer(raw, from)))
   }
   func make(_ from: Double) throws -> EmacsValue {
-    return EmacsValue(from: try check(raw.pointee.make_float(raw, from)))
+    EmacsValue(from: try check(pointee.make_float(raw, from)))
   }
   func make(_ from: [EmacsValue]) throws -> EmacsValue {
-    return try apply("vector", with: from)
+    try apply("vector", with: from)
   }
   func make(
     _ value: RawOpaquePointer,
     with finalizer: @escaping RawFinalizer = { _ in () }
   ) throws -> EmacsValue {
-    return EmacsValue(
-      from: try check(raw.pointee.make_user_ptr(raw, finalizer, value)))
+    EmacsValue(
+      from: try check(pointee.make_user_ptr(raw, finalizer, value)))
   }
 
   //
@@ -286,22 +286,22 @@ extension Environment {
     // The first call to `copy_string_contents` is needed to determine
     // the actual length of the string...
     let _ = try check(
-      raw.pointee.copy_string_contents(raw, value.raw, nil, &len))
+      pointee.copy_string_contents(raw, value.raw, nil, &len))
     // ...then allocate the buffer of the right size...
     var buf = [CChar](repeating: 0, count: len)
     // ...and use it again with that buffer to fill.
-    let _ = raw.pointee.copy_string_contents(raw, value.raw, &buf, &len)
+    let _ = try pointee.copy_string_contents(raw, value.raw, &buf, &len)
     // Swift owns this memory know, nothing to be worried about!
     return String(cString: buf)
   }
   func toInt(_ value: EmacsValue) throws -> Int {
-    return try Int(check(raw.pointee.extract_integer(raw, value.raw)))
+    try Int(check(pointee.extract_integer(raw, value.raw)))
   }
   func toDouble(_ value: EmacsValue) throws -> Double {
-    return try Double(check(raw.pointee.extract_float(raw, value.raw)))
+    try Double(check(pointee.extract_float(raw, value.raw)))
   }
   func toArray(_ value: EmacsValue) throws -> [EmacsValue] {
-    let size = try check(raw.pointee.vec_size(raw, value.raw))
+    let size = try check(pointee.vec_size(raw, value.raw))
     // We can only get values one by one, but we also need to
     // initialize our array with some values, so we used our
     // original value to take all the spots at first.
@@ -309,7 +309,7 @@ extension Environment {
 
     for i in 0..<size {
       result[i] = EmacsValue(
-        from: try check(raw.pointee.vec_get(raw, value.raw, i)))
+        from: try check(pointee.vec_get(raw, value.raw, i)))
     }
 
     return result
@@ -318,6 +318,6 @@ extension Environment {
     // All the raw pointers are consifered nullable by Swift, but
     // Emacs actually has these values marked as non null.
     // So, if we didn't throw during the check, it's OK to force unwrap.
-    return try check(raw.pointee.get_user_ptr(raw, value.raw))!
+    try check(pointee.get_user_ptr(raw, value.raw))!
   }
 }

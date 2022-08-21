@@ -49,6 +49,19 @@ private let Emacs29Size = MemoryLayout<emacs_env_29>.size
 /// > Warning: Don't copy and don't capture `Environment` objects. It becomes invalid the second your module initialization or function finishes execution.
 public final class Environment {
   let raw: UnsafeMutablePointer<emacs_env>
+  var pointee: emacs_env {
+    get throws {
+      guard valid else {
+        throw EmacsError.lifetimeViolation
+      }
+      return raw.pointee
+    }
+  }
+
+  var valid = true
+  /// Mark this environment as invalid
+  public func invalidate() { valid = false }
+
   /// Version of the Emacs binary that issued this environment.
   public let version: EmacsVersion
 
@@ -107,7 +120,7 @@ public final class Environment {
     if !name.unicodeScalars.allSatisfy({ $0.isASCII }) {
       throw EmacsError.nonASCIISymbol(value: name)
     }
-    return EmacsValue(from: raw.pointee.intern(raw, name))
+    return EmacsValue(from: try pointee.intern(raw, name))
   }
 
   /// Return a persistent version of the given value.

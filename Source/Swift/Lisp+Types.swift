@@ -109,7 +109,7 @@ extension List: EmacsConvertible where Element: EmacsConvertible {
     var list = from
     // We could've constructed it recursively, but lists can get pretty long, so it's better
     // not to take any chancec with stack overflowing.
-    while env.isNotNil(list) {
+    while try env.isNotNil(list) {
       array.append(try env.funcall("car", with: list))
       list = try env.funcall("cdr", with: list)
     }
