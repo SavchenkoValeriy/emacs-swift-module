@@ -17,3 +17,7 @@ At the same time, Swift code exceptions are also fine and will be translated int
 ## User Interruptions
 
 If your code introduces a long-running Lisp function, you should check from time to time if the user interrupted it by pressing `C-g` (or similar). In this situation, it is recommended to quit any work as soon as possible. You can check it via ``Environment/interrupted()`` method. If you work with environment, any call to it will throw ``EmacsError/interrupted``, when in this state.
+
+## Lifetime Violations
+
+``Environment`` checks for lifetime and thread model consistency and throws ``EmacsError/lifetimeViolation`` or ``EmacsError/threadModelViolation``. Check <doc:Lifetimes> for more details.

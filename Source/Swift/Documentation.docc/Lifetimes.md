@@ -27,6 +27,8 @@ This code doesn't change the number of required arguments to call `test`, Emacs 
 
 This lifetime restriction ensures one of the core principles of Emacs dynamic modules **"Emacs calls into then module's code when it wants to, not the other way around"**. Using ``Environment`` outside of its lifetime means calling into Emacs asynchronously when Emacs does not expect it to happen. That will violate its concurrency model.
 
+In order to ensure this requirement, ``Environment`` has additional checks in place to spot lifetime violations and throw ``EmacsError/lifetimeViolation`` exception when it does. This way the very first snippet from this section won't actually crash Emacs, but simply signal an error when calling the `test` function.
+
 ## EmacsValue Lifetime
 
 Similarly to ``Environment``, opaque ``EmacsValue`` also has a limited lifetime. It is not enforced as strictly, and can produce even more confusion.
@@ -98,3 +100,5 @@ After preservation, `lambda` can be safely used from different functions.
 ## Concurrency
 
 As it was mentioned earlier, ``Environment`` lifetime restriction comes from the desire to keep Emacs own concurrency model intact. This also includes another rule for using ``Environment`` - it should be used on the same thread it was created on. It is important to keep it mind, even considering that using ``Environment`` asynchronously will most likely violate its lifetime. To learn how to mix asynchronous code with Emacs interactions, please refer to <doc:AsyncCallbacks>.
+
+Similarly to lifetime violations, ``Environment`` validates that its user follows Emacs concurrency model and throws ``EmacsError/threadModelViolation`` when ``Environment`` is attempted to be used on the other thread.
