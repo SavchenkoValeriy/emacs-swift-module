@@ -109,6 +109,12 @@ class TestModule: Module {
     try env.defun("swift-env-misuse-lifetime") {
       try env.funcall("message", with: "Some message")
     }
+    try env.defun("swift-env-misuse-thread") {
+      (env: Environment, callback: PersistentEmacsValue) throws in
+      Task.detached {
+        try env.funcall(callback)
+      }
+    }
 
     if env.version >= .Emacs28 {
       let channel = try env.openChannel(name: "test")

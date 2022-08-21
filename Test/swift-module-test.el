@@ -149,6 +149,9 @@
         (should (equal x 32))
         (funcall done))))
 
-(ert-deftest swift-module:lifetime-checks ()
+(ert-deftest-async-tagged swift-module:lifetime-checks (done)
   :tags '(emacs-all)
-  (should-error (swift-env-misuse-lifetime) :type 'swift-error))
+  (should-error (swift-env-misuse-lifetime) :type 'swift-error)
+  (swift-env-misuse-thread
+   (lambda () (funcall done "Shouldn't have called the callback")))
+  (funcall done))

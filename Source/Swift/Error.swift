@@ -79,6 +79,10 @@ public enum EmacsError: Error {
   ///
   /// See <doc:Lifetimes> for more details.
   case lifetimeViolation
+  /// Using ``Environment`` in a different thread than issued it.
+  ///
+  /// See <doc:Lifetimes> for more details.
+  case threadModelViolation
   /// If everything went to hell...
   case unknown
 }
