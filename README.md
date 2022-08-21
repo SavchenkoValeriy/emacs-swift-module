@@ -1,4 +1,5 @@
-# EmacsSwiftModule [![Emacs](https://img.shields.io/badge/Emacs-25.3%2B-blueviolet)](https://www.gnu.org/software/emacs/) [![Swift Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FSavchenkoValeriy%2Femacs-swift-module%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/SavchenkoValeriy/emacs-swift-module) [![OS](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FSavchenkoValeriy%2Femacs-swift-module%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/SavchenkoValeriy/emacs-swift-module) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+# EmacsSwiftModule 
+[![Emacs](https://img.shields.io/badge/Emacs-25.3%2B-blueviolet)](https://www.gnu.org/software/emacs/) [![Swift Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FSavchenkoValeriy%2Femacs-swift-module%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/SavchenkoValeriy/emacs-swift-module) [![OS](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FSavchenkoValeriy%2Femacs-swift-module%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/SavchenkoValeriy/emacs-swift-module) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 A Swift library to write Emacs plugins in Swift!
 
@@ -67,7 +68,7 @@ Full documentation of the package can be found here: https://savchenkovaleriy.gi
 Add the following line to you package dependencies:
 
 ```swift
-.package("https://github.com/SavchenkoValeriy/emacs-swift-module.git", from: "1.2.0")
+.package("https://github.com/SavchenkoValeriy/emacs-swift-module.git", from: "1.3.0")
 ```
 
 Or add `"https://github.com/SavchenkoValeriy/emacs-swift-module.git"` directly via Xcode.
