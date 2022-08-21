@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.5
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -9,11 +9,17 @@ let package = Package(
   products: [
     .library(
       name: "EmacsSwiftModule",
-      targets: ["EmacsSwiftModule"]),
+      targets: ["EmacsSwiftModule"]
+    ),
+    .plugin(
+      name: "ModuleFactoryPlugin",
+      targets: ["ModuleFactoryPlugin"]
+    ),
     .library(
       name: "TestModule",
       type: .dynamic,
-      targets: ["TestModule"]),
+      targets: ["TestModule"]
+    ),
   ],
   dependencies: [],
   targets: [
@@ -28,10 +34,22 @@ let package = Package(
       path: "Source/C",
       publicHeadersPath: "include"
     ),
+    .plugin(
+      name: "ModuleFactoryPlugin",
+      capability: .buildTool(),
+      dependencies: [.target(name: "ModuleInitializerInjector")]
+    ),
+    .executableTarget(
+      name: "ModuleInitializerInjector",
+      path: "Plugins",
+      exclude: ["ModuleFactoryPlugin/ModuleFactoryPlugin.swift"],
+      sources: ["ModuleInitializerInjector.swift"]
+    ),
     .target(
       name: "TestModule",
       dependencies: ["EmacsSwiftModule"],
-      path: "Test/TestModule"
+      path: "Test/TestModule",
+      plugins: ["ModuleFactoryPlugin"]
     ),
   ]
 )

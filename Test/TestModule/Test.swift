@@ -1,8 +1,5 @@
 import EmacsSwiftModule
 
-@_cdecl("plugin_is_GPL_compatible")
-public func isGPLCompatible() {}
-
 struct MyError: Error {
   let x: Int
 }
@@ -26,10 +23,10 @@ func someAsyncTaskWithResult(completion: (Int) -> Void) async throws {
   completion(42)
 }
 
-@_cdecl("emacs_module_init")
-public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
-  let env = Environment(from: runtimePtr)
-  do {
+class TestModule: Module {
+  let isGPLCompatible = true
+
+  func Init(_ env: Environment) throws {
     try env.defun("swift-int") { (arg: Int) in arg * 2 }
     try env.defun("swift-float") { (arg: Double) in arg * 2 }
     try env.defun("swift-bool") { (arg: Bool) in !arg }
@@ -184,8 +181,7 @@ public func Init(_ runtimePtr: RuntimePointer) -> Int32 {
         }
       }
     }
-  } catch {
-    return 1
   }
-  return 0
 }
+
+func createModule() -> Module { TestModule() }
