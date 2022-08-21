@@ -18,6 +18,7 @@
 // EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
 //
 import EmacsModule
+import Foundation
 
 public enum EmacsVersion: Int, Comparable {
   case Emacs25 = 25
@@ -54,9 +55,13 @@ public final class Environment {
       guard valid else {
         throw EmacsError.lifetimeViolation
       }
+      guard thread == Thread.current else {
+        throw EmacsError.threadModelViolation
+      }
       return raw.pointee
     }
   }
+  let thread = Thread.current
 
   var valid = true
   /// Mark this environment as invalid
