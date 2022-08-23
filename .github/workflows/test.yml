@@ -13,9 +13,12 @@ on:
 
 jobs:
   test:
-    runs-on: macos-12
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os:
+          - macos-12
+          - ubuntu-22.04
         emacs-version:
           - 25.3
           - 26.3
@@ -24,19 +27,26 @@ jobs:
         configuration:
           - release
           - debug
+        # 25.3 doesn't work in CI for some reason
+        exclude:
+          - os: ubuntu-22.04
+            emacs-version: 25.3
     env:
       EMACS_VERSION: ${{ matrix.emacs-version }}
-      EMACS_MAJOR_VERSION: "${EMACS_VERSION%.*}"
       BUILD_DIR: .build/${{ matrix.configuration }}
-      TEST_LIB: $BUILD_DIR/libTestModule.${{ matrix.emacs-version == 28.1 && 'dylib' || 'so' }}
+      TEST_LIB: libTestModule.${{ matrix.emacs-version == 28.1 && matrix.os == 'macos-12' && 'dylib' || 'so' }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: purcell/setup-emacs@master
+      - run: echo $LD_LIBRARY_PATH
+      - run: find /usr/lib -name libstdc++.so.6
+      - name: Checkout source code
+        uses: actions/checkout@v2
+      - name: Setup Swift
+        if: runner.os == 'Linux'
+        uses: swift-actions/setup-swift@v1
+      - name: Setup Emacs
+        uses: purcell/setup-emacs@master
         with:
           version: ${{ matrix.emacs-version }}
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.6'
       - uses: actions/cache@v3
         id: cache-cask-packages
         with:
@@ -47,13 +57,20 @@ jobs:
         with:
           path: ~/.cask
           key: cache-cask-executable-000
-      - uses: cask/setup-cask@master
+      - name: Setup Cask
+        uses: cask/setup-cask@master
         if: steps.cache-cask-executable.outputs.cache-hit != 'true'
         with:
           version: snapshot
       - run: echo "$HOME/.cask/bin" >> $GITHUB_PATH
-      - run: swift build -c ${{ matrix.configuration }}
-      - run: cp $BUILD_DIR/libTestModule.dylib $BUILD_DIR/libTestModule.so
-        if: matrix.emacs-version != 28.1
-      - run: cask install
-      - run: cask exec ert-runner -l $TEST_LIB -t emacs-$EMACS_MAJOR_VERSION,emacs-all
+      - name: Build the test module
+        run: swift build -c ${{ matrix.configuration }}
+      - name: Rename .dylib for older Emacs versions
+        run: cp $BUILD_DIR/libTestModule.dylib $BUILD_DIR/$TEST_LIB
+        if: matrix.emacs-version != 28.1 && runner.os == 'macOS'
+      - name: Cask install test dependencies
+        run: cask install
+      - name: Run tests
+        run: cask exec ert-runner -l $BUILD_DIR/$TEST_LIB -t emacs-${EMACS_VERSION%.*},emacs-all
+        env:
+          LD_LIBRARY_PATH: /usr/lib/x86_64-linux-gnu
