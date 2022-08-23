@@ -18,7 +18,21 @@
 // EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
 //
 import Foundation
+#if os(macOS)
 import os.lock
+#endif
+
+#if os(macOS)
+typealias Lock = os_unfair_lock_s
+private func makeLock() -> Lock { os_unfair_lock() }
+private func lock(_ lock: inout Lock) { os_unfair_lock_lock(&lock) }
+private func unlock(_ lock: inout Lock) { os_unfair_lock_unlock(&lock) }
+#else
+typealias Lock = NSLock
+private func makeLock() -> Lock { NSLock() }
+private func lock(_ lock: inout Lock) { lock.lock() }
+private func unlock(_ lock: inout Lock) { lock.unlock() }
+#endif
 
 /// This is a callback that knows how to unpack its arguments and call itself
 protocol AnyLazyCallback {
@@ -35,19 +49,19 @@ private struct CallbackStack {
   typealias Element = (callback: AnyLazyCallback, args: Any)
   typealias Index = Int
   private var elements: [Element?] = []
-  private var lock = os_unfair_lock()
+  private var mutex = makeLock()
 
   mutating func push(callback: AnyLazyCallback, args: Any) -> Index {
-    os_unfair_lock_lock(&lock)
-    defer { os_unfair_lock_unlock(&lock) }
+    lock(&mutex)
+    defer { unlock(&mutex) }
 
     elements.append((callback, args))
     return elements.count - 1
   }
 
   mutating func pop(at index: Index) -> Element? {
-    os_unfair_lock_lock(&lock)
-    defer { os_unfair_lock_unlock(&lock) }
+    lock(&mutex)
+    defer { unlock(&mutex) }
 
     guard let element = elements[index] else {
       print("Tried to call already called element!")
@@ -105,7 +119,7 @@ public class Channel {
   private var stack = CallbackStack()
 
   // We need a lock to prevent races writing to the pipe.
-  private var lock = os_unfair_lock()
+  private var mutex = makeLock()
 
   fileprivate init(name: String) {
     self.name = name
@@ -135,8 +149,8 @@ public class Channel {
   }
 
   private func write(_ index: CallbackStack.Index) {
-    os_unfair_lock_lock(&lock)
-    defer { os_unfair_lock_unlock(&lock) }
+    lock(&mutex)
+    defer { unlock(&mutex) }
 
     if let data = "\(index)\n".data(using: String.Encoding.utf8) {
       do {
