@@ -1,6 +1,7 @@
 name: Build & Test
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -8,7 +9,6 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch
 
 
 jobs:
