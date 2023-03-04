@@ -48,7 +48,7 @@ let package = Package(
     .target(
       name: "TestModule",
       dependencies: ["EmacsSwiftModule"],
-      path: "Test/TestModule",
+      path: "test/TestModule",
       plugins: ["ModuleFactoryPlugin"]
     ),
   ]

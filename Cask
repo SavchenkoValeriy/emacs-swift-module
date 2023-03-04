@@ -1,8 +1,7 @@
 (source gnu)
 (source melpa)
 
-(package-descriptor "Test/test-module-pkg.el")
-(files (:default "*.el" ".build/debug/libTestModule.dylib"))
+(package-descriptor "test/test-module-pkg.el")
 
 (development
  (depends-on "ert-runner")
