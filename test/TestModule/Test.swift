@@ -115,6 +115,9 @@ class TestModule: Module {
         try env.funcall(callback)
       }
     }
+    try env.defun("swift-result-conversion-error") {
+      env in try env.funcall("+", with: 1, 1) as String
+    }
 
     if env.version >= .Emacs28 {
       let channel = try env.openChannel(name: "test")

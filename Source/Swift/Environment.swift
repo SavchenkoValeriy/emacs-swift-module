@@ -55,17 +55,23 @@ public final class Environment {
       guard valid else {
         throw EmacsError.lifetimeViolation
       }
-      guard thread == Thread.current else {
+      guard threadValid else {
         throw EmacsError.threadModelViolation
       }
       return raw.pointee
     }
   }
   let thread = Thread.current
+  var threadValid: Bool { get { thread == Thread.current } }
 
   var valid = true
   /// Mark this environment as invalid
-  public func invalidate() { valid = false }
+  public func invalidate() {
+    // We always invalidate the environment right before the end.
+    // It is a perfect moment to clean up.
+    cleanup()
+    valid = false
+  }
 
   /// Version of the Emacs binary that issued this environment.
   public let version: EmacsVersion
@@ -105,12 +111,6 @@ public final class Environment {
   /// Construct the environment from the raw runtime C pointer.
   public convenience init(from: UnsafeMutablePointer<emacs_runtime>) {
     self.init(from: from.pointee.get_environment(from)!)
-  }
-
-  deinit {
-    // When we destroy the environment, we need to check if there is
-    // anything we can cleanup in our memory.
-    cleanup()
   }
 
   /// Return the canonical Emacs symbol with the given name.
