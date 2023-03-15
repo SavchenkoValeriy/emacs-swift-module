@@ -132,6 +132,11 @@ extension Environment {
     }
   }
 
+  /// Return true if this environment is in Emacs error state.
+  func inErrorState() -> Bool {
+    return raw.pointee.non_local_exit_check(raw) != emacs_funcall_exit_return;
+  }
+
   /// Signal a Swift error with the given message.
   func error(with message: String) {
     error(tag: swiftError, with: message)

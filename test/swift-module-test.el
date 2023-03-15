@@ -155,3 +155,14 @@
   (swift-env-misuse-thread
    (lambda () (funcall done "Shouldn't have called the callback")))
   (funcall done))
+
+(ert-deftest swift-module:result-conversion-error ()
+  :tags '(emacs-all)
+  (should-error (swift-result-conversion-error) :type 'wrong-type-argument))
+
+(ert-deftest-async-tagged swift-module:error-in-async (done)
+  :tags '(emacs-28 emacs-29)
+  (swift-async-channel
+   (lambda ()
+     (funcall done)
+     (should-error (asdagasda) :type 'void-function))))
