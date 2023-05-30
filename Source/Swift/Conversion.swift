@@ -259,7 +259,7 @@ extension Environment {
   //
   func make(_ from: String) throws -> EmacsValue {
     EmacsValue(
-      from: try check(pointee.make_string(raw, from, from.count)))
+      from: try check(pointee.make_string(raw, from, from.utf8.count)))
   }
   func make(_ from: Int) throws -> EmacsValue {
     EmacsValue(from: try check(pointee.make_integer(raw, from)))

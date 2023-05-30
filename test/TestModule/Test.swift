@@ -30,6 +30,7 @@ class TestModule: Module {
     try env.defun("swift-int") { (arg: Int) in arg * 2 }
     try env.defun("swift-float") { (arg: Double) in arg * 2 }
     try env.defun("swift-bool") { (arg: Bool) in !arg }
+    try env.defun("swift-string") { (arg: String) in arg }
     try env.defun("swift-call") {
       (env: Environment, arg: String) throws in
       return try env.funcall("format", with: "'%s'", arg)
@@ -183,9 +184,9 @@ class TestModule: Module {
           async let a: Int = channel.withAsyncEnvironment {
             env in try env.funcall("+", with: x, 42)
           }
-            async let b: Int = channel.withAsyncEnvironment {
-              env in try env.funcall("*", with: x, 2)
-            }
+          async let b: Int = channel.withAsyncEnvironment {
+            env in try env.funcall("*", with: x, 2)
+          }
           let result = try await a - b
           channel.withEnvironment {
             env in try env.funcall(callback, with: result)
