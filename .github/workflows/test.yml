@@ -2,6 +2,12 @@ name: Build & Test
 
 on:
   workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        required: false
+        default: false
   push:
     branches:
       - main
@@ -70,6 +76,10 @@ jobs:
         if: matrix.emacs-version != 28.1 && runner.os == 'macOS'
       - name: Cask install test dependencies
         run: cask install
+      # Enable tmate debugging of manually-triggered workflows if the input option was provided
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
       - name: Run tests
         run: cask exec ert-runner -l $BUILD_DIR/$TEST_LIB -t emacs-${EMACS_VERSION%.*},emacs-all
         env:
