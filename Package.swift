@@ -55,6 +55,22 @@ let package = Package(
       dependencies: ["EmacsSwiftModule"],
       path: "test/TestModule",
       plugins: ["ModuleFactoryPlugin"]
+    ),
+    .target(
+      name: "EmacsEnvMock",
+      dependencies: ["EmacsModule"],
+      path: "test/Mock/C",
+      publicHeadersPath: "include"
+    ),
+    .target(
+      name: "EmacsMock",
+      dependencies: ["EmacsModule", "EmacsSwiftModule", "EmacsEnvMock"],
+      path: "test/Mock/Swift"
+    ),
+    .testTarget(
+      name: "EmacsSwiftModuleTests",
+      dependencies: ["EmacsSwiftModule", "EmacsMock"],
+      path: "test/Unit"
     )
   ]
 )
