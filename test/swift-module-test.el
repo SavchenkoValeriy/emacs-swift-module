@@ -96,19 +96,19 @@
   (should (equal (funcall (swift-get-lambda) "hello") "Received hello")))
 
 (ert-deftest-async-tagged swift-module:check-async (done1 done2 done3 done4)
-  :tags '(emacs-28 emacs-29)
+  :tags '(emacs-28 emacs-29 emacs-30)
   (swift-async-channel done1)
   (swift-async-lisp-callback done2)
   (swift-async-lisp-callback done3)
   (swift-with-environment done4))
 
 (ert-deftest swift-module:check-persistence ()
-  :tags '(emacs-28 emacs-29)
+  :tags '(emacs-28 emacs-29 emacs-30)
   (mapc (lambda (x) (swift-add-to-array x)) (number-sequence 1 5))
   (should (equal (swift-get-array) (vconcat (number-sequence 1 5)))))
 
 (ert-deftest-async-tagged swift-module:check-async-hook (done1 done2)
-  :tags '(emacs-28 emacs-29)
+  :tags '(emacs-28 emacs-29 emacs-30)
   (setq normal-hook nil)
   (add-hook 'normal-hook done1)
   (setq abnormal-hook nil)
@@ -132,7 +132,7 @@
     (should (equal (length result) 1))))
 
 (ert-deftest-async-tagged swift-module:check-async-nested-1 (done1 done2)
-  :tags '(emacs-28 emacs-29)
+  :tags '(emacs-28 emacs-29 emacs-30)
   (swift-async-channel-with-result
    (lambda (x)
      (swift-async-channel-with-result
@@ -140,14 +140,14 @@
      (swift-async-channel done2))))
 
 (ert-deftest-async-tagged swift-module:check-async-nested-2 (done1)
-  :tags '(emacs-28 emacs-29)
+  :tags '(emacs-28 emacs-29 emacs-30)
   (swift-nested-async-with-result
    (lambda (x)
      (should (equal x 42))
      (funcall done1))))
 
 (ert-deftest-async-tagged swift-module:check-async-with-result (done)
-  :tags '(emacs-28 emacs-29)
+  :tags '(emacs-28 emacs-29 emacs-30)
   (swift-with-async-environment
    10 (lambda (x)
         (should (equal x 32))
@@ -165,7 +165,7 @@
   (should-error (swift-result-conversion-error) :type 'wrong-type-argument))
 
 (ert-deftest-async-tagged swift-module:error-in-async (done)
-  :tags '(emacs-28 emacs-29)
+  :tags '(emacs-28 emacs-29 emacs-30)
   (swift-async-channel
    (lambda ()
      (funcall done)
