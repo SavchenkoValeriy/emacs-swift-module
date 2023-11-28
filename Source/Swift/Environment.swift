@@ -26,6 +26,7 @@ public enum EmacsVersion: Int, Comparable {
   case Emacs27 = 27
   case Emacs28 = 28
   case Emacs29 = 29
+  case Emacs30 = 30
 
   public static func <(lhs: EmacsVersion, rhs: EmacsVersion) -> Bool {
     return lhs.rawValue < rhs.rawValue
@@ -37,6 +38,7 @@ private let Emacs26Size = MemoryLayout<emacs_env_26>.size
 private let Emacs27Size = MemoryLayout<emacs_env_27>.size
 private let Emacs28Size = MemoryLayout<emacs_env_28>.size
 private let Emacs29Size = MemoryLayout<emacs_env_29>.size
+private let Emacs30Size = MemoryLayout<emacs_env_30>.size
 
 /// Environment is the interaction point with Emacs. If you want to do anything on the Emacs side, you need to have an Environment.
 ///
@@ -99,8 +101,10 @@ public final class Environment {
       version = .Emacs27
     case Emacs28Size ..< Emacs29Size:
       version = .Emacs28
-    default:
+    case Emacs29Size ..< Emacs30Size:
       version = .Emacs29
+    default:
+      version = .Emacs30
     }
 
     // While we didn't have any environments live, we could've accumulated
