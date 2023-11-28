@@ -30,6 +30,7 @@ jobs:
           - 26.3
           - 27.2
           - 28.1
+          - 29.1
         configuration:
           - release
           - debug
