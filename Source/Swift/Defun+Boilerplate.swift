@@ -17,7 +17,66 @@
 // You should have received a copy of the GNU General Public License along with
 // EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
 //
+
+#if swift(>=5.9)
+private func counter() -> () -> Int {
+  var count = 0
+  return {
+    defer { count += 1 }
+    return count
+  }
+}
+private func count<each T>(_ types: repeat (each T).Type) -> Int {
+  let index = counter()
+  _ = (repeat (each types, index()))
+  return index()
+}
+#endif
+
 extension DefunImplementation {
+  #if swift(>=5.9)
+  convenience init<R: EmacsConvertible, each T: EmacsConvertible>(_ original: @escaping (repeat each T) throws -> R) {
+    self.init(
+      { (env, args) in
+        let index = counter()
+        return try original(
+          repeat (each T).convert(from: args[index()], within: env)
+        ).convert(within: env)
+      }, count(repeat (each T).self))
+  }
+
+  convenience init<each T: EmacsConvertible>(_ original: @escaping (repeat each T) throws -> Void) {
+    self.init(
+      { (env, args) in
+        let index = counter()
+        try original(
+          repeat (each T).convert(from: args[index()], within: env)
+        )
+        return env.Nil
+      }, count(repeat (each T).self))
+  }
+
+  convenience init<R: EmacsConvertible, each T: EmacsConvertible>(_ original: @escaping (Environment, repeat each T) throws -> R) {
+    self.init(
+      { (env, args) in
+        let index = counter()
+        return try original(
+          env, repeat (each T).convert(from: args[index()], within: env)
+        ).convert(within: env)
+      }, count(repeat (each T).self))
+  }
+
+  convenience init<each T: EmacsConvertible>(_ original: @escaping (Environment, repeat each T) throws -> Void) {
+    self.init(
+      { (env, args) in
+        let index = counter()
+        try original(
+          env, repeat (each T).convert(from: args[index()], within: env)
+        )
+        return env.Nil
+      }, count(repeat (each T).self))
+  }
+  #else
   convenience init<R: EmacsConvertible>(_ original: @escaping () throws -> R) {
     self.init(
       { (env, args) in
@@ -310,9 +369,58 @@ extension DefunImplementation {
         return env.Nil
       }, 5)
   }
+  #endif
 }
 
 extension Environment {
+  #if swift(>=5.9)
+  @discardableResult
+  public func defun<
+    R: EmacsConvertible,
+    each T: EmacsConvertible
+  >(
+    _ name: String? = nil,
+    with docstring: String = "",
+    function: @escaping (repeat each T) throws -> R
+  ) throws -> EmacsValue {
+    let wrapped = DefunImplementation(function)
+    return try defun(named: name, with: docstring, function: wrapped)
+  }
+  @discardableResult
+  public func defun<
+    each T: EmacsConvertible
+  >(
+    _ name: String? = nil,
+    with docstring: String = "",
+    function: @escaping (repeat each T) throws -> Void
+  ) throws -> EmacsValue {
+    let wrapped = DefunImplementation(function)
+    return try defun(named: name, with: docstring, function: wrapped)
+  }
+  @discardableResult
+  public func defun<
+    R: EmacsConvertible,
+    each T: EmacsConvertible
+  >(
+    _ name: String? = nil,
+    with docstring: String = "",
+    function: @escaping (Environment, repeat each T) throws -> R
+  ) throws -> EmacsValue {
+    let wrapped = DefunImplementation(function)
+    return try defun(named: name, with: docstring, function: wrapped)
+  }
+  @discardableResult
+  public func defun<
+    each T: EmacsConvertible
+  >(
+    _ name: String? = nil,
+    with docstring: String = "",
+    function: @escaping (Environment, repeat each T) throws -> Void
+  ) throws -> EmacsValue {
+    let wrapped = DefunImplementation(function)
+    return try defun(named: name, with: docstring, function: wrapped)
+  }
+  #else
   /// Define a Lisp function without parameters out of the given closure.
   ///
   ///  - Parameters:
@@ -914,4 +1022,5 @@ extension Environment {
     let wrapped = DefunImplementation(function)
     return try defun(named: name, with: docstring, function: wrapped)
   }
+  #endif
 }
