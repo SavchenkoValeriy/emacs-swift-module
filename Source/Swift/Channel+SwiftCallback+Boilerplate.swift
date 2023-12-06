@@ -18,6 +18,18 @@
 // EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
 //
 extension Channel {
+  #if swift(>=5.9)
+  public func callback<each T>(function: @escaping (Environment, repeat each T) throws -> Void)
+    -> (repeat each T) -> Void
+  {
+    return { [self] (arg: repeat each T) in
+      register {
+        env in try function(env, repeat each arg)
+      }
+    }
+  }
+  #else
+
   /// Make a callback that doesn't require the environment from a closure that does.
   ///
   /// This allows us to contact Emacs as part of asynchronous callbacks from Swift APIs.
@@ -114,6 +126,7 @@ extension Channel {
       }
     }
   }
+  #endif
 
   /// Execute the given closure with Emacs environment.
   ///
