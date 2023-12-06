@@ -143,7 +143,9 @@ class TestModule: Module {
         Task {
           try await someAsyncTaskWithResult(
             completion: channel.callback {
-              (_, x) in channel.callback(callback)(x)
+              (_, x) in
+              let fun = channel.callback(callback) as (Int) -> Void
+              fun(x)
             })
         }
       }
