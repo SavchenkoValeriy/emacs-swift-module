@@ -34,46 +34,36 @@ private func lock(_ lock: inout Lock) { lock.lock() }
 private func unlock(_ lock: inout Lock) { lock.unlock() }
 #endif
 
-/// This is a callback that knows how to unpack its arguments and call itself
-protocol AnyLazyCallback {
-  /// Call this callback within the given environment.
-  ///
-  ///  - Parameters:
-  ///    - env: Emacs Environment to make a call within.
-  ///    - args: an opaque value containing all of the needed arguments.
-  ///  - Throws: any exception that might occur during the call.
-  func call(_ env: Environment, with args: Any) throws
-}
+typealias Callback = (Environment) throws -> Void
 
 private struct CallbackStack {
-  typealias Element = (callback: AnyLazyCallback, args: Any)
   typealias Index = Int
-  private var elements: [Element?] = []
+  private var callbacks: [Callback?] = []
   private var mutex = makeLock()
 
-  mutating func push(callback: AnyLazyCallback, args: Any) -> Index {
+  mutating func push(callback: @escaping Callback) -> Index {
     lock(&mutex)
     defer { unlock(&mutex) }
 
-    elements.append((callback, args))
-    return elements.count - 1
+    callbacks.append(callback)
+    return callbacks.count - 1
   }
 
-  mutating func pop(at index: Index) -> Element? {
+  mutating func pop(at index: Index) -> Callback? {
     lock(&mutex)
     defer { unlock(&mutex) }
 
-    guard let element = elements[index] else {
-      print("Tried to call already called element!")
+    guard let callback = callbacks[index] else {
+      print("Tried to call already called callback!")
       return nil
     }
 
-    elements[index] = nil
-    if elements.allSatisfy({ $0 == nil }) {
-      elements.removeAll()
+    callbacks[index] = nil
+    if callbacks.allSatisfy({ $0 == nil }) {
+      callbacks.removeAll()
     }
 
-    return element
+    return callback
   }
 }
 
@@ -138,14 +128,14 @@ public class Channel {
   /// Call the callback stored under the given index.
   private func call(_ index: CallbackStack.Index, with env: Environment) throws
   {
-    if let element = stack.pop(at: index) {
-      try element.callback.call(env, with: element.args)
+    if let callback = stack.pop(at: index) {
+      try callback(env)
     }
   }
 
   /// Register a callback to be called with the given arguments.
-  func register(callback: AnyLazyCallback, args: Any) {
-    write(stack.push(callback: callback, args: args))
+  func register(callback: @escaping Callback) {
+    write(stack.push(callback: callback))
   }
 
   private func write(_ index: CallbackStack.Index) {
