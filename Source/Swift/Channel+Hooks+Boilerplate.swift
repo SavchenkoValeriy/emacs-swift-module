@@ -34,6 +34,30 @@ extension Channel {
       }
     }
   }
+
+  #if swift(>=5.9)
+  /// Make a Swift callback out of an Emacs hook's name.
+  ///
+  /// This allows us to use Emacs hooks as callbacks in Swift APIs.
+  /// Please, see <doc:AsyncCallbacks> for more details on that.
+  ///
+  /// - Parameter function: a name of a Lisp hook to turn into callback.
+  /// - Returns: a callback that if called, will eventually run the hook.
+  public func hook<each T: EmacsConvertible>(_ hook: String)
+    -> (repeat each T) -> Void
+  {
+    return { [self] (arg: repeat each T) in
+      register {
+        env in try withTupleAsArray(repeat each arg) {
+           argsAsArray in
+           var args: [EmacsConvertible] = [Symbol(name: hook)]
+           args.append(contentsOf: argsAsArray)
+           try env.apply("run-hook-with-args", with: args)
+        }
+      }
+    }
+  }
+  #else
   /// Make a Swift callback out of an Emacs hook's name.
   ///
   /// This allows us to use Emacs hooks as callbacks in Swift APIs.
@@ -122,4 +146,5 @@ extension Channel {
       }
     }
   }
+  #endif
 }

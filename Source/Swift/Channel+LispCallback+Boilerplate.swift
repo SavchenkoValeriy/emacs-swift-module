@@ -17,30 +17,6 @@
 // You should have received a copy of the GNU General Public License along with
 // EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
 //
-#if swift(>=5.9)
-private func counter() -> () -> Int {
-  var count = 0
-  return {
-    defer { count += 1 }
-    return count
-  }
-}
-private func count<each T>(_ types: repeat (each T).Type) -> Int {
-  let index = counter()
-  _ = (repeat (each types, index()))
-  return index()
-}
-
-private func withTupleAsArray<each T: EmacsConvertible>(_ element: repeat each T, function: ([EmacsConvertible]) throws -> Void) rethrows -> Void {
-  let tuple = (repeat (each element) as EmacsConvertible)
-  return try withUnsafePointer(to: tuple) { tuplePtr in
-    let start = UnsafeRawPointer(tuplePtr).assumingMemoryBound(to: EmacsConvertible.self)
-    let buf = UnsafeBufferPointer(start: start, count: count(repeat (each T).self))
-    try function([EmacsConvertible](buf))
-  }
-}
-#endif
-
 extension Channel {
   /// Make a Swift callback out of an Emacs function.
   ///
