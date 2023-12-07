@@ -32,6 +32,7 @@ public struct ModuleInitializerInjector {
         return 0
       }
       """
-    try initializerSource.write(to: initializerSourcePath, atomically: true, encoding: .utf8)
+    try initializerSource.write(
+      to: initializerSourcePath, atomically: true, encoding: .utf8)
   }
 }

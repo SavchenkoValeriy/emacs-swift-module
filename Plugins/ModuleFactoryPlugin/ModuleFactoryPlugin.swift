@@ -2,8 +2,11 @@ import PackagePlugin
 
 @main
 struct ModuleFactoryPlugin: BuildToolPlugin {
-  func createBuildCommands(context: PluginContext, target: Target) async throws -> [Command] {
-    let outputPath = context.pluginWorkDirectory.appending("ModuleInitializer.swift")
+  func createBuildCommands(context: PluginContext, target: Target) async throws
+    -> [Command]
+  {
+    let outputPath = context.pluginWorkDirectory.appending(
+      "ModuleInitializer.swift")
     return [
       .buildCommand(
         displayName: "Module initialization injection",

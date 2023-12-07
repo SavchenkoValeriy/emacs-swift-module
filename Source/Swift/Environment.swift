@@ -28,7 +28,7 @@ public enum EmacsVersion: Int, Comparable {
   case Emacs29 = 29
   case Emacs30 = 30
 
-  public static func <(lhs: EmacsVersion, rhs: EmacsVersion) -> Bool {
+  public static func < (lhs: EmacsVersion, rhs: EmacsVersion) -> Bool {
     return lhs.rawValue < rhs.rawValue
   }
 }
@@ -64,7 +64,7 @@ public final class Environment {
     }
   }
   let thread = Thread.current
-  var threadValid: Bool { get { thread == Thread.current } }
+  var threadValid: Bool { thread == Thread.current }
 
   var valid = true
   /// Mark this environment as invalid
@@ -91,17 +91,17 @@ public final class Environment {
   required init(from env: UnsafeMutablePointer<emacs_env>) {
     raw = env
     switch env.pointee.size {
-    case 0 ..< Emacs25Size:
+    case 0..<Emacs25Size:
       fatalError("Emacs is too old!")
-    case Emacs25Size ..< Emacs26Size:
+    case Emacs25Size..<Emacs26Size:
       version = .Emacs25
-    case Emacs26Size ..< Emacs27Size:
+    case Emacs26Size..<Emacs27Size:
       version = .Emacs26
-    case Emacs27Size ..< Emacs28Size:
+    case Emacs27Size..<Emacs28Size:
       version = .Emacs27
-    case Emacs28Size ..< Emacs29Size:
+    case Emacs28Size..<Emacs29Size:
       version = .Emacs28
-    case Emacs29Size ..< Emacs30Size:
+    case Emacs29Size..<Emacs30Size:
       version = .Emacs29
     default:
       version = .Emacs30

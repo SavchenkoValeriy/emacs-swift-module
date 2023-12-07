@@ -58,9 +58,10 @@ public final class PersistentEmacsValue: EmacsValue {
 extension Environment {
   func cleanup() {
     guard valid,
-          threadValid,
-          !inErrorState(),
-          !interrupted() else {
+      threadValid,
+      !inErrorState(),
+      !interrupted()
+    else {
       // Can't cleanup when the environment in a bad or inconsistent
       // state.
       return

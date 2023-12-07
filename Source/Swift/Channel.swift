@@ -18,20 +18,21 @@
 // EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
 //
 import Foundation
+
 #if os(macOS)
-import os.lock
+  import os.lock
 #endif
 
 #if os(macOS)
-typealias Lock = os_unfair_lock_s
-private func makeLock() -> Lock { os_unfair_lock() }
-private func lock(_ lock: inout Lock) { os_unfair_lock_lock(&lock) }
-private func unlock(_ lock: inout Lock) { os_unfair_lock_unlock(&lock) }
+  typealias Lock = os_unfair_lock_s
+  private func makeLock() -> Lock { os_unfair_lock() }
+  private func lock(_ lock: inout Lock) { os_unfair_lock_lock(&lock) }
+  private func unlock(_ lock: inout Lock) { os_unfair_lock_unlock(&lock) }
 #else
-typealias Lock = NSLock
-private func makeLock() -> Lock { NSLock() }
-private func lock(_ lock: inout Lock) { lock.lock() }
-private func unlock(_ lock: inout Lock) { lock.unlock() }
+  typealias Lock = NSLock
+  private func makeLock() -> Lock { NSLock() }
+  private func lock(_ lock: inout Lock) { lock.lock() }
+  private func unlock(_ lock: inout Lock) { lock.unlock() }
 #endif
 
 typealias Callback = (Environment) throws -> Void
@@ -226,7 +227,8 @@ extension Environment {
     // Please see Channel comments for additional information
     // on the dark magic happening here.
     if version < .Emacs28 {
-      throw EmacsError.unsupported(what: "channels are only available for Emacs 28 and later")
+      throw EmacsError.unsupported(
+        what: "channels are only available for Emacs 28 and later")
     }
     let channel = Channel(name: name)
     let pipeFD = try pointee.open_channel(
