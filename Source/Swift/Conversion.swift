@@ -18,6 +18,7 @@
 // EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
 //
 import EmacsModule
+import Foundation
 
 /// The main protocol for value conversions between Emacs Lisp and Swift.
 ///
@@ -70,6 +71,18 @@ extension String: EmacsConvertible {
     -> Self
   {
     return try env.toString(from)
+  }
+}
+
+extension Data: EmacsConvertible {
+  public func convert(within env: Environment) throws -> EmacsValue {
+    return try env.make(self)
+  }
+
+  public static func convert(from: EmacsValue, within env: Environment) throws
+    -> Self
+  {
+    return try env.toData(from)
   }
 }
 
@@ -277,6 +290,11 @@ extension Environment {
     EmacsValue(
       from: try check(pointee.make_user_ptr(raw, finalizer, value)))
   }
+  func make(_ from: Data) throws -> EmacsValue {
+    try from.withUnsafeBytes { rawBufferPointer in
+      EmacsValue(from: try check(pointee.make_unibyte_string(raw, rawBufferPointer.baseAddress, from.count)))
+    }
+  }
 
   //
   // Converter functions
@@ -319,5 +337,18 @@ extension Environment {
     // Emacs actually has these values marked as non null.
     // So, if we didn't throw during the check, it's OK to force unwrap.
     try check(pointee.get_user_ptr(raw, value.raw))!
+  }
+  func toData(_ value: EmacsValue) throws -> Data {
+    var len = 0
+    // The first call to `copy_string_contents` is needed to determine
+    // the actual length of the string...
+    let _ = try check(
+      pointee.copy_string_contents(raw, value.raw, nil, &len))
+    // ...then allocate the buffer of the right size...
+    var buf = [CChar](repeating: 0, count: len)
+    // ...and use it again with that buffer to fill.
+    let _ = try pointee.copy_string_contents(raw, value.raw, &buf, &len)
+    // Swift owns this memory know, nothing to be worried about!
+    return Data(bytes: buf, count: len)
   }
 }
