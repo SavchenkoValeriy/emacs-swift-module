@@ -36,6 +36,14 @@ extension Channel {
   }
 
   #if swift(>=5.9)
+
+    /// Make a Swift callback out of an Emacs function.
+    ///
+    /// This allows us to use Emacs functions as callbacks in Swift APIs.
+    /// Please, see <doc:AsyncCallbacks> for more details on that.
+    ///
+    /// - Parameter function: a Lisp function to turn into a callback.
+    /// - Returns: a callback that if called, will eventually call the given function.
     public func callback<each T: EmacsConvertible>(
       _ function: EmacsValue
     ) -> (repeat each T) -> Void {
