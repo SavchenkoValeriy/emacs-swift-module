@@ -19,6 +19,14 @@
 //
 extension Channel {
   #if swift(>=5.9)
+
+    /// Make a callback that doesn't require the environment from a closure that does.
+    ///
+    /// This allows us to contact Emacs as part of asynchronous callbacks from Swift APIs.
+    /// Please, see <doc:AsyncCallbacks> for more details on that.
+    ///
+    /// - Parameter function: a function to turn into a callback.
+    /// - Returns: a callback that if called, will eventually call the given function.
     public func callback<each T>(
       function: @escaping (Environment, repeat each T) throws -> Void
     )
