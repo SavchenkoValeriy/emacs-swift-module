@@ -24,8 +24,10 @@
 
 (ert-deftest swift-module:check-data-conversion ()
   :tags '(emacs-28 emacs-29 emacs-30)
-  (let ((d1 "\000\000\000\001\000"))
-    (should (string= d1 (swift-data d1)))))
+  (let ((d1 "\000\000\000\001\000")
+        (d2 ""))
+    (should (string= d1 (swift-data d1)))
+    (should (string= d2 (swift-data d2)))))
 
 (ert-deftest swift-module:check-incorrect-num-of-args ()
   :tags '(emacs-all)
