@@ -305,7 +305,7 @@ extension Environment {
   //
   // Converter functions
   //
-  func toString(_ value: EmacsValue) throws -> String {
+  func toBytesArray(_ value: EmacsValue) throws -> [CChar] {
     var len = 0
     // The first call to `copy_string_contents` is needed to determine
     // the actual length of the string...
@@ -316,7 +316,10 @@ extension Environment {
     // ...and use it again with that buffer to fill.
     let _ = try pointee.copy_string_contents(raw, value.raw, &buf, &len)
     // Swift owns this memory know, nothing to be worried about!
-    return String(cString: buf)
+    return buf
+  }
+  func toString(_ value: EmacsValue) throws -> String {
+    return String(cString: try toBytesArray(value))
   }
   func toInt(_ value: EmacsValue) throws -> Int {
     try Int(check(pointee.extract_integer(raw, value.raw)))
@@ -345,16 +348,10 @@ extension Environment {
     try check(pointee.get_user_ptr(raw, value.raw))!
   }
   func toData(_ value: EmacsValue) throws -> Data {
-    var len = 0
-    // The first call to `copy_string_contents` is needed to determine
-    // the actual length of the string...
-    let _ = try check(
-      pointee.copy_string_contents(raw, value.raw, nil, &len))
-    // ...then allocate the buffer of the right size...
-    var buf = [CChar](repeating: 0, count: len)
-    // ...and use it again with that buffer to fill.
-    let _ = try pointee.copy_string_contents(raw, value.raw, &buf, &len)
-    // Swift owns this memory know, nothing to be worried about!
-    return Data(bytes: buf, count: len)
+    var buf = try toBytesArray(value)
+    // Emacs `copy_string_contents` include the last null byte,
+    // we remove that when convert back to Data.
+    buf.removeLast()
+    return Data(bytes: buf, count: buf.count)
   }
 }
