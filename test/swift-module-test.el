@@ -22,6 +22,11 @@
     (should (string= s1 (swift-string s1)))
     (should (string= s2 (swift-string s2)))))
 
+(ert-deftest swift-module:check-data-conversion ()
+  :tags '(emacs-28 emacs-29 emacs-30)
+  (let ((d1 "\000\000\000\001\000"))
+    (should (string= d1 (swift-data d1)))))
+
 (ert-deftest swift-module:check-incorrect-num-of-args ()
   :tags '(emacs-all)
   (should-error (swift-int) :type 'wrong-number-of-arguments)
