@@ -74,6 +74,9 @@ extension String: EmacsConvertible {
   }
 }
 
+/// Data conversions to and from Emacs values.
+///
+/// Convert to Emacs string, this function is available after emacs 28.
 extension Data: EmacsConvertible {
   public func convert(within env: Environment) throws -> EmacsValue {
     return try env.make(self)
@@ -291,7 +294,10 @@ extension Environment {
       from: try check(pointee.make_user_ptr(raw, finalizer, value)))
   }
   func make(_ from: Data) throws -> EmacsValue {
-    try from.withUnsafeBytes { rawBufferPointer in
+    if self.version < EmacsVersion.Emacs28 {
+      throw EmacsError.unsupported(what: "make_unibyte_string is supporting from emacs28")
+    }
+    return try from.withUnsafeBytes { rawBufferPointer in
       EmacsValue(from: try check(pointee.make_unibyte_string(raw, rawBufferPointer.baseAddress, from.count)))
     }
   }

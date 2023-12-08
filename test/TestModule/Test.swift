@@ -1,4 +1,5 @@
 import EmacsSwiftModule
+import Foundation
 
 struct MyError: Error {
   let x: Int
@@ -31,6 +32,7 @@ class TestModule: Module {
     try env.defun("swift-float") { (arg: Double) in arg * 2 }
     try env.defun("swift-bool") { (arg: Bool) in !arg }
     try env.defun("swift-string") { (arg: String) in arg }
+    try env.defun("swift-data") { (arg: Data) in arg }
     try env.defun("swift-call") {
       (env: Environment, arg: String) throws in
       return try env.funcall("format", with: "'%s'", arg)
