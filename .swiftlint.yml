@@ -1,0 +1,53 @@
+disabled_rules:
+  - force_try
+  - force_cast
+  - force_unwrapping
+  # TODOs are good for the future
+  - todo
+  # Too subjective
+  - function_body_length
+  - file_length
+  - identifier_name
+  # These are handled by SwiftFormat
+  - line_length
+  - closure_parameter_position
+  - vertical_whitespace_closing_braces
+  - multiline_arguments
+  - multiline_arguments_brackets
+  - multiline_parameters_brackets
+
+opt_in_rules:
+  - array_init
+  - closure_end_indentation
+  - closure_spacing
+  - collection_alignment
+  - conditional_returns_on_newline
+  - contains_over_first_not_nil
+  - discouraged_optional_boolean
+  - empty_count
+  - empty_string
+  - first_where
+  - flatmap_over_map_reduce
+  - implicit_return
+  - joined_default_parameter
+  - let_var_whitespace
+  - literal_expression_end_indentation
+  - multiline_arguments
+  - multiline_arguments_brackets
+  - multiline_literal_brackets
+  - multiline_parameters
+  - multiline_parameters_brackets
+  - operator_usage_whitespace
+  - overridden_super_call
+  - override_in_extension
+  - pattern_matching_keywords
+  - redundant_nil_coalescing
+  - sorted_first_last
+  - sorted_imports
+  - switch_case_alignment
+  - switch_case_on_newline
+  - trailing_closure
+  - unneeded_parentheses_in_closure_argument
+  - vertical_whitespace_closing_braces
+  - vertical_whitespace_opening_braces
+  - yoda_condition

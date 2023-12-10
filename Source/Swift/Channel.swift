@@ -39,6 +39,7 @@ typealias Callback = (Environment) throws -> Void
 
 private struct CallbackStack {
   typealias Index = Int
+
   private var callbacks: [Callback?] = []
   private var mutex = makeLock()
 
