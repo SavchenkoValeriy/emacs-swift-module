@@ -74,4 +74,16 @@ class ConversionTests: XCTestCase {
     let value = try optInt.convert(within: env)
     XCTAssertEqual(try Int.convert(from: value, within: env), 42)
   }
+
+  func testArrayConversion() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let original = [1, 5, 10]
+    let value = try original.convert(within: env)
+    XCTAssertEqual(try [Int].convert(from: value, within: env), original)
+
+    let empty = try [Double]().convert(within: env)
+    XCTAssertEqual(try [Double].convert(from: empty, within: env), [])
+  }
 }
