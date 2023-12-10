@@ -11,6 +11,11 @@ let package = Package(
       name: "EmacsSwiftModule",
       targets: ["EmacsSwiftModule"]
     ),
+    .library(
+      name: "EmacsSwiftModuleDynamic",
+      type: .dynamic,
+      targets: ["EmacsSwiftModule"]
+    ),
     .plugin(
       name: "ModuleFactoryPlugin",
       targets: ["ModuleFactoryPlugin"]
