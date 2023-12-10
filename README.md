@@ -68,7 +68,7 @@ Full documentation of the package can be found here: https://savchenkovaleriy.gi
 Add the following line to you package dependencies:
 
 ```swift
-.package("https://github.com/SavchenkoValeriy/emacs-swift-module.git", from: "1.3.0")
+.package("https://github.com/SavchenkoValeriy/emacs-swift-module.git", from: "1.3.4")
 ```
 
 Or add `"https://github.com/SavchenkoValeriy/emacs-swift-module.git"` directly via Xcode.
