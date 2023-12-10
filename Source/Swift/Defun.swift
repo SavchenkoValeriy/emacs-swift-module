@@ -75,7 +75,7 @@ extension Environment {
       // not even capturing generic types in this callback. That's why `DefunImplementation`
       // has a very simple interface to it.
       let impl = Unmanaged<DefunImplementation>.fromOpaque(data!)
-        .takeUnretainedValue()  // We take unretained value because we probably want to
+        .takeUnretainedValue() // We take unretained value because we probably want to
       // allow users calling the same function multiple times. We only clean it up in
       // a function's finalizer (see below).
       assert(
@@ -89,26 +89,28 @@ extension Environment {
         // And here's the last step, call `DefunImplementation` with the given
         // environment and a list of arguments appropriately wrapped in `EmacsValue`.
         let result = try impl.function(
-          env, buffer.map { EmacsValue(from: $0) })
+          env, buffer.map { EmacsValue(from: $0) }
+        )
         defer { env.invalidate() }
         // Since our function returns back `EmacsValue`, we need to unwrap it and
         // pass Emacs a raw pointer it knows about.
         return result.raw
 
-      } catch (EmacsError.wrongType(let expected, let actual, let value)) {
+      } catch let EmacsError.wrongType(expected, actual, value) {
         // For `EmacsError.wrongType` exceptions, we use `wrong-type-argument` since
         // it is an already defined error and it fits us like a glove.
         env.error(
           tag: try! env.intern("wrong-type-argument"), with: expected, actual,
-          value)
+          value
+        )
 
-      } catch (EmacsError.customError(let message)) {
+      } catch let EmacsError.customError(message) {
         env.error(with: message)
 
-      } catch (EmacsError.signal(let symbol, let data)) {
+      } catch let EmacsError.signal(symbol, data) {
         env.signal(symbol, with: data)
 
-      } catch (EmacsError.thrown(let tag, let value)) {
+      } catch let EmacsError.thrown(tag, value) {
         env.throwForTag(tag, with: value)
 
       } catch EmacsError.interrupted {
@@ -132,7 +134,8 @@ extension Environment {
     let funcValue = EmacsValue(
       from: env.make_function(
         raw, function.arity, function.arity, actualFunction, docstring,
-        wrappedPtr))
+        wrappedPtr
+      ))
 
     // Only starting from Emacs 28 there are finalizers for functions.
     // For earlier versions, we have to live with the fact that there is
@@ -147,11 +150,11 @@ extension Environment {
       }
     }
 
-    if let name = name {
+    if let name {
       // Create a symbol for it.
       let symbol = try intern(name)
       // And tie them together nicely.
-      let _ = try funcall("fset", with: symbol, funcValue)
+      _ = try funcall("fset", with: symbol, funcValue)
     }
     return funcValue
   }

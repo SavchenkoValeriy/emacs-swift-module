@@ -19,354 +19,341 @@
 //
 extension DefunImplementation {
   #if swift(>=5.9)
-    convenience init<R: EmacsConvertible, each T: EmacsConvertible>(
-      _ original: @escaping (repeat each T) throws -> R
+    convenience init<each T: EmacsConvertible>(
+      _ original: @escaping (repeat each T) throws -> some EmacsConvertible
     ) {
-      self.init(
-        { (env, args) in
-          let index = counter()
-          return try original(
-            repeat (each T).convert(from: args[index()], within: env)
-          ).convert(within: env)
-        }, count(repeat (each T).self))
+      self.init({ env, args in
+        let index = counter()
+        return try original(
+          repeat (each T).convert(from: args[index()], within: env)
+        ).convert(within: env)
+      }, count(repeat (each T).self))
     }
 
     convenience init<each T: EmacsConvertible>(
       _ original: @escaping (repeat each T) throws -> Void
     ) {
-      self.init(
-        { (env, args) in
-          let index = counter()
-          try original(
-            repeat (each T).convert(from: args[index()], within: env)
-          )
-          return env.Nil
-        }, count(repeat (each T).self))
+      self.init({ env, args in
+        let index = counter()
+        try original(
+          repeat (each T).convert(from: args[index()], within: env)
+        )
+        return env.Nil
+      }, count(repeat (each T).self))
     }
 
-    convenience init<R: EmacsConvertible, each T: EmacsConvertible>(
-      _ original: @escaping (Environment, repeat each T) throws -> R
+    convenience init<each T: EmacsConvertible>(
+      _ original: @escaping (Environment, repeat each T) throws -> some EmacsConvertible
     ) {
-      self.init(
-        { (env, args) in
-          let index = counter()
-          return try original(
-            env, repeat (each T).convert(from: args[index()], within: env)
-          ).convert(within: env)
-        }, count(repeat (each T).self))
+      self.init({ env, args in
+        let index = counter()
+        return try original(
+          env, repeat (each T).convert(from: args[index()], within: env)
+        ).convert(within: env)
+      }, count(repeat (each T).self))
     }
 
     convenience init<each T: EmacsConvertible>(
       _ original: @escaping (Environment, repeat each T) throws -> Void
     ) {
-      self.init(
-        { (env, args) in
-          let index = counter()
-          try original(
-            env, repeat (each T).convert(from: args[index()], within: env)
-          )
-          return env.Nil
-        }, count(repeat (each T).self))
+      self.init({ env, args in
+        let index = counter()
+        try original(
+          env, repeat (each T).convert(from: args[index()], within: env)
+        )
+        return env.Nil
+      }, count(repeat (each T).self))
     }
   #else
-    convenience init<R: EmacsConvertible>(_ original: @escaping () throws -> R)
-    {
-      self.init(
-        { (env, args) in
-          try original().convert(within: env)
-        }, 0)
+    convenience init(_ original: @escaping () throws -> some EmacsConvertible) {
+      self.init({ env, _ in
+        try original().convert(within: env)
+      }, 0)
     }
-    convenience init<R: EmacsConvertible>(
-      _ original: @escaping (Environment) throws -> R
+
+    convenience init(
+      _ original: @escaping (Environment) throws -> some EmacsConvertible
     ) {
-      self.init(
-        { (env, args) in
-          try original(env).convert(within: env)
-        }, 0)
+      self.init({ env, _ in
+        try original(env).convert(within: env)
+      }, 0)
     }
+
     convenience init(_ original: @escaping () throws -> Void) {
-      self.init(
-        { (env, args) in
-          try original()
-          return env.Nil
-        }, 0)
+      self.init({ env, _ in
+        try original()
+        return env.Nil
+      }, 0)
     }
+
     convenience init(
       _ original: @escaping (Environment) throws -> Void
     ) {
-      self.init(
-        { (env, args) in
-          try original(env)
-          return env.Nil
-        }, 0)
+      self.init({ env, _ in
+        try original(env)
+        return env.Nil
+      }, 0)
     }
 
-    convenience init<T: EmacsConvertible, R: EmacsConvertible>(
-      _ original: @escaping (T) throws -> R
+    convenience init<T: EmacsConvertible>(
+      _ original: @escaping (T) throws -> some EmacsConvertible
     ) {
-      self.init(
-        { (env, args) in
-          try original(T.convert(from: args[0], within: env)).convert(
-            within: env)
-        }, 1)
+      self.init({ env, args in
+        try original(T.convert(from: args[0], within: env)).convert(
+          within: env)
+      }, 1)
     }
-    convenience init<T: EmacsConvertible, R: EmacsConvertible>(
-      _ original: @escaping (Environment, T) throws -> R
+
+    convenience init<T: EmacsConvertible>(
+      _ original: @escaping (Environment, T) throws -> some EmacsConvertible
     ) {
-      self.init(
-        { (env, args) in
-          try original(env, T.convert(from: args[0], within: env)).convert(
-            within: env)
-        }, 1)
+      self.init({ env, args in
+        try original(env, T.convert(from: args[0], within: env)).convert(
+          within: env)
+      }, 1)
     }
+
     convenience init<T: EmacsConvertible>(
       _ original: @escaping (T) throws -> Void
     ) {
-      self.init(
-        { (env, args) in
-          try original(T.convert(from: args[0], within: env))
-          return env.Nil
-        }, 1)
+      self.init({ env, args in
+        try original(T.convert(from: args[0], within: env))
+        return env.Nil
+      }, 1)
     }
+
     convenience init<T: EmacsConvertible>(
       _ original: @escaping (Environment, T) throws -> Void
     ) {
-      self.init(
-        { (env, args) in
-          try original(env, T.convert(from: args[0], within: env))
-          return env.Nil
-        }, 1)
+      self.init({ env, args in
+        try original(env, T.convert(from: args[0], within: env))
+        return env.Nil
+      }, 1)
     }
 
     convenience init<
-      T1: EmacsConvertible, T2: EmacsConvertible, R: EmacsConvertible
+      T1: EmacsConvertible, T2: EmacsConvertible
     >(
-      _ original: @escaping (T1, T2) throws -> R
+      _ original: @escaping (T1, T2) throws -> some EmacsConvertible
     ) {
-      self.init(
-        { (env, args) in
-          try original(
-            T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env)
-          ).convert(within: env)
-        }, 2)
+      self.init({ env, args in
+        try original(
+          T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env)
+        ).convert(within: env)
+      }, 2)
     }
+
     convenience init<
-      T1: EmacsConvertible, T2: EmacsConvertible, R: EmacsConvertible
+      T1: EmacsConvertible, T2: EmacsConvertible
     >(
-      _ original: @escaping (Environment, T1, T2) throws -> R
+      _ original: @escaping (Environment, T1, T2) throws -> some EmacsConvertible
     ) {
-      self.init(
-        { (env, args) in
-          try original(
-            env, T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env)
-          ).convert(within: env)
-        }, 2)
+      self.init({ env, args in
+        try original(
+          env, T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env)
+        ).convert(within: env)
+      }, 2)
     }
+
     convenience init<T1: EmacsConvertible, T2: EmacsConvertible>(
       _ original: @escaping (T1, T2) throws -> Void
     ) {
-      self.init(
-        { (env, args) in
-          try original(
-            T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env)
-          )
-          return env.Nil
-        }, 2)
+      self.init({ env, args in
+        try original(
+          T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env)
+        )
+        return env.Nil
+      }, 2)
     }
+
     convenience init<T1: EmacsConvertible, T2: EmacsConvertible>(
       _ original: @escaping (Environment, T1, T2) throws -> Void
     ) {
-      self.init(
-        { (env, args) in
-          try original(
-            env, T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env)
-          )
-          return env.Nil
-        }, 2)
+      self.init({ env, args in
+        try original(
+          env, T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env)
+        )
+        return env.Nil
+      }, 2)
     }
 
     convenience init<
-      T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-      R: EmacsConvertible
-    >(_ original: @escaping (T1, T2, T3) throws -> R) {
-      self.init(
-        { (env, args) in
-          try original(
-            T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env),
-            T3.convert(from: args[2], within: env)
-          ).convert(within: env)
-        }, 3)
+      T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible
+    >(_ original: @escaping (T1, T2, T3) throws -> some EmacsConvertible) {
+      self.init({ env, args in
+        try original(
+          T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env),
+          T3.convert(from: args[2], within: env)
+        ).convert(within: env)
+      }, 3)
     }
+
     convenience init<
-      T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-      R: EmacsConvertible
-    >(_ original: @escaping (Environment, T1, T2, T3) throws -> R) {
-      self.init(
-        { (env, args) in
-          try original(
-            env, T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env),
-            T3.convert(from: args[2], within: env)
-          ).convert(within: env)
-        }, 3)
+      T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible
+    >(_ original: @escaping (Environment, T1, T2, T3) throws -> some EmacsConvertible) {
+      self.init({ env, args in
+        try original(
+          env, T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env),
+          T3.convert(from: args[2], within: env)
+        ).convert(within: env)
+      }, 3)
     }
+
     convenience init<
       T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible
     >(_ original: @escaping (T1, T2, T3) throws -> Void) {
-      self.init(
-        { (env, args) in
-          try original(
-            T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env),
-            T3.convert(from: args[2], within: env)
-          )
-          return env.Nil
-        }, 3)
+      self.init({ env, args in
+        try original(
+          T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env),
+          T3.convert(from: args[2], within: env)
+        )
+        return env.Nil
+      }, 3)
     }
+
     convenience init<
       T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible
     >(_ original: @escaping (Environment, T1, T2, T3) throws -> Void) {
-      self.init(
-        { (env, args) in
-          try original(
-            env, T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env),
-            T3.convert(from: args[2], within: env)
-          )
-          return env.Nil
-        }, 3)
+      self.init({ env, args in
+        try original(
+          env, T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env),
+          T3.convert(from: args[2], within: env)
+        )
+        return env.Nil
+      }, 3)
     }
 
     convenience init<
       T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-      T4: EmacsConvertible, R: EmacsConvertible
-    >(_ original: @escaping (T1, T2, T3, T4) throws -> R) {
-      self.init(
-        { (env, args) in
-          try original(
-            T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env),
-            T3.convert(from: args[2], within: env),
-            T4.convert(from: args[3], within: env)
-          ).convert(within: env)
-        }, 4)
+      T4: EmacsConvertible
+    >(_ original: @escaping (T1, T2, T3, T4) throws -> some EmacsConvertible) {
+      self.init({ env, args in
+        try original(
+          T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env),
+          T3.convert(from: args[2], within: env),
+          T4.convert(from: args[3], within: env)
+        ).convert(within: env)
+      }, 4)
     }
+
     convenience init<
       T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-      T4: EmacsConvertible, R: EmacsConvertible
-    >(_ original: @escaping (Environment, T1, T2, T3, T4) throws -> R) {
-      self.init(
-        { (env, args) in
-          try original(
-            env, T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env),
-            T3.convert(from: args[2], within: env),
-            T4.convert(from: args[3], within: env)
-          ).convert(within: env)
-        }, 4)
+      T4: EmacsConvertible
+    >(_ original: @escaping (Environment, T1, T2, T3, T4) throws -> some EmacsConvertible) {
+      self.init({ env, args in
+        try original(
+          env, T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env),
+          T3.convert(from: args[2], within: env),
+          T4.convert(from: args[3], within: env)
+        ).convert(within: env)
+      }, 4)
     }
+
     convenience init<
       T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
       T4: EmacsConvertible
     >(_ original: @escaping (T1, T2, T3, T4) throws -> Void) {
-      self.init(
-        { (env, args) in
-          try original(
-            T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env),
-            T3.convert(from: args[2], within: env),
-            T4.convert(from: args[3], within: env)
-          )
-          return env.Nil
-        }, 4)
+      self.init({ env, args in
+        try original(
+          T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env),
+          T3.convert(from: args[2], within: env),
+          T4.convert(from: args[3], within: env)
+        )
+        return env.Nil
+      }, 4)
     }
+
     convenience init<
       T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
       T4: EmacsConvertible
     >(_ original: @escaping (Environment, T1, T2, T3, T4) throws -> Void) {
-      self.init(
-        { (env, args) in
-          try original(
-            env, T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env),
-            T3.convert(from: args[2], within: env),
-            T4.convert(from: args[3], within: env)
-          )
-          return env.Nil
-        }, 4)
+      self.init({ env, args in
+        try original(
+          env, T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env),
+          T3.convert(from: args[2], within: env),
+          T4.convert(from: args[3], within: env)
+        )
+        return env.Nil
+      }, 4)
     }
 
     convenience init<
       T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-      T4: EmacsConvertible, T5: EmacsConvertible, R: EmacsConvertible
-    >(_ original: @escaping (T1, T2, T3, T4, T5) throws -> R) {
-      self.init(
-        { (env, args) in
-          try original(
-            T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env),
-            T3.convert(from: args[2], within: env),
-            T4.convert(from: args[3], within: env),
-            T5.convert(from: args[4], within: env)
-          ).convert(within: env)
-        }, 5)
+      T4: EmacsConvertible, T5: EmacsConvertible
+    >(_ original: @escaping (T1, T2, T3, T4, T5) throws -> some EmacsConvertible) {
+      self.init({ env, args in
+        try original(
+          T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env),
+          T3.convert(from: args[2], within: env),
+          T4.convert(from: args[3], within: env),
+          T5.convert(from: args[4], within: env)
+        ).convert(within: env)
+      }, 5)
     }
+
     convenience init<
       T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
-      T4: EmacsConvertible, T5: EmacsConvertible, R: EmacsConvertible
-    >(_ original: @escaping (Environment, T1, T2, T3, T4, T5) throws -> R) {
-      self.init(
-        { (env, args) in
-          try original(
-            env, T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env),
-            T3.convert(from: args[2], within: env),
-            T4.convert(from: args[3], within: env),
-            T5.convert(from: args[4], within: env)
-          ).convert(within: env)
-        }, 5)
+      T4: EmacsConvertible, T5: EmacsConvertible
+    >(_ original: @escaping (Environment, T1, T2, T3, T4, T5) throws -> some EmacsConvertible) {
+      self.init({ env, args in
+        try original(
+          env, T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env),
+          T3.convert(from: args[2], within: env),
+          T4.convert(from: args[3], within: env),
+          T5.convert(from: args[4], within: env)
+        ).convert(within: env)
+      }, 5)
     }
+
     convenience init<
       T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
       T4: EmacsConvertible, T5: EmacsConvertible
     >(_ original: @escaping (T1, T2, T3, T4, T5) throws -> Void) {
-      self.init(
-        { (env, args) in
-          try original(
-            T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env),
-            T3.convert(from: args[2], within: env),
-            T4.convert(from: args[3], within: env),
-            T5.convert(from: args[4], within: env)
-          )
-          return env.Nil
-        }, 5)
+      self.init({ env, args in
+        try original(
+          T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env),
+          T3.convert(from: args[2], within: env),
+          T4.convert(from: args[3], within: env),
+          T5.convert(from: args[4], within: env)
+        )
+        return env.Nil
+      }, 5)
     }
+
     convenience init<
       T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
       T4: EmacsConvertible, T5: EmacsConvertible
     >(_ original: @escaping (Environment, T1, T2, T3, T4, T5) throws -> Void) {
-      self.init(
-        { (env, args) in
-          try original(
-            env, T1.convert(from: args[0], within: env),
-            T2.convert(from: args[1], within: env),
-            T3.convert(from: args[2], within: env),
-            T4.convert(from: args[3], within: env),
-            T5.convert(from: args[4], within: env)
-          )
-          return env.Nil
-        }, 5)
+      self.init({ env, args in
+        try original(
+          env, T1.convert(from: args[0], within: env),
+          T2.convert(from: args[1], within: env),
+          T3.convert(from: args[2], within: env),
+          T4.convert(from: args[3], within: env),
+          T5.convert(from: args[4], within: env)
+        )
+        return env.Nil
+      }, 5)
     }
   #endif
 }
 
-extension Environment {
+public extension Environment {
   #if swift(>=5.9)
 
     /// Define a Lisp function out of the given closure.
@@ -382,13 +369,12 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
-      R: EmacsConvertible,
+    func defun<
       each T: EmacsConvertible
     >(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping (repeat each T) throws -> R
+      function: @escaping (repeat each T) throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
@@ -407,7 +393,7 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       each T: EmacsConvertible
     >(
       _ name: String? = nil,
@@ -431,13 +417,12 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
-      R: EmacsConvertible,
+    func defun<
       each T: EmacsConvertible
     >(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping (Environment, repeat each T) throws -> R
+      function: @escaping (Environment, repeat each T) throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
@@ -456,7 +441,7 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       each T: EmacsConvertible
     >(
       _ name: String? = nil,
@@ -480,16 +465,15 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
-      R: EmacsConvertible
-    >(
+    func defun(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping () throws -> R
+      function: @escaping () throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function without parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -503,16 +487,15 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
-      R: EmacsConvertible
-    >(
+    func defun(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping (Environment) throws -> R
+      function: @escaping (Environment) throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function without parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -525,7 +508,7 @@ extension Environment {
     ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
     ///
     /// See <doc:DefiningLispFunctions> for examples.
-    @discardableResult public func defun(
+    @discardableResult func defun(
       _ name: String? = nil,
       with docstring: String = "",
       function: @escaping () throws -> Void
@@ -533,6 +516,7 @@ extension Environment {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function without parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -545,7 +529,7 @@ extension Environment {
     ///  - Throws: ``EmacsError`` if something goes wrong on the Emacs side.
     ///
     /// See <doc:DefiningLispFunctions> for examples.
-    @discardableResult public func defun(
+    @discardableResult func defun(
       _ name: String? = nil,
       with docstring: String = "",
       function: @escaping (Environment) throws -> Void
@@ -567,17 +551,17 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
-      T: EmacsConvertible,
-      R: EmacsConvertible
+    func defun<
+      T: EmacsConvertible
     >(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping (T) throws -> R
+      function: @escaping (T) throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with one parameter out of the given closure.
     ///
     ///  - Parameters:
@@ -591,17 +575,17 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
-      T: EmacsConvertible,
-      R: EmacsConvertible
+    func defun<
+      T: EmacsConvertible
     >(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping (Environment, T) throws -> R
+      function: @escaping (Environment, T) throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with one parameter out of the given closure.
     ///
     ///  - Parameters:
@@ -615,7 +599,7 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T: EmacsConvertible
     >(
       _ name: String? = nil,
@@ -625,6 +609,7 @@ extension Environment {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with one parameter out of the given closure.
     ///
     ///  - Parameters:
@@ -638,7 +623,7 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T: EmacsConvertible
     >(
       _ name: String? = nil,
@@ -662,18 +647,18 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
-      T2: EmacsConvertible,
-      R: EmacsConvertible
+      T2: EmacsConvertible
     >(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping (T1, T2) throws -> R
+      function: @escaping (T1, T2) throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with two parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -687,18 +672,18 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
-      T2: EmacsConvertible,
-      R: EmacsConvertible
+      T2: EmacsConvertible
     >(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping (Environment, T1, T2) throws -> R
+      function: @escaping (Environment, T1, T2) throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with two parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -712,7 +697,7 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible
     >(
@@ -723,6 +708,7 @@ extension Environment {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with two parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -736,7 +722,7 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible
     >(
@@ -761,19 +747,19 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible,
-      T3: EmacsConvertible,
-      R: EmacsConvertible
+      T3: EmacsConvertible
     >(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping (T1, T2, T3) throws -> R
+      function: @escaping (T1, T2, T3) throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with three parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -787,19 +773,19 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible,
-      T3: EmacsConvertible,
-      R: EmacsConvertible
+      T3: EmacsConvertible
     >(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping (Environment, T1, T2, T3) throws -> R
+      function: @escaping (Environment, T1, T2, T3) throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with three parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -813,7 +799,7 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible,
       T3: EmacsConvertible
@@ -825,6 +811,7 @@ extension Environment {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with three parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -838,7 +825,7 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible,
       T3: EmacsConvertible
@@ -864,20 +851,20 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible,
       T3: EmacsConvertible,
-      T4: EmacsConvertible,
-      R: EmacsConvertible
+      T4: EmacsConvertible
     >(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping (T1, T2, T3, T4) throws -> R
+      function: @escaping (T1, T2, T3, T4) throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with four parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -891,20 +878,20 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible,
       T3: EmacsConvertible,
-      T4: EmacsConvertible,
-      R: EmacsConvertible
+      T4: EmacsConvertible
     >(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping (Environment, T1, T2, T3, T4) throws -> R
+      function: @escaping (Environment, T1, T2, T3, T4) throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with four parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -918,7 +905,7 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible,
       T3: EmacsConvertible,
@@ -931,6 +918,7 @@ extension Environment {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with four parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -944,7 +932,7 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible,
       T3: EmacsConvertible,
@@ -971,21 +959,21 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible,
       T3: EmacsConvertible,
       T4: EmacsConvertible,
-      T5: EmacsConvertible,
-      R: EmacsConvertible
+      T5: EmacsConvertible
     >(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping (T1, T2, T3, T4, T5) throws -> R
+      function: @escaping (T1, T2, T3, T4, T5) throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with five parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -999,21 +987,21 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible,
       T3: EmacsConvertible,
       T4: EmacsConvertible,
-      T5: EmacsConvertible,
-      R: EmacsConvertible
+      T5: EmacsConvertible
     >(
       _ name: String? = nil,
       with docstring: String = "",
-      function: @escaping (Environment, T1, T2, T3, T4, T5) throws -> R
+      function: @escaping (Environment, T1, T2, T3, T4, T5) throws -> some EmacsConvertible
     ) throws -> EmacsValue {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with five parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -1027,7 +1015,7 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible,
       T3: EmacsConvertible,
@@ -1041,6 +1029,7 @@ extension Environment {
       let wrapped = DefunImplementation(function)
       return try defun(named: name, with: docstring, function: wrapped)
     }
+
     /// Define a Lisp function with five parameters out of the given closure.
     ///
     ///  - Parameters:
@@ -1054,7 +1043,7 @@ extension Environment {
     ///
     /// See <doc:DefiningLispFunctions> for examples.
     @discardableResult
-    public func defun<
+    func defun<
       T1: EmacsConvertible,
       T2: EmacsConvertible,
       T3: EmacsConvertible,

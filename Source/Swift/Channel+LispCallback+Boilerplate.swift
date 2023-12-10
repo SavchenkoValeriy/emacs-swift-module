@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU General Public License along with
 // EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
 //
-extension Channel {
+public extension Channel {
   /// Make a Swift callback out of an Emacs function.
   ///
   /// This allows us to use Emacs functions as callbacks in Swift APIs.
@@ -25,10 +25,9 @@ extension Channel {
   ///
   /// - Parameter function: a Lisp function to turn into a callback.
   /// - Returns: a callback that if called, will eventually call the given function.
-  public func callback(_ function: EmacsValue)
-    -> () -> Void
-  {
-    return { [self] in
+  func callback(_ function: EmacsValue)
+    -> () -> Void {
+    { [self] in
       register {
         env in try env.funcall(function)
       }
@@ -44,10 +43,10 @@ extension Channel {
     ///
     /// - Parameter function: a Lisp function to turn into a callback.
     /// - Returns: a callback that if called, will eventually call the given function.
-    public func callback<each T: EmacsConvertible>(
+    func callback<each T: EmacsConvertible>(
       _ function: EmacsValue
     ) -> (repeat each T) -> Void {
-      return { [self] (args: repeat each T) in
+      { [self](args: repeat each T) in
         register {
           env in
           try withTupleAsArray(repeat each args) {
@@ -65,10 +64,9 @@ extension Channel {
     ///
     /// - Parameter function: a Lisp function to turn into a callback.
     /// - Returns: a callback that if called, will eventually call the given function.
-    public func callback<T: EmacsConvertible>(_ function: EmacsValue)
-      -> (T) -> Void
-    {
-      return { [self] arg in
+    func callback<T: EmacsConvertible>(_ function: EmacsValue)
+      -> (T) -> Void {
+      { [self] arg in
         register {
           env in try env.funcall(function, with: arg)
         }
@@ -82,15 +80,16 @@ extension Channel {
     ///
     /// - Parameter function: a Lisp function to turn into a callback.
     /// - Returns: a callback that if called, will eventually call the given function.
-    public func callback<T1: EmacsConvertible, T2: EmacsConvertible>(
+    func callback<T1: EmacsConvertible, T2: EmacsConvertible>(
       _ function: EmacsValue
     ) -> (T1, T2) -> Void {
-      return { [self] (arg1, arg2) in
+      { [self] arg1, arg2 in
         register {
           env in try env.funcall(function, with: arg1, arg2)
         }
       }
     }
+
     /// Make a Swift callback out of an Emacs function.
     ///
     /// This allows us to use Emacs functions as callbacks in Swift APIs.
@@ -98,17 +97,18 @@ extension Channel {
     ///
     /// - Parameter function: a Lisp function to turn into a callback.
     /// - Returns: a callback that if called, will eventually call the given function.
-    public func callback<
+    func callback<
       T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible
     >(
       _ function: EmacsValue
     ) -> (T1, T2, T3) -> Void {
-      return { [self] (arg1, arg2, arg3) in
+      { [self] arg1, arg2, arg3 in
         register {
           env in try env.funcall(function, with: arg1, arg2, arg3)
         }
       }
     }
+
     /// Make a Swift callback out of an Emacs function.
     ///
     /// This allows us to use Emacs functions as callbacks in Swift APIs.
@@ -116,18 +116,19 @@ extension Channel {
     ///
     /// - Parameter function: a Lisp function to turn into a callback.
     /// - Returns: a callback that if called, will eventually call the given function.
-    public func callback<
+    func callback<
       T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
       T4: EmacsConvertible
     >(
       _ function: EmacsValue
     ) -> (T1, T2, T3, T4) -> Void {
-      return { [self] (arg1, arg2, arg3, arg4) in
+      { [self] arg1, arg2, arg3, arg4 in
         register {
           env in try env.funcall(function, with: arg1, arg2, arg3, arg4)
         }
       }
     }
+
     /// Make a Swift callback out of an Emacs function.
     ///
     /// This allows us to use Emacs functions as callbacks in Swift APIs.
@@ -135,13 +136,13 @@ extension Channel {
     ///
     /// - Parameter function: a Lisp function to turn into a callback.
     /// - Returns: a callback that if called, will eventually call the given function.
-    public func callback<
+    func callback<
       T1: EmacsConvertible, T2: EmacsConvertible, T3: EmacsConvertible,
       T4: EmacsConvertible, T5: EmacsConvertible
     >(
       _ function: EmacsValue
     ) -> (T1, T2, T3, T4, T5) -> Void {
-      return { [self] (arg1, arg2, arg3, arg4, arg5) in
+      { [self] arg1, arg2, arg3, arg4, arg5 in
         register {
           env in try env.funcall(function, with: arg1, arg2, arg3, arg4, arg5)
         }

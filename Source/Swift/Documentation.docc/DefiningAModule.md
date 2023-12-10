@@ -63,7 +63,7 @@ class AwesomeSwiftEmacsModule: Module {
 func createModule() -> Module { AwesomeSwiftEmacsModule() }
 ```
 
-Now, if you compile this code with `swift build` and load it from Emacs via 
+Now, if you compile this code with `swift build` and load it from Emacs via
 ```emacs-lisp
 (module-load "SOURCE_DIR/.build/debug/libYOUR_MODULE_NAME.dylib")
 ```
