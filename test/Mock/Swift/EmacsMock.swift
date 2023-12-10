@@ -7,28 +7,51 @@ private func toMockEnv(_ raw: UnsafeMutablePointer<emacs_env>) -> EnvironmentMoc
   Unmanaged<EnvironmentMock>.fromOpaque(raw.pointee.private_members.pointee.owner).takeUnretainedValue()
 }
 
-class StoredValue<T> {
+class StoredValue {
   public let pointer: UnsafeMutablePointer<emacs_value_tag>
+  public let deallocator: () -> Void
 
-  required init(_ pointer: UnsafeMutablePointer<T>) {
+  required init(_ pointer: UnsafeMutablePointer<some Any>) {
     self.pointer = UnsafeMutablePointer<emacs_value_tag>.allocate(capacity: 1)
     self.pointer.initialize(to: emacs_value_tag(data: pointer))
+    deallocator = {
+      pointer.deallocate()
+    }
+  }
+
+  required init() {
+    pointer = UnsafeMutablePointer<emacs_value_tag>.allocate(capacity: 1)
+    pointer.initialize(to: emacs_value_tag(data: nil))
+    deallocator = {}
   }
 
   deinit {
-    pointer.pointee.data.assumingMemoryBound(to: T.self).deallocate()
+    deallocator()
     pointer.deallocate()
   }
 }
 
 public class EnvironmentMock {
   var raw = UnsafeMutablePointer<emacs_env>.allocate(capacity: 1)
-  var data: [AnyObject] = []
+  var data: [StoredValue] = []
+  var symbols: [String: emacs_value] = [:]
 
   func tag(_ pointer: UnsafeMutablePointer<some Any>) -> UnsafeMutablePointer<emacs_value_tag> {
     let result = StoredValue(pointer)
     data.append(result)
     return result.pointer
+  }
+
+  func intern(_ name: String) -> emacs_value {
+    if let symbol = symbols[name] {
+      return symbol
+    }
+
+    let index = data.count
+    data.append(StoredValue())
+    let symbol = make(index)
+    symbols[name] = symbol
+    return symbol
   }
 
   private func make<T>(_ from: T) -> emacs_value {
@@ -72,6 +95,14 @@ public class EnvironmentMock {
     env.non_local_exit_clear = { _ in }
     env.should_quit = {
       _ in false
+    }
+    env.intern = {
+      raw, cString in
+      toMockEnv(raw!).intern(String(cString: cString!))
+    }
+    env.is_not_nil = {
+      raw, value in
+      UnsafeMutableRawPointer(toMockEnv(raw!).environment.Nil.raw!) != value!
     }
     env.make_integer = {
       raw, value in

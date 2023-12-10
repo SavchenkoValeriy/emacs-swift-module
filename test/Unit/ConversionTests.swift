@@ -19,6 +19,19 @@ class ConversionTests: XCTestCase {
     XCTAssertEqual(try Double.convert(from: value, within: env), 36.6)
   }
 
+  func testBoolConversion() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let falseValue = false.convert(within: env)
+    XCTAssertFalse(try Bool.convert(from: falseValue, within: env))
+    XCTAssert(try env.isNil(falseValue))
+
+    let trueValue = true.convert(within: env)
+    XCTAssert(try Bool.convert(from: trueValue, within: env))
+    XCTAssert(try env.isNotNil(trueValue))
+  }
+
   func testStringConversion() throws {
     let mock = EnvironmentMock()
     let env = mock.environment
