@@ -60,4 +60,18 @@ class ConversionTests: XCTestCase {
 
     XCTAssertEqual(swiftString, "hello")
   }
+
+  func testOptionalConversion() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    var optInt: Int? = nil
+    let nilValue = try optInt.convert(within: env)
+    XCTAssert(try env.isNil(nilValue))
+    XCTAssertNil(try Int?.convert(from: nilValue, within: env))
+
+    optInt = 42
+    let value = try optInt.convert(within: env)
+    XCTAssertEqual(try Int.convert(from: value, within: env), 42)
+  }
 }
