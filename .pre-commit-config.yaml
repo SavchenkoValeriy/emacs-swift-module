@@ -28,5 +28,5 @@ ci:
     autoupdate_branch: 'main'
     autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
     autoupdate_schedule: weekly
-    skip: []
+    skip: [swiftlint]
     submodules: false
