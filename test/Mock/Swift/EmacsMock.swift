@@ -9,20 +9,26 @@ private func toMockEnv(_ raw: UnsafeMutablePointer<emacs_env>) -> EnvironmentMoc
 
 class StoredValue {
   public let pointer: UnsafeMutablePointer<emacs_value_tag>
-  public let deallocator: () -> Void
+  public var deallocator: () -> Void
 
-  required init(_ pointer: UnsafeMutablePointer<some Any>) {
-    self.pointer = UnsafeMutablePointer<emacs_value_tag>.allocate(capacity: 1)
-    self.pointer.initialize(to: emacs_value_tag(data: pointer))
-    deallocator = {
-      pointer.deallocate()
-    }
+  convenience init(_ pointer: UnsafeMutablePointer<some Any>) {
+    self.init()
+    setq(pointer)
   }
 
   required init() {
     pointer = UnsafeMutablePointer<emacs_value_tag>.allocate(capacity: 1)
     pointer.initialize(to: emacs_value_tag(data: nil))
     deallocator = {}
+  }
+
+  public func setq(_ data: UnsafeMutablePointer<some Any>) {
+    deallocator()
+    pointer.update(repeating: emacs_value_tag(data: data), count: 1)
+    deallocator = { [data] in
+      data.deinitialize(count: 1)
+      data.deallocate()
+    }
   }
 
   deinit {
@@ -32,6 +38,7 @@ class StoredValue {
 }
 
 public class EnvironmentMock {
+  typealias Function = ([emacs_value]) -> emacs_value
   var raw = UnsafeMutablePointer<emacs_env>.allocate(capacity: 1)
   var data: [StoredValue] = []
   var symbols: [String: emacs_value] = [:]
@@ -52,6 +59,15 @@ public class EnvironmentMock {
     let symbol = make(index)
     symbols[name] = symbol
     return symbol
+  }
+
+  func funcall(_ rawFunction: emacs_value, _ count: CLong, _ args: UnsafePointer<emacs_value?>) -> emacs_value {
+    let functionIndex: Int = extract(rawFunction)
+    let function: Function = extract(data[functionIndex].pointer)
+    return args.withMemoryRebound(to: emacs_value.self, capacity: count) {
+      nonOptArgs in
+      function(Array(UnsafeBufferPointer(start: nonOptArgs, count: count)))
+    }
   }
 
   private func make<T>(_ from: T) -> emacs_value {
@@ -128,10 +144,43 @@ public class EnvironmentMock {
       raw, value, buf, len in
       toMockEnv(raw!).extract(value!, buf, len!)
     }
+    env.vec_get = {
+      raw, value, index in
+      let env = toMockEnv(raw!)
+      let array: [emacs_value] = env.extract(value!)
+      return array[index]
+    }
+    env.vec_size = {
+      raw, value in
+      let env = toMockEnv(raw!)
+      let array: [emacs_value] = env.extract(value!)
+      return array.count
+    }
+    env.funcall = {
+      raw, function, count, args in
+      toMockEnv(raw!).funcall(function!, count, args!)
+    }
+
+    initializeBuiltins()
+
     env.private_members = UnsafeMutablePointer<emacs_env_private>.allocate(capacity: 1)
     env.private_members.initialize(to: emacs_env_private(owner: Unmanaged.passUnretained(self).toOpaque()))
 
     raw.initialize(from: &env, count: 1)
+  }
+
+  func bind(_ name: String, to function: @escaping Function) {
+    let index = data.count
+    _ = make(function)
+    let symbol = make(index)
+    symbols[name] = symbol
+  }
+
+  func initializeBuiltins() {
+    bind("vector") {
+      [unowned self] args in
+      make(args)
+    }
   }
 
   deinit {
