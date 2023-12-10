@@ -29,7 +29,7 @@ public enum EmacsVersion: Int, Comparable {
   case Emacs30 = 30
 
   public static func < (lhs: EmacsVersion, rhs: EmacsVersion) -> Bool {
-    return lhs.rawValue < rhs.rawValue
+    lhs.rawValue < rhs.rawValue
   }
 }
 
@@ -63,6 +63,7 @@ public final class Environment {
       return raw.pointee
     }
   }
+
   let thread = Thread.current
   var threadValid: Bool { thread == Thread.current }
 
@@ -79,11 +80,12 @@ public final class Environment {
   public let version: EmacsVersion
 
   /// This is a symbol we use for surfacing Swift exceptions to Emacs Lisp.
-  internal lazy var swiftError: EmacsValue = {
+  lazy var swiftError: EmacsValue = {
     let symbol = try! intern("swift-error")
-    let _ = try! funcall(
+    _ = try! funcall(
       "define-error", with: symbol,
-      "Exception from a Swift module")
+      "Exception from a Swift module"
+    )
     return symbol
   }()
 
@@ -91,17 +93,17 @@ public final class Environment {
   required init(from env: UnsafeMutablePointer<emacs_env>) {
     raw = env
     switch env.pointee.size {
-    case 0..<Emacs25Size:
+    case 0 ..< Emacs25Size:
       fatalError("Emacs is too old!")
-    case Emacs25Size..<Emacs26Size:
+    case Emacs25Size ..< Emacs26Size:
       version = .Emacs25
-    case Emacs26Size..<Emacs27Size:
+    case Emacs26Size ..< Emacs27Size:
       version = .Emacs26
-    case Emacs27Size..<Emacs28Size:
+    case Emacs27Size ..< Emacs28Size:
       version = .Emacs27
-    case Emacs28Size..<Emacs29Size:
+    case Emacs28Size ..< Emacs29Size:
       version = .Emacs28
-    case Emacs29Size..<Emacs30Size:
+    case Emacs29Size ..< Emacs30Size:
       version = .Emacs29
     default:
       version = .Emacs30
@@ -126,10 +128,10 @@ public final class Environment {
   ///  - Returns: the opaque Emacs value representing a Lisp symbol for the given name.
   ///  - Throws: ``EmacsError/nonASCIISymbol(value:)`` if the name has non-ASCII symbols (not allowed by Lisp).
   public func intern(_ name: String) throws -> EmacsValue {
-    if !name.unicodeScalars.allSatisfy({ $0.isASCII }) {
+    if !name.unicodeScalars.allSatisfy(\.isASCII) {
       throw EmacsError.nonASCIISymbol(value: name)
     }
-    return EmacsValue(from: try pointee.intern(raw, name))
+    return try EmacsValue(from: pointee.intern(raw, name))
   }
 
   /// Return a persistent version of the given value.
@@ -140,7 +142,7 @@ public final class Environment {
   ///  - Returns: the same value, but with prolongued lifetime.
   ///  - Throws: ``EmacsError`` if something on the Emacs side goes wrong.
   public func preserve(_ value: EmacsValue) throws -> PersistentEmacsValue {
-    return try PersistentEmacsValue(from: value, within: self)
+    try PersistentEmacsValue(from: value, within: self)
   }
 
   /// Retain the given value.
@@ -157,8 +159,8 @@ public final class Environment {
   ///  - Returns: retained copy of the value.
   ///  - Throws: ``EmacsError`` if something on the Emacs side goes wrong.
   public func retain(_ value: EmacsValue) throws -> EmacsValue {
-    return EmacsValue(
-      from: try check(raw.pointee.make_global_ref(raw, value.raw)))
+    try EmacsValue(
+      from: check(raw.pointee.make_global_ref(raw, value.raw)))
   }
 
   /// Release the given value.
@@ -174,6 +176,6 @@ public final class Environment {
   ///  - Parameter value: the value to be released.
   ///  - Throws: ``EmacsError`` if something on the Emacs side goes wrong.
   public func release(_ value: EmacsValue) throws {
-    let _ = try check(raw.pointee.free_global_ref(raw, value.raw))
+    _ = try check(raw.pointee.free_global_ref(raw, value.raw))
   }
 }

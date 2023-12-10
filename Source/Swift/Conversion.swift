@@ -31,7 +31,7 @@ public protocol EmacsConvertible {
   ///
   /// - Parameter env: Emacs environment to convert the value in.
   /// - Returns: an opaque Emacs value representing this object.
-  /// - Throws: any kind of excpetion if something during the conversion process went wrong.
+  /// - Throws: any kind of exception if something during the conversion process went wrong.
   func convert(within env: Environment) throws -> EmacsValue
   /// Convert given EmacsValue value into the value of the current type within the given environment.
   ///
@@ -39,21 +39,20 @@ public protocol EmacsConvertible {
   ///   - from: an opaque Emacs value to convert.
   ///   - env: Emacs environment to convert the value in.
   /// - Returns: an object of the current type.
-  /// - Throws: an `EmacsError` excpetion if something during the conversion process went wrong.
+  /// - Throws: an `EmacsError` exception if something during the conversion process went wrong.
   static func convert(from: EmacsValue, within env: Environment) throws -> Self
 }
 
 /// We should be able to use Emacs value itself whenever we expect something
 /// convertible to an Emacs value.
 extension EmacsValue: EmacsConvertible {
-  public func convert(within env: Environment) -> EmacsValue {
-    return self
+  public func convert(within _: Environment) -> EmacsValue {
+    self
   }
 
   public static func convert(from: EmacsValue, within env: Environment) throws
-    -> Self
-  {
-    return try Self(from: from, within: env)
+    -> Self {
+    try Self(from: from, within: env)
   }
 }
 
@@ -64,13 +63,12 @@ extension EmacsValue: EmacsConvertible {
 /// corresponding string on the Lisp side and vice versa.
 extension String: EmacsConvertible {
   public func convert(within env: Environment) throws -> EmacsValue {
-    return try env.make(self)
+    try env.make(self)
   }
 
   public static func convert(from: EmacsValue, within env: Environment) throws
-    -> Self
-  {
-    return try env.toString(from)
+    -> Self {
+    try env.toString(from)
   }
 }
 
@@ -79,13 +77,12 @@ extension String: EmacsConvertible {
 /// Convert to Emacs string, this function is available after emacs 28.
 extension Data: EmacsConvertible {
   public func convert(within env: Environment) throws -> EmacsValue {
-    return try env.make(self)
+    try env.make(self)
   }
 
   public static func convert(from: EmacsValue, within env: Environment) throws
-    -> Self
-  {
-    return try env.toData(from)
+    -> Self {
+    try env.toData(from)
   }
 }
 
@@ -98,13 +95,12 @@ extension Data: EmacsConvertible {
 /// As for the true value, we chose `t`, which is a common Emacs Lisp practice.
 extension Bool: EmacsConvertible {
   public func convert(within env: Environment) -> EmacsValue {
-    return self ? env.t : env.Nil
+    self ? env.t : env.Nil
   }
 
   public static func convert(from value: EmacsValue, within env: Environment)
-    throws -> Bool
-  {
-    return try env.isNotNil(value)
+    throws -> Bool {
+    try env.isNotNil(value)
   }
 }
 
@@ -114,14 +110,13 @@ extension Bool: EmacsConvertible {
 extension Int: EmacsConvertible {
   public func convert(within env: Environment) throws -> EmacsValue {
     // TODO: handle bigger integers
-    return try env.make(self)
+    try env.make(self)
   }
 
   public static func convert(from value: EmacsValue, within env: Environment)
-    throws -> Int
-  {
+    throws -> Int {
     // TODO: handle bigger integers
-    return try env.toInt(value)
+    try env.toInt(value)
   }
 }
 
@@ -130,13 +125,12 @@ extension Int: EmacsConvertible {
 /// Emacs Lisp has a built-in floating point type, so this one is a 1-to-1 conversion.
 extension Double: EmacsConvertible {
   public func convert(within env: Environment) throws -> EmacsValue {
-    return try env.make(self)
+    try env.make(self)
   }
 
   public static func convert(from value: EmacsValue, within env: Environment)
-    throws -> Double
-  {
-    return try env.toDouble(value)
+    throws -> Double {
+    try env.toDouble(value)
   }
 }
 
@@ -149,14 +143,13 @@ extension Double: EmacsConvertible {
 /// lists conversions to Swift arrays later on.
 extension Array: EmacsConvertible where Element: EmacsConvertible {
   public func convert(within env: Environment) throws -> EmacsValue {
-    return try env.make(self.map { try $0.convert(within: env) })
+    try env.make(map { try $0.convert(within: env) })
   }
 
   public static func convert(from value: EmacsValue, within env: Environment)
-    throws -> [Element]
-  {
+    throws -> [Element] {
     // TODO: maybe we should convert lists to arrays as well.
-    return try env.toArray(value).map {
+    try env.toArray(value).map {
       try Element.convert(from: $0, within: env)
     }
   }
@@ -168,18 +161,16 @@ extension Array: EmacsConvertible where Element: EmacsConvertible {
 /// Dictionaries are constructed to and from Lisp alists. Other candidates,
 /// plists and hash tables are not yet supported.
 extension Dictionary: EmacsConvertible
-where
+  where
   Key: EmacsConvertible,
-  Value: EmacsConvertible
-{
+  Value: EmacsConvertible {
   public func convert(within env: Environment) throws -> EmacsValue {
-    let cells = self.map { ConsCell(car: $0, cdr: $1) }
+    let cells = map { ConsCell(car: $0, cdr: $1) }
     return try List(from: cells).convert(within: env)
   }
 
   public static func convert(from value: EmacsValue, within env: Environment)
-    throws -> [Key: Value]
-  {
+    throws -> [Key: Value] {
     let raw = try List<ConsCell<Key, Value>>.convert(from: value, within: env)
     return Dictionary(
       uniqueKeysWithValues: raw.map { cons in (cons.car, cons.cdr) })
@@ -195,13 +186,12 @@ where
 /// otherwise it's simply and underlying type conversion.
 extension Optional: EmacsConvertible where Wrapped: EmacsConvertible {
   public func convert(within env: Environment) throws -> EmacsValue {
-    return try self?.convert(within: env) ?? env.Nil
+    try self?.convert(within: env) ?? env.Nil
   }
 
   public static func convert(from value: EmacsValue, within env: Environment)
-    throws -> Self
-  {
-    return try env.isNil(value)
+    throws -> Self {
+    try env.isNil(value)
       ? nil : try Wrapped.convert(from: value, within: env)
   }
 }
@@ -217,8 +207,8 @@ extension Optional: EmacsConvertible where Wrapped: EmacsConvertible {
 /// when the corresponding value is garbage-collected on the Emacs side of things.
 public protocol OpaquelyEmacsConvertible: AnyObject, EmacsConvertible {}
 
-extension OpaquelyEmacsConvertible {
-  public func convert(within env: Environment) throws -> EmacsValue {
+public extension OpaquelyEmacsConvertible {
+  func convert(within env: Environment) throws -> EmacsValue {
     try env.make(Unmanaged.passRetained(self).toOpaque()) { ptr in
       // This closure is going to get called when the value is garbage-collected
       // on the Emacs side.
@@ -234,12 +224,11 @@ extension OpaquelyEmacsConvertible {
     }
   }
 
-  public static func convert(from value: EmacsValue, within env: Environment)
-    throws -> Self
-  {
+  static func convert(from value: EmacsValue, within env: Environment)
+    throws -> Self {
     // First let's try converting it to some opaque pointer (we can fail here,
     // if it's not a user pointer at all).
-    let candidate = Unmanaged<AnyObject>.fromOpaque(try env.toOpaque(value))
+    let candidate = try Unmanaged<AnyObject>.fromOpaque(env.toOpaque(value))
       .takeUnretainedValue()
     // And only then let's try to check that it has the right type (for Emacs
     // all user pointers are the same and it is a Swift responsibility to check
@@ -258,47 +247,56 @@ extension Environment {
   public var Nil: EmacsValue {
     try! intern("nil")
   }
+
   /// Emacs `t` value.
   public var t: EmacsValue {
     try! intern("t")
   }
+
   /// Check if the given Emacs value is `nil`.
   public func isNil(_ value: EmacsValue) throws -> Bool {
     try !isNotNil(value)
   }
+
   /// Check if the given Emacs value is not `nil`.
   public func isNotNil(_ value: EmacsValue) throws -> Bool {
     try pointee.is_not_nil(raw, value.raw)
   }
+
   //
   // Value factories
   //
   func make(_ from: String) throws -> EmacsValue {
-    EmacsValue(
-      from: try check(pointee.make_string(raw, from, from.utf8.count)))
+    try EmacsValue(
+      from: check(pointee.make_string(raw, from, from.utf8.count)))
   }
+
   func make(_ from: Int) throws -> EmacsValue {
-    EmacsValue(from: try check(pointee.make_integer(raw, from)))
+    try EmacsValue(from: check(pointee.make_integer(raw, from)))
   }
+
   func make(_ from: Double) throws -> EmacsValue {
-    EmacsValue(from: try check(pointee.make_float(raw, from)))
+    try EmacsValue(from: check(pointee.make_float(raw, from)))
   }
+
   func make(_ from: [EmacsValue]) throws -> EmacsValue {
     try apply("vector", with: from)
   }
+
   func make(
     _ value: RawOpaquePointer,
     with finalizer: @escaping RawFinalizer = { _ in () }
   ) throws -> EmacsValue {
-    EmacsValue(
-      from: try check(pointee.make_user_ptr(raw, finalizer, value)))
+    try EmacsValue(
+      from: check(pointee.make_user_ptr(raw, finalizer, value)))
   }
+
   func make(_ from: Data) throws -> EmacsValue {
-    if self.version < EmacsVersion.Emacs28 {
+    if version < EmacsVersion.Emacs28 {
       throw EmacsError.unsupported(what: "make_unibyte_string is supporting from emacs28")
     }
     return try from.withUnsafeBytes { rawBufferPointer in
-      EmacsValue(from: try check(pointee.make_unibyte_string(raw, rawBufferPointer.baseAddress, from.count)))
+      try EmacsValue(from: check(pointee.make_unibyte_string(raw, rawBufferPointer.baseAddress, from.count)))
     }
   }
 
@@ -309,24 +307,28 @@ extension Environment {
     var len = 0
     // The first call to `copy_string_contents` is needed to determine
     // the actual length of the string...
-    let _ = try check(
+    _ = try check(
       pointee.copy_string_contents(raw, value.raw, nil, &len))
     // ...then allocate the buffer of the right size...
     var buf = [CChar](repeating: 0, count: len)
     // ...and use it again with that buffer to fill.
-    let _ = try pointee.copy_string_contents(raw, value.raw, &buf, &len)
+    _ = try pointee.copy_string_contents(raw, value.raw, &buf, &len)
     // Swift owns this memory know, nothing to be worried about!
     return buf
   }
+
   func toString(_ value: EmacsValue) throws -> String {
-    return String(cString: try toBytesArray(value))
+    try String(cString: toBytesArray(value))
   }
+
   func toInt(_ value: EmacsValue) throws -> Int {
     try Int(check(pointee.extract_integer(raw, value.raw)))
   }
+
   func toDouble(_ value: EmacsValue) throws -> Double {
     try Double(check(pointee.extract_float(raw, value.raw)))
   }
+
   func toArray(_ value: EmacsValue) throws -> [EmacsValue] {
     let size = try check(pointee.vec_size(raw, value.raw))
     // We can only get values one by one, but we also need to
@@ -334,19 +336,21 @@ extension Environment {
     // original value to take all the spots at first.
     var result = [EmacsValue](repeating: value, count: size)
 
-    for i in 0..<size {
-      result[i] = EmacsValue(
-        from: try check(pointee.vec_get(raw, value.raw, i)))
+    for i in 0 ..< size {
+      result[i] = try EmacsValue(
+        from: check(pointee.vec_get(raw, value.raw, i)))
     }
 
     return result
   }
+
   func toOpaque(_ value: EmacsValue) throws -> RawOpaquePointer {
-    // All the raw pointers are consifered nullable by Swift, but
+    // All the raw pointers are considered nullable by Swift, but
     // Emacs actually has these values marked as non null.
     // So, if we didn't throw during the check, it's OK to force unwrap.
     try check(pointee.get_user_ptr(raw, value.raw))!
   }
+
   func toData(_ value: EmacsValue) throws -> Data {
     var buf = try toBytesArray(value)
     // Emacs `copy_string_contents` include the last null byte,

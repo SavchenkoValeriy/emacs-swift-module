@@ -27,19 +27,18 @@ public struct Symbol: EmacsConvertible {
   }
 
   public func convert(within env: Environment) throws -> EmacsValue {
-    return try env.intern(name)
+    try env.intern(name)
   }
 
   public static func convert(from value: EmacsValue, within env: Environment)
-    throws -> Symbol
-  {
-    return Symbol(name: try env.funcall("symbol-name", with: value))
+    throws -> Symbol {
+    try Symbol(name: env.funcall("symbol-name", with: value))
   }
 }
 
 /// Emacs cons cell
 public struct ConsCell<CarType, CdrType>: EmacsConvertible
-where CarType: EmacsConvertible, CdrType: EmacsConvertible {
+  where CarType: EmacsConvertible, CdrType: EmacsConvertible {
   public var car: CarType
   public var cdr: CdrType
 
@@ -53,8 +52,7 @@ where CarType: EmacsConvertible, CdrType: EmacsConvertible {
   }
 
   public static func convert(from: EmacsValue, within env: Environment) throws
-    -> ConsCell
-  {
+    -> ConsCell {
     let car: CarType = try env.funcall("car", with: from)
     let cdr: CdrType = try env.funcall("cdr", with: from)
     return ConsCell(car: car, cdr: cdr)
@@ -71,8 +69,8 @@ public enum List<Element> {
 
 /// Allowing convenient iteration over the list
 extension List: Sequence, IteratorProtocol {
-  mutating public func next() -> Element? {
-    guard case .Cons(let element, let nested) = self else {
+  public mutating func next() -> Element? {
+    guard case let .Cons(element, nested) = self else {
       return nil
     }
     self = nested
@@ -81,9 +79,9 @@ extension List: Sequence, IteratorProtocol {
 }
 
 /// Convenienct conversions to and from arrays
-extension List {
+public extension List {
   /// Construct List from Array.
-  public init(from array: [Element]) {
+  init(from array: [Element]) {
     var list: List = .Nil
     for element in array.reversed() {
       list = .Cons(head: element, tail: list)
@@ -92,7 +90,7 @@ extension List {
   }
 
   /// Construct Array from List.
-  public func toArray() -> [Element] {
+  func toArray() -> [Element] {
     map { $0 }
   }
 }
@@ -103,14 +101,13 @@ extension List: EmacsConvertible where Element: EmacsConvertible {
   }
 
   public static func convert(from: EmacsValue, within env: Environment) throws
-    -> List<Element>
-  {
+    -> List<Element> {
     var array: [Element] = []
     var list = from
     // We could've constructed it recursively, but lists can get pretty long, so it's better
     // not to take any chancec with stack overflowing.
     while try env.isNotNil(list) {
-      array.append(try env.funcall("car", with: list))
+      try array.append(env.funcall("car", with: list))
       list = try env.funcall("cdr", with: list)
     }
     return List(from: array)

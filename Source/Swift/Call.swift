@@ -19,7 +19,7 @@
 //
 import EmacsModule
 
-extension Environment {
+public extension Environment {
   /// Call Emacs Lisp function by its symbol or value.
   ///
   /// It replicates the `apply` Emacs Lisp function by asking you to provide
@@ -33,15 +33,15 @@ extension Environment {
   ///   - args: an array of arguments for the call.
   /// - Returns: an opaque Emacs value representing the result of the call.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side.
-  @discardableResult public func apply(
+  @discardableResult func apply(
     _ fun: EmacsValue, with args: [EmacsConvertible]
   ) throws
-    -> EmacsValue
-  {
+    -> EmacsValue {
     var rawArgs = try args.map { try $0.convert(within: self).raw }
-    return EmacsValue(
-      from: try check(pointee.funcall(raw, fun.raw, args.count, &rawArgs)))
+    return try EmacsValue(
+      from: check(pointee.funcall(raw, fun.raw, args.count, &rawArgs)))
   }
+
   /// Call Emacs Lisp function by its name.
   ///
   /// It replicates the `apply` Emacs Lisp function by asking you to provide
@@ -55,13 +55,13 @@ extension Environment {
   ///   - args: an array of arguments for the call.
   /// - Returns: an opaque Emacs value representing the result of the call.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side.
-  @discardableResult public func apply(
+  @discardableResult func apply(
     _ fun: String, with args: [EmacsConvertible]
   ) throws
-    -> EmacsValue
-  {
-    return try apply(try intern(fun), with: args)
+    -> EmacsValue {
+    try apply(intern(fun), with: args)
   }
+
   /// Call Emacs Lisp function by its symbol or value.
   ///
   /// It replicates the `apply` Emacs Lisp function by asking you to provide
@@ -76,11 +76,12 @@ extension Environment {
   /// - Returns: a value of the type inferred from the context.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side
   /// or the value has incorrect type.
-  @discardableResult public func apply<R: EmacsConvertible>(
+  @discardableResult func apply<R: EmacsConvertible>(
     _ fun: EmacsValue, with args: [EmacsConvertible]
   ) throws -> R {
-    return try R.convert(from: try apply(fun, with: args), within: self)
+    try R.convert(from: apply(fun, with: args), within: self)
   }
+
   /// Call Emacs Lisp function by its name.
   ///
   /// It replicates the `apply` Emacs Lisp function by asking you to provide
@@ -95,11 +96,12 @@ extension Environment {
   /// - Returns: a value of the type inferred from the context.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side
   /// or the value has incorrect type.
-  @discardableResult public func apply<R: EmacsConvertible>(
+  @discardableResult func apply<R: EmacsConvertible>(
     _ fun: String, with args: [EmacsConvertible]
   ) throws -> R {
-    return try R.convert(from: try apply(fun, with: args), within: self)
+    try R.convert(from: apply(fun, with: args), within: self)
   }
+
   /// Call Emacs Lisp function by its symbol or value.
   ///
   /// It replicates the `funcall` Emacs Lisp function by asking you to provide
@@ -113,13 +115,13 @@ extension Environment {
   ///   - args: the arguments for the call.
   /// - Returns: an opaque Emacs value representing the result of the call.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side.
-  @discardableResult public func funcall(
+  @discardableResult func funcall(
     _ fun: EmacsValue, with args: EmacsConvertible...
   ) throws
-    -> EmacsValue
-  {
-    return try apply(fun, with: args)
+    -> EmacsValue {
+    try apply(fun, with: args)
   }
+
   /// Call Emacs Lisp function by its name.
   ///
   /// It replicates the `funcall` Emacs Lisp function by asking you to provide
@@ -133,13 +135,13 @@ extension Environment {
   ///   - args: the arguments for the call.
   /// - Returns: an opaque Emacs value representing the result of the call.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side.
-  @discardableResult public func funcall(
+  @discardableResult func funcall(
     _ fun: String, with args: EmacsConvertible...
   )
-    throws -> EmacsValue
-  {
-    return try apply(fun, with: args)
+    throws -> EmacsValue {
+    try apply(fun, with: args)
   }
+
   /// Call Emacs Lisp function by its symbol or value.
   ///
   /// It replicates the `funcall` Emacs Lisp function by asking you to provide
@@ -154,11 +156,12 @@ extension Environment {
   /// - Returns: a value of the type inferred from the context.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side
   /// or the value has incorrect type.
-  @discardableResult public func funcall<R: EmacsConvertible>(
+  @discardableResult func funcall<R: EmacsConvertible>(
     _ fun: EmacsValue, with args: EmacsConvertible...
   ) throws -> R {
-    return try R.convert(from: try apply(fun, with: args), within: self)
+    try R.convert(from: apply(fun, with: args), within: self)
   }
+
   /// Call Emacs Lisp function by its name.
   ///
   /// It replicates the `funcall` Emacs Lisp function by asking you to provide
@@ -173,9 +176,9 @@ extension Environment {
   /// - Returns: a value of the type inferred from the context.
   /// - Throws: an instance of `EmacsError` if something went wrong on the Emacs side
   /// or the value has incorrect type.
-  @discardableResult public func funcall<R: EmacsConvertible>(
+  @discardableResult func funcall<R: EmacsConvertible>(
     _ fun: String, with args: EmacsConvertible...
   ) throws -> R {
-    return try R.convert(from: try apply(fun, with: args), within: self)
+    try R.convert(from: apply(fun, with: args), within: self)
   }
 }

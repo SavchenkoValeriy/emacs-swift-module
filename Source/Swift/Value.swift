@@ -29,7 +29,8 @@ public class EmacsValue {
   required init(from: RawEmacsValue) {
     raw = from
   }
-  required init(from: EmacsValue, within env: Environment) throws {
+
+  required init(from: EmacsValue, within _: Environment) throws {
     raw = from.raw
   }
 }
@@ -47,9 +48,11 @@ public final class PersistentEmacsValue: EmacsValue {
   required init(from: RawEmacsValue) {
     super.init(from: from)
   }
+
   required init(from: EmacsValue, within env: Environment) throws {
-    super.init(from: try env.retain(from).raw)
+    try super.init(from: env.retain(from).raw)
   }
+
   deinit {
     freedPersistentValues.append(raw)
   }
@@ -58,9 +61,9 @@ public final class PersistentEmacsValue: EmacsValue {
 extension Environment {
   func cleanup() {
     guard valid,
-      threadValid,
-      !inErrorState(),
-      !interrupted()
+          threadValid,
+          !inErrorState(),
+          !interrupted()
     else {
       // Can't cleanup when the environment in a bad or inconsistent
       // state.

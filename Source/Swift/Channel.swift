@@ -104,7 +104,7 @@ public class Channel {
   /// This is an actual pipe opened by the Emacs for us, so we can
   /// communicate asynchronously with our "agent" function on the
   /// Emacs side.
-  private var pipe: FileHandle? = nil
+  private var pipe: FileHandle?
   /// This is our internal thread-safe data-structure to keep track
   /// of all registered calls and their arguments.
   private var stack = CallbackStack()
@@ -117,7 +117,7 @@ public class Channel {
   }
 
   fileprivate func setFileDescriptor(_ fileDescriptor: Int32) {
-    self.pipe = FileHandle(fileDescriptor: fileDescriptor)
+    pipe = FileHandle(fileDescriptor: fileDescriptor)
   }
 
   deinit {
@@ -127,8 +127,7 @@ public class Channel {
   }
 
   /// Call the callback stored under the given index.
-  private func call(_ index: CallbackStack.Index, with env: Environment) throws
-  {
+  private func call(_ index: CallbackStack.Index, with env: Environment) throws {
     if let callback = stack.pop(at: index) {
       try callback(env)
     }
@@ -160,11 +159,12 @@ public class Channel {
   // controlling the pipe process.
   fileprivate func makeProcess(in env: Environment) throws -> EmacsValue {
     let bufferName: String = try env.funcall(
-      "generate-new-buffer-name", with: " swift-channel-\(name)")
+      "generate-new-buffer-name", with: " swift-channel-\(name)"
+    )
     let buffer = try env.funcall("generate-new-buffer", with: bufferName)
 
     let filter = try env.defun {
-      [self] (env: Environment, process: EmacsValue, message: EmacsValue) throws
+      [self] (env: Environment, _: EmacsValue, message: EmacsValue) throws
       in
       // As of now, I don't know how to use Emacs Lisp macros in
       // dynamic modules, so instead of (with-current-buffer ...),
@@ -175,19 +175,20 @@ public class Channel {
       // function.
       try env.funcall("set-buffer", with: bufferName)
       // First, let's insert the newly received message from the pipe.
-      try env.funcall("goto-char", with: try env.funcall("point-max"))
+      try env.funcall("goto-char", with: env.funcall("point-max"))
       try env.funcall("insert", with: message)
       // Then go back to the beginning of the buffer (it should contain
       // only data about the functions we still need to call).
       try env.funcall("goto-char", with: 1)
-      // While we match our calback stack indices, we proceed.
+      // While we match our callback stack indices, we proceed.
       while try env.funcall(
         "re-search-forward", with: "\\([[:digit:]]+\\)\n",
-        env.Nil, env.t)
-      {
+        env.Nil, env.t
+      ) {
         let indexStr: String = try env.funcall("match-string", with: 1)
         try env.funcall(
-          "delete-region", with: 1, try env.funcall("match-end", with: 0))
+          "delete-region", with: 1, env.funcall("match-end", with: 0)
+        )
         guard let index = Int(indexStr) else {
           fatalError("Found unexpected match in the channel!")
         }
@@ -208,11 +209,12 @@ public class Channel {
       "make-pipe-process", with: Symbol(name: ":name"), name,
       Symbol(name: ":noquery"), true, Symbol(name: ":buffer"), buffer,
       Symbol(name: ":filter"),
-      filter)
+      filter
+    )
   }
 }
 
-extension Environment {
+public extension Environment {
   /// Open a communication channel with Emacs for the time when Environment is not available.
   ///
   /// The only way to communicate back to Emacs and call back
@@ -223,7 +225,7 @@ extension Environment {
   /// - Parameter name: the name to identify the channel.
   /// - Returns: a new communication channel with the given name.
   /// - Throws: an ``EmacsError`` if something goes wrong.
-  public func openChannel(name: String) throws -> Channel {
+  func openChannel(name: String) throws -> Channel {
     // Please see Channel comments for additional information
     // on the dark magic happening here.
     if version < .Emacs28 {
@@ -232,7 +234,8 @@ extension Environment {
     }
     let channel = Channel(name: name)
     let pipeFD = try pointee.open_channel(
-      raw, channel.makeProcess(in: self).raw)
+      raw, channel.makeProcess(in: self).raw
+    )
     channel.setFileDescriptor(pipeFD)
     return channel
   }

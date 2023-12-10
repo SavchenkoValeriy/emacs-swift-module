@@ -1,0 +1,4 @@
+--indent 2
+--swiftversion 5.9
+--disable wrapMultilineStatementBraces
+--commas inline

@@ -23,7 +23,7 @@ try env.defun("test") {
   // some code after
 }
 ```
-This code doesn't change the number of required arguments to call `test`, Emacs already passes a new environemnt with every function invocation. This way we just ask ``Environment`` to pass it to us on call.
+This code doesn't change the number of required arguments to call `test`, Emacs already passes a new environment with every function invocation. This way we just ask ``Environment`` to pass it to us on call.
 
 This lifetime restriction ensures one of the core principles of Emacs dynamic modules **"Emacs calls into then module's code when it wants to, not the other way around"**. Using ``Environment`` outside of its lifetime means calling into Emacs asynchronously when Emacs does not expect it to happen. That will violate its concurrency model.
 
@@ -81,7 +81,7 @@ try env.defun("get-stash") {
 ```
 This fixes it! We just changed parameter type of our function and that's enough! This way we tell `EmacsSwiftModule` that actually the Swift side should take care of this value's lifetime. ``PersistentEmacsValue`` effectively marries Swift's ARC and Emacs' garbage collection, so we can share values across environments.
 
-``PersistentEmacsValue`` also works with `funcall` and `apply` result type inferrence, so you can write:
+``PersistentEmacsValue`` also works with `funcall` and `apply` result type inference, so you can write:
 ```swift
 let x: PersistentEmacsValue = try env.funcall("foo")
 let y = try env.funcall("bar") as PersistentEmacsValue

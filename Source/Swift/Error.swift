@@ -118,13 +118,15 @@ extension Environment {
       raw.pointee.non_local_exit_clear(raw)
       throw EmacsError.signal(
         symbol: EmacsValue(from: symbolOrTag),
-        data: EmacsValue(from: dataOrValue))
+        data: EmacsValue(from: dataOrValue)
+      )
 
     case emacs_funcall_exit_throw:
       raw.pointee.non_local_exit_clear(raw)
       throw EmacsError.thrown(
         tag: EmacsValue(from: symbolOrTag),
-        value: EmacsValue(from: dataOrValue))
+        value: EmacsValue(from: dataOrValue)
+      )
 
     case let status:
       // Shouldn't get here, but just in case let's stop early.
@@ -134,13 +136,14 @@ extension Environment {
 
   /// Return true if this environment is in Emacs error state.
   func inErrorState() -> Bool {
-    return raw.pointee.non_local_exit_check(raw) != emacs_funcall_exit_return
+    raw.pointee.non_local_exit_check(raw) != emacs_funcall_exit_return
   }
 
   /// Signal a Swift error with the given message.
   func error(with message: String) {
     error(tag: swiftError, with: message)
   }
+
   /// Signal a custom error with the given arguments.
   ///
   /// It replicates Emacs Lisp `error` function.

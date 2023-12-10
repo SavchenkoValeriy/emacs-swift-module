@@ -24,7 +24,7 @@ let package = Package(
       name: "TestModule",
       type: .dynamic,
       targets: ["TestModule"]
-    ),
+    )
   ],
   dependencies: [],
   targets: [
@@ -55,7 +55,7 @@ let package = Package(
       dependencies: ["EmacsSwiftModule"],
       path: "test/TestModule",
       plugins: ["ModuleFactoryPlugin"]
-    ),
+    )
   ]
 )
 
