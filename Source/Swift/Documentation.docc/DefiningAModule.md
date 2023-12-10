@@ -9,7 +9,7 @@ Defining a new Emacs module from Swift.
 Add the following line to you package dependencies:
 
 ```swift
-.package("https://github.com/SavchenkoValeriy/emacs-swift-module.git", from: "1.3.2")
+.package("https://github.com/SavchenkoValeriy/emacs-swift-module.git", from: "1.3.4")
 ```
 
 Or add `"https://github.com/SavchenkoValeriy/emacs-swift-module.git"` directly via Xcode.
@@ -26,13 +26,13 @@ products: [
     targets: ["AwesomeSwiftEmacsModule"]),
 ],
 dependencies: [
-  .package("https://github.com/SavchenkoValeriy/emacs-swift-module.git", from: "1.3.2")
+  .package("https://github.com/SavchenkoValeriy/emacs-swift-module.git", from: "1.3.4")
 ],
 targets: [
   .target(
     name: "AwesomeSwiftEmacsModule",
     dependencies: [
-      .product(name: "EmacsSwiftModule", package: "emacs-swift-module")
+      .product(name: "EmacsSwiftModuleDynamic", package: "emacs-swift-module")
     ],
     plugins: [
       .plugin(name: "ModuleFactoryPlugin", package: "emacs-swift-module")
