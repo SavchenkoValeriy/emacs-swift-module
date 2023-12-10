@@ -70,10 +70,9 @@ class TestModule: Module {
       a == 42 ? nil : a * 2
     }
     let captured = MyClassA()
-    try env.defun("swift-get-captured-a-x", function: { captured.x })
+    try env.defun("swift-get-captured-a-x") { captured.x }
     try env.defun(
-      "swift-set-captured-a-x", function: { (x: Int) in captured.x = x }
-    )
+      "swift-set-captured-a-x") { (x: Int) in captured.x = x }
     try env.defun("swift-typed-funcall") {
       (env: Environment, x: EmacsValue) throws -> String in
       try env.funcall("format", with: "%S", x)

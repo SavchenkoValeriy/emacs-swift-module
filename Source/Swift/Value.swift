@@ -26,6 +26,7 @@
 /// ``EmacsValue`` is only useful together with ``Environment``.
 public class EmacsValue {
   let raw: RawEmacsValue
+
   required init(from: RawEmacsValue) {
     raw = from
   }
