@@ -26,6 +26,9 @@ class StoredValue {
     deallocator()
     pointer.update(repeating: emacs_value_tag(data: data), count: 1)
     deallocator = { [data] in
+      if let box = data.pointee as? Box {
+        box.finalize()
+      }
       data.deinitialize(count: 1)
       data.deallocate()
     }
@@ -34,6 +37,34 @@ class StoredValue {
   deinit {
     deallocator()
     pointer.deallocate()
+  }
+}
+
+struct Box {
+  typealias Finalizer<T> = (T) -> Void
+  typealias AnyFinalizer = Finalizer<Any>
+
+  let type: Any.Type
+  let value: Any
+  let finalizer: AnyFinalizer?
+
+  init<T>(_ value: T, _ finalizer: Finalizer<T>? = nil) {
+    type = T.self
+    self.value = value
+    if let finalizer {
+      self.finalizer = {
+        toFinalize in
+        finalizer(toFinalize as! T)
+      }
+    } else {
+      self.finalizer = nil
+    }
+  }
+
+  func finalize() {
+    if let finalizer {
+      finalizer(value)
+    }
   }
 }
 
@@ -70,9 +101,9 @@ public class EnvironmentMock {
     }
   }
 
-  private func make<T>(_ from: T) -> emacs_value {
-    let pointer = UnsafeMutablePointer<T>.allocate(capacity: 1)
-    pointer.initialize(to: from)
+  private func make<T>(_ from: T, _ finalizer: Box.Finalizer<T>? = nil) -> emacs_value {
+    let pointer = UnsafeMutablePointer<Box>.allocate(capacity: 1)
+    pointer.initialize(to: Box(from, finalizer))
     return tag(pointer)
   }
 
@@ -84,7 +115,8 @@ public class EnvironmentMock {
   }
 
   private func extract<T>(_ value: emacs_value) -> T {
-    value.pointee.data.assumingMemoryBound(to: T.self).pointee
+    let box = value.pointee.data.assumingMemoryBound(to: Box.self).pointee
+    return box.value as! T
   }
 
   private func extract(_ value: emacs_value, _ buf: UnsafeMutablePointer<CChar>?, _ len: UnsafeMutablePointer<Int>) -> Bool {
@@ -155,6 +187,14 @@ public class EnvironmentMock {
       let env = toMockEnv(raw!)
       let array: [emacs_value] = env.extract(value!)
       return array.count
+    }
+    env.make_user_ptr = {
+      raw, finalizer, ptr in
+      toMockEnv(raw!).make(ptr, finalizer)
+    }
+    env.get_user_ptr = {
+      raw, value in
+      toMockEnv(raw!).extract(value!)
     }
     env.funcall = {
       raw, function, count, args in
