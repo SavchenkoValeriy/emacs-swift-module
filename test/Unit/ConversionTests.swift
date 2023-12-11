@@ -86,4 +86,19 @@ class ConversionTests: XCTestCase {
     let empty = try [Double]().convert(within: env)
     XCTAssertEqual(try [Double].convert(from: empty, within: env), [])
   }
+
+  func testOpaqueArrayConversion() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let original = try [42.convert(within: env), true.convert(within: env), "hello".convert(within: env)]
+    let value = try original.convert(within: env)
+
+    let converted = try [EmacsValue].convert(from: value, within: env)
+
+    XCTAssertEqual(converted.count, 3)
+    XCTAssertEqual(try Int.convert(from: converted[0], within: env), 42)
+    XCTAssert(try Bool.convert(from: converted[1], within: env))
+    XCTAssertEqual(try String.convert(from: converted[2], within: env), "hello")
+  }
 }
