@@ -101,4 +101,68 @@ class ConversionTests: XCTestCase {
     XCTAssert(try Bool.convert(from: converted[1], within: env))
     XCTAssertEqual(try String.convert(from: converted[2], within: env), "hello")
   }
+
+  class A: OpaquelyEmacsConvertible {
+    let x: Int
+
+    init(_ param: Int) {
+      x = param
+    }
+  }
+
+  class B: OpaquelyEmacsConvertible {
+    let y: Double
+
+    init(_ param: Double) {
+      y = param
+    }
+  }
+
+  func testOpaquelyConvertible() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let first = A(42)
+    let second = A(10)
+    let third = B(36.6)
+
+    var value = try first.convert(within: env)
+    XCTAssertEqual(try A.convert(from: value, within: env).x, first.x)
+
+    value = try second.convert(within: env)
+    XCTAssertEqual(try A.convert(from: value, within: env).x, second.x)
+
+    value = try third.convert(within: env)
+    XCTAssertEqual(try B.convert(from: value, within: env).y, third.y)
+  }
+
+  func testOpaquelyConvertibleSurviveInLisp() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    var value: EmacsValue
+    do {
+      let a = A(42)
+      value = try a.convert(within: env)
+      // a's retain count decreases here
+    }
+
+    XCTAssertEqual(try A.convert(from: value, within: env).x, 42)
+  }
+
+  func testOpaquelyConvertibleSurviveInSwift() throws {
+    let a = A(42)
+    let b: A
+
+    var value: EmacsValue
+    do {
+      let mock = EnvironmentMock()
+      let env = mock.environment
+      value = try a.convert(within: env)
+      b = try A.convert(from: value, within: env)
+      // env and all its values are gone now
+    }
+
+    XCTAssertEqual(b.x, 42)
+  }
 }
