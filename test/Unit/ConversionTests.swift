@@ -30,6 +30,10 @@ class ConversionTests: XCTestCase {
     let trueValue = true.convert(within: env)
     XCTAssert(try Bool.convert(from: trueValue, within: env))
     XCTAssert(try env.isNotNil(trueValue))
+
+    let intValue = try 42.convert(within: env)
+    XCTAssert(try Bool.convert(from: intValue, within: env))
+    XCTAssert(try env.isNotNil(intValue))
   }
 
   func testStringConversion() throws {
