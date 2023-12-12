@@ -74,6 +74,14 @@ public class EnvironmentMock {
   var data: [StoredValue] = []
   var symbols: [String: emacs_value] = [:]
 
+  var interrupted = false
+  var signaled = false
+  var thrown = false
+
+  func interrupt() { interrupted = true }
+  func signal() { signaled = true }
+  func throwException() { thrown = true }
+
   func tag(_ pointer: UnsafeMutablePointer<some Any>) -> UnsafeMutablePointer<emacs_value_tag> {
     let result = StoredValue(pointer)
     data.append(result)
@@ -93,8 +101,12 @@ public class EnvironmentMock {
   }
 
   func funcall(_ rawFunction: emacs_value, _ count: CLong, _ args: UnsafePointer<emacs_value?>) -> emacs_value {
-    let functionIndex: Int = extract(rawFunction)
-    let function: Function = extract(data[functionIndex].pointer)
+    guard let functionIndex: Int = extract(rawFunction) else {
+      return intern("nil")
+    }
+    guard let function: Function = extract(data[functionIndex].pointer) else {
+      return intern("nil")
+    }
     return args.withMemoryRebound(to: emacs_value.self, capacity: count) {
       nonOptArgs in
       function(Array(UnsafeBufferPointer(start: nonOptArgs, count: count)))
@@ -108,24 +120,29 @@ public class EnvironmentMock {
   }
 
   private func make(_ str: UnsafePointer<CChar>, _ len: Int) -> emacs_value {
-    let pointer = UnsafeMutablePointer<CChar>.allocate(capacity: len + 1)
-    pointer.initialize(from: str, count: len)
-    pointer.advanced(by: len).initialize(to: 0)
-    return tag(pointer)
+    let buffer = UnsafeBufferPointer(start: str, count: len + 1)
+    var array = Array(buffer)
+    array[len] = 0
+    return make(array)
   }
 
-  private func extract<T>(_ value: emacs_value) -> T {
+  private func extract<T>(_ value: emacs_value) -> T? {
     let box = value.pointee.data.assumingMemoryBound(to: Box.self).pointee
-    return box.value as! T
+    let result = box.value as? T
+    if result == nil {
+      // TODO: signal wrong types
+      signal()
+    }
+    return result
   }
 
   private func extract(_ value: emacs_value, _ buf: UnsafeMutablePointer<CChar>?, _ len: UnsafeMutablePointer<Int>) -> Bool {
+    let array: [CChar] = extract(value) ?? []
     if buf == nil {
-      let actualLen = strlen(value.pointee.data.assumingMemoryBound(to: CChar.self)) + 1
-      len.initialize(to: actualLen)
+      len.initialize(to: array.count)
     } else {
       let actualLen = len.pointee
-      buf!.initialize(from: value.pointee.data.assumingMemoryBound(to: CChar.self), count: actualLen)
+      buf!.initialize(from: array, count: actualLen)
     }
 
     return true
@@ -138,11 +155,29 @@ public class EnvironmentMock {
       _ in emacs_funcall_exit_return
     }
     env.non_local_exit_get = {
-      _, _, _ in emacs_funcall_exit_return
+      raw, symbol, data in
+      let env = toMockEnv(raw!)
+      if env.signaled {
+        symbol!.pointee = env.intern("mock-signal")
+        data!.pointee = env.intern("nil")
+        return emacs_funcall_exit_signal
+      }
+      if env.thrown {
+        symbol!.pointee = env.intern("mock-exception")
+        data!.pointee = env.intern("nil")
+        return emacs_funcall_exit_throw
+      }
+      return emacs_funcall_exit_return
     }
-    env.non_local_exit_clear = { _ in }
+    env.non_local_exit_clear = {
+      raw in
+      let env = toMockEnv(raw!)
+      env.interrupted = false
+      env.signaled = false
+      env.thrown = false
+    }
     env.should_quit = {
-      _ in false
+      raw in toMockEnv(raw!).interrupted
     }
     env.intern = {
       raw, cString in
@@ -158,7 +193,7 @@ public class EnvironmentMock {
     }
     env.extract_integer = {
       raw, value in
-      toMockEnv(raw!).extract(value!)
+      toMockEnv(raw!).extract(value!) ?? 0
     }
     env.make_float = {
       raw, value in
@@ -166,7 +201,7 @@ public class EnvironmentMock {
     }
     env.extract_float = {
       raw, value in
-      toMockEnv(raw!).extract(value!)
+      toMockEnv(raw!).extract(value!) ?? 0
     }
     env.make_string = {
       raw, str, len in
@@ -179,18 +214,20 @@ public class EnvironmentMock {
     env.vec_get = {
       raw, value, index in
       let env = toMockEnv(raw!)
-      let array: [emacs_value] = env.extract(value!)
-      return array[index]
+      if let array: [emacs_value] = env.extract(value!) {
+        return array[index]
+      }
+      return env.intern("nil")
     }
     env.vec_size = {
       raw, value in
       let env = toMockEnv(raw!)
-      let array: [emacs_value] = env.extract(value!)
-      return array.count
+      let array: [emacs_value]? = env.extract(value!)
+      return array?.count ?? 0
     }
     env.make_user_ptr = {
       raw, finalizer, ptr in
-      toMockEnv(raw!).make(ptr, finalizer)
+      toMockEnv(raw!).make(ptr!, finalizer)
     }
     env.get_user_ptr = {
       raw, value in
