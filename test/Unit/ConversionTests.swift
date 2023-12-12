@@ -179,4 +179,18 @@ class ConversionTests: XCTestCase {
     XCTAssertThrowsError(try String.convert(from: value, within: env))
     XCTAssertThrowsError(try A.convert(from: value, within: env))
   }
+
+  func testOpaquelyConvertibleConversionFailure() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let first = A(42)
+    let second = B(36.6)
+
+    var value = try first.convert(within: env)
+    XCTAssertThrowsError(try B.convert(from: value, within: env))
+
+    value = try second.convert(within: env)
+    XCTAssertThrowsError(try A.convert(from: value, within: env))
+  }
 }
