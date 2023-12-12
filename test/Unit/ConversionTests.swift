@@ -165,4 +165,14 @@ class ConversionTests: XCTestCase {
 
     XCTAssertEqual(b.x, 42)
   }
+
+  func testConversionFailure() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let value = try 42.convert(within: env)
+    XCTAssertThrowsError(try Double.convert(from: value, within: env))
+    XCTAssertThrowsError(try String.convert(from: value, within: env))
+    XCTAssertThrowsError(try A.convert(from: value, within: env))
+  }
 }
