@@ -266,6 +266,26 @@ public class EnvironmentMock {
         intern("nil")
       }
     }
+    bind("cons") {
+      [unowned self] args in
+      make(ConsCell(car: args[0], cdr: args[1]))
+    }
+    bind("car") {
+      [unowned self] args in
+      if let cons: ConsCell<emacs_value, emacs_value> = extract(args[0]) {
+        cons.car
+      } else {
+        intern("nil")
+      }
+    }
+    bind("cdr") {
+      [unowned self] args in
+      if let cons: ConsCell<emacs_value, emacs_value> = extract(args[0]) {
+        cons.cdr
+      } else {
+        intern("nil")
+      }
+    }
   }
 
   deinit {
