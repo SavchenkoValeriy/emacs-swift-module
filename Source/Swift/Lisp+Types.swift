@@ -37,8 +37,7 @@ public struct Symbol: EmacsConvertible {
 }
 
 /// Emacs cons cell
-public struct ConsCell<CarType, CdrType>: EmacsConvertible
-  where CarType: EmacsConvertible, CdrType: EmacsConvertible {
+public struct ConsCell<CarType, CdrType> {
   public var car: CarType
   public var cdr: CdrType
 
@@ -46,7 +45,10 @@ public struct ConsCell<CarType, CdrType>: EmacsConvertible
     self.car = car
     self.cdr = cdr
   }
+}
 
+extension ConsCell: EmacsConvertible
+  where CarType: EmacsConvertible, CdrType: EmacsConvertible {
   public func convert(within env: Environment) throws -> EmacsValue {
     try env.funcall("cons", with: car, cdr)
   }
@@ -78,7 +80,7 @@ extension List: Sequence, IteratorProtocol {
   }
 }
 
-/// Convenienct conversions to and from arrays
+/// Convenient conversions to and from arrays
 public extension List {
   /// Construct List from Array.
   init(from array: [Element]) {
