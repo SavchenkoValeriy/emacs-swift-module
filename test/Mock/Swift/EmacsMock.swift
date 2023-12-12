@@ -258,6 +258,14 @@ public class EnvironmentMock {
       [unowned self] args in
       make(args)
     }
+    bind("symbol-name") {
+      [unowned self] args in
+      if let pair = symbols.first(where: { $0.value == args[0] }) {
+        make(pair.key, pair.key.count)
+      } else {
+        intern("nil")
+      }
+    }
   }
 
   deinit {
