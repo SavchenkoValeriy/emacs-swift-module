@@ -91,6 +91,11 @@ public extension List {
     self = list
   }
 
+  /// Construct List from the given elements.
+  init(_ elements: Element...) {
+    self.init(from: elements)
+  }
+
   /// Construct Array from List.
   func toArray() -> [Element] {
     map { $0 }
