@@ -211,6 +211,7 @@ public class EnvironmentMock {
       raw, str, len in
       toMockEnv(raw!).make(str!, len)
     }
+    env.make_unibyte_string = env.make_string
     env.copy_string_contents = {
       raw, value, buf, len in
       toMockEnv(raw!).extract(value!, buf, len!)

@@ -207,4 +207,18 @@ class ConversionTests: XCTestCase {
     let dict = try [Int: String].convert(from: list, within: env)
     XCTAssertEqual(dict, [1: "1", 2: "4", 3: "9", 4: "16", 5: "25"])
   }
+
+  func testDataConversion() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let bytes: [UInt8] = [0x01, 0x02, 0x03, 0x04, 0x05]
+    let data = Data(bytes)
+
+    let value = try data.convert(within: env)
+    XCTAssertEqual(try Data.convert(from: value, within: env), data)
+
+    let dataAsString = try String.convert(from: value, within: env)
+    XCTAssertEqual(dataAsString, String(data: data, encoding: .utf8))
+  }
 }
