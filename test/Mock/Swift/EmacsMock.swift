@@ -68,6 +68,14 @@ struct Box {
   }
 }
 
+class Reference {
+  var to: emacs_value
+
+  init(_ to: emacs_value) {
+    self.to = to
+  }
+}
+
 public class EnvironmentMock {
   typealias Function = ([emacs_value]) -> emacs_value
   var raw = UnsafeMutablePointer<emacs_env>.allocate(capacity: 1)
@@ -93,22 +101,19 @@ public class EnvironmentMock {
       return symbol
     }
 
-    let index = data.count
-    data.append(StoredValue())
-    let symbol = make(index)
+    return intern(name, with: data[0].pointer)
+  }
+
+  func intern(_ name: String, with value: emacs_value) -> emacs_value {
+    let symbol = make(Reference(value))
     symbols[name] = symbol
     return symbol
   }
 
   func funcall(_ rawFunction: emacs_value, _ count: CLong, _ args: UnsafePointer<emacs_value?>) -> emacs_value {
-    guard let functionIndex: Int = extract(rawFunction) else {
-      return intern("nil")
-    }
-    let pointer = data[functionIndex].pointer
-    if pointer.pointee.data == nil {
-      return intern("nil")
-    }
-    guard let function: Function = extract(pointer) else {
+    guard let functionRef: Reference = extract(rawFunction),
+          functionRef.to.pointee.data != nil,
+          let function: Function = extract(functionRef.to) else {
       return intern("nil")
     }
     return args.withMemoryRebound(to: emacs_value.self, capacity: count) {
@@ -242,6 +247,25 @@ public class EnvironmentMock {
       raw, function, count, args in
       toMockEnv(raw!).funcall(function!, count, args!)
     }
+    env.make_function = {
+      raw, _, _, function, _, payload in
+      toMockEnv(raw!).make(
+        {
+          (args: [emacs_value]) in
+          var mutableArgs = args
+          return mutableArgs.withUnsafeMutableBufferPointer {
+            argsPtr in
+            let rawPtr = UnsafeMutableRawPointer(argsPtr.baseAddress)
+            let ptrToOpt = rawPtr?.bindMemory(to: emacs_value?.self, capacity: args.count)
+            return function!(raw, args.count, ptrToOpt, payload)!
+          }
+        } as Function
+      )
+    }
+    env.set_function_finalizer = { _, _, _ in () }
+
+    let nilValue: Int? = nil
+    _ = intern("nil", with: make(nilValue))
 
     initializeBuiltins()
 
@@ -252,10 +276,7 @@ public class EnvironmentMock {
   }
 
   func bind(_ name: String, to function: @escaping Function) {
-    let index = data.count
-    _ = make(function)
-    let symbol = make(index)
-    symbols[name] = symbol
+    _ = intern(name, with: make(function))
   }
 
   func initializeBuiltins() {
@@ -298,6 +319,13 @@ public class EnvironmentMock {
         result = make(ConsCell(car: element, cdr: result))
       }
       return result
+    }
+    bind("fset") {
+      [unowned self] args in
+      if let ref: Reference = extract(args[0]) {
+        ref.to = args[1]
+      }
+      return intern("nil")
     }
   }
 
