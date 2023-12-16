@@ -38,4 +38,31 @@ class LispTypesTests: XCTestCase {
     let value = try 42.convert(within: env)
     XCTAssertThrowsError(try ConsCell<Int, String>.convert(from: value, within: env))
   }
+
+  func testList() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let list = List<Int>(2, 3, 10, 42)
+    let value = try list.convert(within: env)
+
+    let head: Int = try env.funcall("car", with: value)
+    XCTAssertEqual(head, 2)
+    let tail: List<Int> = try env.funcall("cdr", with: value)
+    XCTAssertEqual(tail.toArray(), [3, 10, 42])
+
+    let asCons = try ConsCell<Int, ConsCell<Int, List<Int>>>.convert(from: value, within: env)
+    XCTAssertEqual(asCons.cdr.cdr.toArray(), [10, 42])
+
+    let empty = try List<String>.convert(from: env.Nil, within: env)
+    XCTAssert(empty.toArray().isEmpty)
+  }
+
+  func testListConversionFailure() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let value = try 42.convert(within: env)
+    XCTAssertThrowsError(try List<Int>.convert(from: value, within: env))
+  }
 }

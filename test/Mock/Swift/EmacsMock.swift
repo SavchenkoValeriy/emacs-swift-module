@@ -104,7 +104,11 @@ public class EnvironmentMock {
     guard let functionIndex: Int = extract(rawFunction) else {
       return intern("nil")
     }
-    guard let function: Function = extract(data[functionIndex].pointer) else {
+    let pointer = data[functionIndex].pointer
+    if pointer.pointee.data == nil {
+      return intern("nil")
+    }
+    guard let function: Function = extract(pointer) else {
       return intern("nil")
     }
     return args.withMemoryRebound(to: emacs_value.self, capacity: count) {
@@ -285,6 +289,14 @@ public class EnvironmentMock {
       } else {
         intern("nil")
       }
+    }
+    bind("list") {
+      [unowned self] args in
+      var result: emacs_value = intern("nil")
+      for element in args.reversed() {
+        result = make(ConsCell(car: element, cdr: result))
+      }
+      return result
     }
   }
 
