@@ -193,4 +193,18 @@ class ConversionTests: XCTestCase {
     value = try second.convert(within: env)
     XCTAssertThrowsError(try A.convert(from: value, within: env))
   }
+
+  func testDictionaryConversion() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let elements: [EmacsValue] = try (1 ..< 6).map { x in
+      let car = try x.convert(within: env)
+      let cdr = try String(x * x).convert(within: env)
+      return try env.funcall("cons", with: car, cdr)
+    }
+    let list = try env.apply("list", with: elements)
+    let dict = try [Int: String].convert(from: list, within: env)
+    XCTAssertEqual(dict, [1: "1", 2: "4", 3: "9", 4: "16", 5: "25"])
+  }
 }
