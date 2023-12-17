@@ -118,10 +118,20 @@ public class EnvironmentMock {
     return symbol
   }
 
+  func extractFunction(_ value: emacs_value) -> FunctionData? {
+    if let functionRef: Reference = extract(value, fatal: false),
+       functionRef.to.pointee.data != nil,
+       let function: FunctionData = extract(functionRef.to, fatal: false) {
+      return function
+    }
+    if let function: FunctionData = extract(value) {
+      return function
+    }
+    return nil
+  }
+
   func funcall(_ rawFunction: emacs_value, _ count: CLong, _ args: UnsafePointer<emacs_value?>) -> emacs_value {
-    guard let functionRef: Reference = extract(rawFunction),
-          functionRef.to.pointee.data != nil,
-          let function: FunctionData = extract(functionRef.to) else {
+    guard let function = extractFunction(rawFunction) else {
       return intern("nil")
     }
     return args.withMemoryRebound(to: emacs_value.self, capacity: count) {
@@ -147,10 +157,10 @@ public class EnvironmentMock {
     value.pointee.data.assumingMemoryBound(to: Box.self)
   }
 
-  private func extract<T>(_ value: emacs_value) -> T? {
+  private func extract<T>(_ value: emacs_value, fatal: Bool = true) -> T? {
     let box = box(of: value).pointee
     let result = box.value as? T
-    if result == nil {
+    if result == nil, fatal {
       // TODO: signal wrong types
       signal()
     }
@@ -199,6 +209,14 @@ public class EnvironmentMock {
     }
     env.should_quit = {
       raw in toMockEnv(raw!).interrupted
+    }
+    env.non_local_exit_signal = {
+      raw, _, _ in
+      toMockEnv(raw!).signal()
+    }
+    env.non_local_exit_throw = {
+      raw, _, _ in
+      toMockEnv(raw!).throwException()
     }
     env.intern = {
       raw, cString in
@@ -348,6 +366,10 @@ public class EnvironmentMock {
         ref.to = args[1]
       }
       return intern("nil")
+    }
+    bind("define-error") {
+      [unowned self] _ in
+      intern("nil")
     }
   }
 
