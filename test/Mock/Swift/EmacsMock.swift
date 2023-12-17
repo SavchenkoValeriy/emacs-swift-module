@@ -11,7 +11,7 @@ class StoredValue {
   public let pointer: UnsafeMutablePointer<emacs_value_tag>
   public var deallocator: () -> Void
 
-  convenience init(_ pointer: UnsafeMutablePointer<some Any>) {
+  convenience init(_ pointer: UnsafeMutablePointer<Box>) {
     self.init()
     setq(pointer)
   }
@@ -22,13 +22,11 @@ class StoredValue {
     deallocator = {}
   }
 
-  public func setq(_ data: UnsafeMutablePointer<some Any>) {
+  public func setq(_ data: UnsafeMutablePointer<Box>) {
     deallocator()
     pointer.update(repeating: emacs_value_tag(data: data), count: 1)
     deallocator = { [data] in
-      if let box = data.pointee as? Box {
-        box.finalize()
-      }
+      data.pointee.finalize()
       data.deinitialize(count: 1)
       data.deallocate()
     }
@@ -46,18 +44,22 @@ struct Box {
 
   let type: Any.Type
   let value: Any
-  let finalizer: AnyFinalizer?
+  var finalizer: AnyFinalizer?
 
   init<T>(_ value: T, _ finalizer: Finalizer<T>? = nil) {
     type = T.self
     self.value = value
     if let finalizer {
-      self.finalizer = {
-        toFinalize in
-        finalizer(toFinalize as! T)
-      }
+      setFinalizer(finalizer)
     } else {
       self.finalizer = nil
+    }
+  }
+
+  mutating func setFinalizer<T>(_ finalizer: @escaping Finalizer<T>) {
+    self.finalizer = {
+      toFinalize in
+      finalizer(toFinalize as! T)
     }
   }
 
@@ -76,8 +78,14 @@ class Reference {
   }
 }
 
+typealias Function = ([emacs_value]) -> emacs_value
+
+struct FunctionData {
+  let function: Function
+  let payload: RawOpaquePointer?
+}
+
 public class EnvironmentMock {
-  typealias Function = ([emacs_value]) -> emacs_value
   var raw = UnsafeMutablePointer<emacs_env>.allocate(capacity: 1)
   var data: [StoredValue] = []
   var symbols: [String: emacs_value] = [:]
@@ -90,7 +98,7 @@ public class EnvironmentMock {
   func signal() { signaled = true }
   func throwException() { thrown = true }
 
-  func tag(_ pointer: UnsafeMutablePointer<some Any>) -> UnsafeMutablePointer<emacs_value_tag> {
+  func tag(_ pointer: UnsafeMutablePointer<Box>) -> UnsafeMutablePointer<emacs_value_tag> {
     let result = StoredValue(pointer)
     data.append(result)
     return result.pointer
@@ -113,12 +121,12 @@ public class EnvironmentMock {
   func funcall(_ rawFunction: emacs_value, _ count: CLong, _ args: UnsafePointer<emacs_value?>) -> emacs_value {
     guard let functionRef: Reference = extract(rawFunction),
           functionRef.to.pointee.data != nil,
-          let function: Function = extract(functionRef.to) else {
+          let function: FunctionData = extract(functionRef.to) else {
       return intern("nil")
     }
     return args.withMemoryRebound(to: emacs_value.self, capacity: count) {
       nonOptArgs in
-      function(Array(UnsafeBufferPointer(start: nonOptArgs, count: count)))
+      function.function(Array(UnsafeBufferPointer(start: nonOptArgs, count: count)))
     }
   }
 
@@ -135,8 +143,12 @@ public class EnvironmentMock {
     return make(array)
   }
 
+  private func box(of value: emacs_value) -> UnsafeMutablePointer<Box> {
+    value.pointee.data.assumingMemoryBound(to: Box.self)
+  }
+
   private func extract<T>(_ value: emacs_value) -> T? {
-    let box = value.pointee.data.assumingMemoryBound(to: Box.self).pointee
+    let box = box(of: value).pointee
     let result = box.value as? T
     if result == nil {
       // TODO: signal wrong types
@@ -250,7 +262,7 @@ public class EnvironmentMock {
     env.make_function = {
       raw, _, _, function, _, payload in
       toMockEnv(raw!).make(
-        {
+        FunctionData(function: {
           (args: [emacs_value]) in
           var mutableArgs = args
           return mutableArgs.withUnsafeMutableBufferPointer {
@@ -259,10 +271,20 @@ public class EnvironmentMock {
             let ptrToOpt = rawPtr?.bindMemory(to: emacs_value?.self, capacity: args.count)
             return function!(raw, args.count, ptrToOpt, payload)!
           }
-        } as Function
+        }, payload: payload)
       )
     }
-    env.set_function_finalizer = { _, _, _ in () }
+    env.set_function_finalizer = {
+      raw, function, finalizer in
+      let env = toMockEnv(raw!)
+      let box = env.box(of: function!)
+      box.pointee.setFinalizer {
+        (data: FunctionData) in
+        if data.payload != nil {
+          finalizer!(data.payload)
+        }
+      }
+    }
 
     let nilValue: Int? = nil
     _ = intern("nil", with: make(nilValue))
@@ -276,7 +298,7 @@ public class EnvironmentMock {
   }
 
   func bind(_ name: String, to function: @escaping Function) {
-    _ = intern(name, with: make(function))
+    _ = intern(name, with: make(FunctionData(function: function, payload: nil)))
   }
 
   func initializeBuiltins() {
