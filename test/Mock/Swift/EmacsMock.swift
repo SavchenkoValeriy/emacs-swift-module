@@ -94,9 +94,9 @@ public class EnvironmentMock {
   var signaled = false
   var thrown = false
 
-  func interrupt() { interrupted = true }
-  func signal() { signaled = true }
-  func throwException() { thrown = true }
+  public func interrupt() { interrupted = true }
+  public func signal() { signaled = true }
+  public func throwException() { thrown = true }
 
   func tag(_ pointer: UnsafeMutablePointer<Box>) -> UnsafeMutablePointer<emacs_value_tag> {
     let result = StoredValue(pointer)
@@ -278,13 +278,18 @@ public class EnvironmentMock {
       toMockEnv(raw!).funcall(function!, count, args!)
     }
     env.make_function = {
-      raw, _, _, function, _, payload in
+      raw, min, max, function, _, payload in
       toMockEnv(raw!).make(
         FunctionData(function: {
           (args: [emacs_value]) in
           var mutableArgs = args
           return mutableArgs.withUnsafeMutableBufferPointer {
             argsPtr in
+            let env = toMockEnv(raw!)
+            if min > args.count || max < args.count {
+              env.signal()
+              return env.intern("nil")
+            }
             let rawPtr = UnsafeMutableRawPointer(argsPtr.baseAddress)
             let ptrToOpt = rawPtr?.bindMemory(to: emacs_value?.self, capacity: args.count)
             return function!(raw, args.count, ptrToOpt, payload)!
@@ -326,30 +331,37 @@ public class EnvironmentMock {
     }
     bind("symbol-name") {
       [unowned self] args in
-      if let pair = symbols.first(where: { $0.value == args[0] }) {
-        make(pair.key, pair.key.count)
+      if args.count == 1, let pair = symbols.first(where: { $0.value == args[0] }) {
+        return make(pair.key, pair.key.count)
       } else {
-        intern("nil")
+        signal()
+        return intern("nil")
       }
     }
     bind("cons") {
       [unowned self] args in
-      make(ConsCell(car: args[0], cdr: args[1]))
+      if args.count != 2 {
+        signal()
+        return intern("nil")
+      }
+      return make(ConsCell(car: args[0], cdr: args[1]))
     }
     bind("car") {
       [unowned self] args in
-      if let cons: ConsCell<emacs_value, emacs_value> = extract(args[0]) {
-        cons.car
+      if args.count == 1, let cons: ConsCell<emacs_value, emacs_value> = extract(args[0]) {
+        return cons.car
       } else {
-        intern("nil")
+        signal()
+        return intern("nil")
       }
     }
     bind("cdr") {
       [unowned self] args in
-      if let cons: ConsCell<emacs_value, emacs_value> = extract(args[0]) {
-        cons.cdr
+      if args.count == 1, let cons: ConsCell<emacs_value, emacs_value> = extract(args[0]) {
+        return cons.cdr
       } else {
-        intern("nil")
+        signal()
+        return intern("nil")
       }
     }
     bind("list") {
@@ -362,8 +374,10 @@ public class EnvironmentMock {
     }
     bind("fset") {
       [unowned self] args in
-      if let ref: Reference = extract(args[0]) {
+      if args.count == 2, let ref: Reference = extract(args[0]) {
         ref.to = args[1]
+      } else {
+        signal()
       }
       return intern("nil")
     }
