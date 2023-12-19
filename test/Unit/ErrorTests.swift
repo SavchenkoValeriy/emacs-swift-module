@@ -46,6 +46,19 @@ class ErrorTests: XCTestCase {
     XCTAssertFalse(called)
   }
 
+  func testInterruptedPredicate() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    XCTAssertFalse(env.interrupted())
+    XCTAssertFalse(env.inErrorState())
+
+    mock.interrupt()
+
+    XCTAssert(env.interrupted())
+    XCTAssertFalse(env.inErrorState())
+  }
+
   func testSignal() throws {
     let mock = EnvironmentMock()
     let env = mock.environment
@@ -90,5 +103,31 @@ class ErrorTests: XCTestCase {
     // Fails during argument conversion because environment is in error state
     XCTAssertThrowsError(try env.funcall("my-car", with: ConsCell(car: 0, cdr: 1)))
     XCTAssertFalse(called)
+  }
+
+  func testSignalInErrorState() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    XCTAssertFalse(env.interrupted())
+    XCTAssertFalse(env.inErrorState())
+
+    mock.signal()
+
+    XCTAssertFalse(env.interrupted())
+    XCTAssert(env.inErrorState())
+  }
+
+  func testEmacsExceptionInErrorState() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    XCTAssertFalse(env.interrupted())
+    XCTAssertFalse(env.inErrorState())
+
+    mock.throwException()
+
+    XCTAssertFalse(env.interrupted())
+    XCTAssert(env.inErrorState())
   }
 }
