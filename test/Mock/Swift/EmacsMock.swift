@@ -183,7 +183,15 @@ public class EnvironmentMock {
     var env = emacs_env()
     env.size = MemoryLayout<emacs_env_29>.size
     env.non_local_exit_check = {
-      _ in emacs_funcall_exit_return
+      raw in
+      let env = toMockEnv(raw!)
+      if env.signaled {
+        return emacs_funcall_exit_signal
+      }
+      if env.thrown {
+        return emacs_funcall_exit_throw
+      }
+      return emacs_funcall_exit_return
     }
     env.non_local_exit_get = {
       raw, symbol, data in
