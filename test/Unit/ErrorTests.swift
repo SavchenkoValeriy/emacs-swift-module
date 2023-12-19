@@ -130,4 +130,74 @@ class ErrorTests: XCTestCase {
     XCTAssertFalse(env.interrupted())
     XCTAssert(env.inErrorState())
   }
+
+  func testInvalidEnvironment() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    var called = false
+
+    try env.defun("my-car") {
+      (cons: ConsCell<Int, Int>) in
+      called = true
+      return cons.car
+    }
+
+    try env.funcall("my-car", with: ConsCell(car: 0, cdr: 1))
+    XCTAssert(called)
+
+    called = false
+    env.invalidate()
+
+    // Fails during argument conversion because environment is in error state
+    XCTAssertThrowsError(try env.funcall("my-car", with: ConsCell(car: 0, cdr: 1)))
+    XCTAssertFalse(called)
+  }
+
+  func testThreadModelViolation() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    try env.defun("void") {}
+
+    XCTAssertNoThrow(try env.funcall("void"))
+
+    let expectation = expectation(description: "'funcall' in another thread")
+
+    DispatchQueue.global(qos: .background).async {
+      if (try? env.funcall("void")) != nil {
+        XCTFail("Managed to 'funcall' on another thread")
+      }
+      expectation.fulfill()
+    }
+
+    // Wait for the expectation
+    waitForExpectations(timeout: 10) { error in
+      if let error {
+        XCTFail("Timeout with error: \(error.localizedDescription)")
+      }
+    }
+  }
+
+  func testLifetimeModelViolation() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    var storedEnvironment = env
+
+    try env.defun("capture") {
+      captured in storedEnvironment = captured
+    }
+
+    try env.defun("use") {
+      try storedEnvironment.intern("variable")
+    }
+
+    // Right now storedEnvironment is valid
+    XCTAssertNoThrow(try env.funcall("use"))
+
+    try env.funcall("capture")
+    // Now storedEnvironment is invalid since it's from the "capture" scope.
+    XCTAssertThrowsError(try env.funcall("use"))
+  }
 }
