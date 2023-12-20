@@ -182,6 +182,7 @@ public class Channel {
       // only data about the functions we still need to call).
       try env.funcall("goto-char", with: 1)
       // While we match our callback stack indices, we proceed.
+      var indicesToCall: [CallbackStack.Index] = []
       while try env.funcall(
         "re-search-forward", with: "\\([[:digit:]]+\\)\n",
         env.Nil, env.t
@@ -194,14 +195,17 @@ public class Channel {
           fatalError("Found unexpected match in the channel!")
         }
 
-        // The main part is here, we are capturing self and can
-        // `call` our callback from here.
-        //
-        // It is very important to call functions on exactly the
-        // same thread this filter was called.
-        try call(index, with: env)
+        indicesToCall.append(index)
       }
+      // Reset the buffer back.
       try env.funcall("set-buffer", with: currentBuffer)
+
+      // The main part is here, we are capturing self and can
+      // `call` our callback from here.
+      //
+      // It is very important to call functions on exactly the
+      // same thread this filter was called.
+      try indicesToCall.forEach { try call($0, with: env) }
     }
     // In order to make a pipe process, we need two main things:
     //   * a buffer
