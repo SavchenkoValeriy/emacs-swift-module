@@ -114,4 +114,70 @@ class ChannelTests: XCTestCase {
     XCTAssertEqual(try env.funcall("current-buffer"), currentBuffer)
     XCTAssertEqual(mock.currentBuffer.contents, "Hello, World")
   }
+
+  func testSwiftCallback() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    try env.defun("42") {
+      42
+    }
+
+    var result = 0
+    let channel = try env.openChannel(name: "test")
+    let called = expectation(description: "Callback is called")
+
+    let callback = channel.callback {
+      (env: Environment, a: Int, b: Int, c: Int) in
+      result = try a + b + c + env.funcall("42")
+      called.fulfill()
+    }
+
+    callback(1, 2, 3)
+
+    waitForExpectations(timeout: 3)
+
+    XCTAssertEqual(result, 48)
+  }
+
+  func testLispCallback() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let called = expectation(description: "Callback is called")
+    var result = 0
+
+    let lispCallback = try env.defun {
+      (x: Int, y: Int, z: Int) in
+      result = x + y + z
+      called.fulfill()
+    }
+
+    let channel = try env.openChannel(name: "test")
+
+    let callback: (Int, Int, Int) -> Void = channel.callback(lispCallback)
+
+    callback(1, 2, 3)
+
+    waitForExpectations(timeout: 3)
+
+    XCTAssertEqual(result, 6)
+  }
+
+  func testAsync() async throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    try env.defun("func") {
+      (x: Int, y: Int, z: Int) in x + y + z
+    }
+
+    let channel = try env.openChannel(name: "test")
+
+    let result: Int = try await channel.withAsyncEnvironment {
+      env in try env.funcall("func", with: 1, 2, 3)
+    }
+
+    XCTAssertEqual(result, 6)
+  }
 }
