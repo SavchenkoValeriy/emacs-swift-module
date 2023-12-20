@@ -85,10 +85,62 @@ struct FunctionData {
   let payload: RawOpaquePointer?
 }
 
+public class Buffer {
+  public let name: String
+  public var contents: String = ""
+  public var position = 0
+
+  init(name: String) {
+    self.name = name
+  }
+}
+
+typealias SearchResults = [(range: Range<String.Index>, match: String)]
+
+func reSearchForward(pattern emacsPattern: String, in text: String, from startIndex: Int = 0) -> SearchResults {
+  // Translate Emacs-style regex pattern to ICU regex pattern
+  let icuPattern = emacsPattern
+    .replacingOccurrences(of: "\\(", with: "(")
+    .replacingOccurrences(of: "\\)", with: ")")
+    .replacingOccurrences(of: "[[:digit:]]", with: "\\d")
+
+  do {
+    let regex = try NSRegularExpression(pattern: icuPattern)
+    let startRangeIndex = text.index(text.startIndex, offsetBy: startIndex, limitedBy: text.endIndex) ?? text.endIndex
+    let searchRange = NSRange(startRangeIndex ..< text.endIndex, in: text)
+
+    if let match = regex.firstMatch(in: text, options: [], range: searchRange) {
+      var results = [(range: Range<String.Index>, match: String)]()
+
+      for i in 0 ..< match.numberOfRanges {
+        let range = match.range(at: i)
+        if let stringRange = Range(range, in: text) {
+          let matchString = String(text[stringRange])
+          results.append((stringRange, matchString))
+        }
+      }
+      return results
+    }
+  } catch {
+    print("Invalid regex: \(error)")
+  }
+
+  return []
+}
+
 public class EnvironmentMock {
   var raw = UnsafeMutablePointer<emacs_env>.allocate(capacity: 1)
   var data: [StoredValue] = []
   var symbols: [String: emacs_value] = [:]
+  var buffers = [Buffer(name: "*scratch*")]
+  var currentBufferIndex = 0
+  var searchResults: SearchResults = []
+
+  public var currentBuffer: Buffer { buffers[currentBufferIndex] }
+
+  func findBuffer(named bufferName: String) -> Int? {
+    buffers.firstIndex { $0.name == bufferName }
+  }
 
   var interrupted = false
   var signaled = false
@@ -140,24 +192,32 @@ public class EnvironmentMock {
     }
   }
 
-  private func make<T>(_ from: T, _ finalizer: Box.Finalizer<T>? = nil) -> emacs_value {
+  func make<T>(_ from: T, _ finalizer: Box.Finalizer<T>? = nil) -> emacs_value {
     let pointer = UnsafeMutablePointer<Box>.allocate(capacity: 1)
     pointer.initialize(to: Box(from, finalizer))
     return tag(pointer)
   }
 
-  private func make(_ str: UnsafePointer<CChar>, _ len: Int) -> emacs_value {
+  func make(_ from: String, _: Box.Finalizer<String>? = nil) -> emacs_value {
+    if let cString = from.cString(using: .utf8) {
+      return make(cString)
+    }
+    signal()
+    return intern("nil")
+  }
+
+  func make(_ str: UnsafePointer<CChar>, _ len: Int) -> emacs_value {
     let buffer = UnsafeBufferPointer(start: str, count: len + 1)
     var array = Array(buffer)
     array[len] = 0
     return make(array)
   }
 
-  private func box(of value: emacs_value) -> UnsafeMutablePointer<Box> {
+  func box(of value: emacs_value) -> UnsafeMutablePointer<Box> {
     value.pointee.data.assumingMemoryBound(to: Box.self)
   }
 
-  private func extract<T>(_ value: emacs_value, fatal: Bool = true) -> T? {
+  func extract<T>(_ value: emacs_value, fatal: Bool = true) -> T? {
     let box = box(of: value).pointee
     let result = box.value as? T
     if result == nil, fatal {
@@ -167,7 +227,14 @@ public class EnvironmentMock {
     return result
   }
 
-  private func extract(_ value: emacs_value, _ buf: UnsafeMutablePointer<CChar>?, _ len: UnsafeMutablePointer<Int>) -> Bool {
+  func extract(_ value: emacs_value, fatal _: Bool = true) -> String? {
+    if let array: [CChar] = extract(value) {
+      return String(cString: array)
+    }
+    return nil
+  }
+
+  func extract(_ value: emacs_value, _ buf: UnsafeMutablePointer<CChar>?, _ len: UnsafeMutablePointer<Int>) -> Bool {
     let array: [CChar] = extract(value) ?? []
     if buf == nil {
       len.initialize(to: array.count)
@@ -316,6 +383,15 @@ public class EnvironmentMock {
         }
       }
     }
+    env.open_channel = {
+      raw, value in
+      if let fd: Int32 = toMockEnv(raw!).extract(value!) {
+        return fd
+      } else {
+        toMockEnv(raw!).signal()
+        return 0
+      }
+    }
 
     let nilValue: Int? = nil
     _ = intern("nil", with: make(nilValue))
@@ -330,69 +406,6 @@ public class EnvironmentMock {
 
   func bind(_ name: String, to function: @escaping Function) {
     _ = intern(name, with: make(FunctionData(function: function, payload: nil)))
-  }
-
-  func initializeBuiltins() {
-    bind("vector") {
-      [unowned self] args in
-      make(args)
-    }
-    bind("symbol-name") {
-      [unowned self] args in
-      if args.count == 1, let pair = symbols.first(where: { $0.value == args[0] }) {
-        return make(pair.key, pair.key.count)
-      } else {
-        signal()
-        return intern("nil")
-      }
-    }
-    bind("cons") {
-      [unowned self] args in
-      if args.count != 2 {
-        signal()
-        return intern("nil")
-      }
-      return make(ConsCell(car: args[0], cdr: args[1]))
-    }
-    bind("car") {
-      [unowned self] args in
-      if args.count == 1, let cons: ConsCell<emacs_value, emacs_value> = extract(args[0]) {
-        return cons.car
-      } else {
-        signal()
-        return intern("nil")
-      }
-    }
-    bind("cdr") {
-      [unowned self] args in
-      if args.count == 1, let cons: ConsCell<emacs_value, emacs_value> = extract(args[0]) {
-        return cons.cdr
-      } else {
-        signal()
-        return intern("nil")
-      }
-    }
-    bind("list") {
-      [unowned self] args in
-      var result: emacs_value = intern("nil")
-      for element in args.reversed() {
-        result = make(ConsCell(car: element, cdr: result))
-      }
-      return result
-    }
-    bind("fset") {
-      [unowned self] args in
-      if args.count == 2, let ref: Reference = extract(args[0]) {
-        ref.to = args[1]
-      } else {
-        signal()
-      }
-      return intern("nil")
-    }
-    bind("define-error") {
-      [unowned self] _ in
-      intern("nil")
-    }
   }
 
   deinit {
