@@ -203,20 +203,13 @@ class TestModule: Module {
         let NUMBER_OF_CHANNELS = 5
         let NUMBER_OF_TASKS_PER_CHANNEL = 10
 
-        actor ResultCollector {
-          var result = 0
-
-          func add(_ value: Int) {
-            result += value
+        let channels = try {
+          var channels: [Channel] = []
+          for i in 0 ..< NUMBER_OF_CHANNELS {
+            try channels.append(env.openChannel(name: "test\(i)"))
           }
-        }
-
-        var channelsToInit: [Channel] = []
-        for i in 0 ..< NUMBER_OF_CHANNELS {
-          try channelsToInit.append(env.openChannel(name: "test\(i)"))
-        }
-
-        let channels = channelsToInit
+          return channels
+        }()
 
         Task {
           let result = await withTaskGroup(of: Int.self) {
