@@ -180,4 +180,63 @@ class ChannelTests: XCTestCase {
 
     XCTAssertEqual(result, 6)
   }
+
+  func testAsyncException() async throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let channel = try env.openChannel(name: "test")
+
+    let result: Int? = try? await channel.withAsyncEnvironment {
+      env in try env.funcall("func", with: 1, 2, 3)
+    }
+
+    XCTAssertNil(result)
+  }
+
+  func testMultipleParallelChannels() async throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let NUMBER_OF_CHANNELS = 5
+    let NUMBER_OF_TASKS_PER_CHANNEL = 10
+
+    var expectations: [XCTestExpectation] = []
+
+    actor CallsCollector {
+      var calls: [[Int]]
+
+      init(size: Int) {
+        calls = Array(repeating: [], count: size)
+      }
+
+      func registerCall(channel: Int, task: Int) {
+        calls[channel].append(task)
+      }
+    }
+
+    let collector = CallsCollector(size: NUMBER_OF_CHANNELS)
+
+    for i in 0 ..< NUMBER_OF_CHANNELS {
+      let channel = try env.openChannel(name: "test\(i)")
+      for j in 0 ..< NUMBER_OF_TASKS_PER_CHANNEL {
+        expectations.append(expectation(description: "Callback #\(j) is called for the channel #\(i)"))
+        let called = expectations.last!
+        Task {
+          _ = try await channel.withAsyncEnvironment {
+            env in
+            called.fulfill()
+            return env.Nil
+          }
+          await collector.registerCall(channel: i, task: j)
+        }
+      }
+    }
+
+    await fulfillment(of: expectations, timeout: 3)
+    for i in 0 ..< NUMBER_OF_CHANNELS {
+      let calls = await collector.calls[i]
+      XCTAssertEqual(calls, [Int](0 ..< NUMBER_OF_TASKS_PER_CHANNEL))
+    }
+  }
 }

@@ -177,3 +177,16 @@
    (lambda ()
      (funcall done)
      (should-error (asdagasda) :type 'void-function))))
+
+(ert-deftest-async-tagged swift-module:highly-concurrent-function (done)
+  :tags '(emacs-28 emacs-29 emacs-30)
+  (let* ((channels 5)
+         (tasks 10)
+         (input 10)
+         (result (+ (* input tasks channels)
+                    (* (/ (* tasks (1- tasks)) 2) channels)
+                    (* (/ (* channels (1- channels)) 2) tasks))))
+    (swift-multiple-channels
+     input (lambda (x)
+             (should (equal result x))
+             (funcall done)))))

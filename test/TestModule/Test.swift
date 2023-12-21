@@ -197,6 +197,51 @@ class TestModule: Module {
           }
         }
       }
+      try env.defun("swift-multiple-channels") {
+        (env: Environment, x: Int, callback: PersistentEmacsValue) in
+
+        let NUMBER_OF_CHANNELS = 5
+        let NUMBER_OF_TASKS_PER_CHANNEL = 10
+
+        actor ResultCollector {
+          var result = 0
+
+          func add(_ value: Int) {
+            result += value
+          }
+        }
+
+        var channelsToInit: [Channel] = []
+        for i in 0 ..< NUMBER_OF_CHANNELS {
+          try channelsToInit.append(env.openChannel(name: "test\(i)"))
+        }
+
+        let channels = channelsToInit
+
+        Task {
+          let result = await withTaskGroup(of: Int.self) {
+            group in
+            for i in 0 ..< NUMBER_OF_CHANNELS {
+              for j in 0 ..< NUMBER_OF_TASKS_PER_CHANNEL {
+                group.addTask {
+                  await (try? channels[i].withAsyncEnvironment {
+                    env in
+                    try env.funcall("+", with: x, i, j)
+                  }) ?? 0
+                }
+              }
+            }
+            var result = 0
+            for await element in group {
+              result += element
+            }
+            return result
+          }
+          channel.withEnvironment {
+            env in try env.funcall(callback, with: result)
+          }
+        }
+      }
     }
   }
 }
