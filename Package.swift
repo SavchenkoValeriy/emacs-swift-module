@@ -66,7 +66,10 @@ let package = Package(
       name: "EmacsSwiftModuleTests",
       dependencies: ["EmacsSwiftModule", "EmacsEnvMock"],
       path: "test/Unit",
-      exclude: ["Mock/C"]
+      exclude: ["Mock/C"],
+      swiftSettings: [
+        .define("LEAKS", .when(configuration: .debug))
+      ]
     )
   ]
 )
