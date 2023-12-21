@@ -19,42 +19,19 @@
 //
 import Foundation
 
-#if os(macOS)
-  import os.lock
-#endif
-
-#if os(macOS)
-  typealias Lock = os_unfair_lock_s
-  private func makeLock() -> Lock { os_unfair_lock() }
-  private func lock(_ lock: inout Lock) { os_unfair_lock_lock(&lock) }
-  private func unlock(_ lock: inout Lock) { os_unfair_lock_unlock(&lock) }
-#else
-  typealias Lock = NSLock
-  private func makeLock() -> Lock { NSLock() }
-  private func lock(_ lock: inout Lock) { lock.lock() }
-  private func unlock(_ lock: inout Lock) { lock.unlock() }
-#endif
-
 typealias Callback = (Environment) throws -> Void
 
 private struct CallbackStack {
   typealias Index = Int
 
   private var callbacks: [Callback?] = []
-  private var mutex = makeLock()
 
   mutating func push(callback: @escaping Callback) -> Index {
-    lock(&mutex)
-    defer { unlock(&mutex) }
-
     callbacks.append(callback)
     return callbacks.count - 1
   }
 
   mutating func pop(at index: Index) -> Callback? {
-    lock(&mutex)
-    defer { unlock(&mutex) }
-
     guard let callback = callbacks[index] else {
       print("Tried to call already called callback!")
       return nil
@@ -111,7 +88,7 @@ public class Channel {
   private var stack = CallbackStack()
 
   // We need a lock to prevent races writing to the pipe.
-  private var mutex = makeLock()
+  private var mutex = Lock()
 
   fileprivate init(name: String) {
     self.name = name
@@ -129,20 +106,19 @@ public class Channel {
 
   /// Call the callback stored under the given index.
   private func call(_ index: CallbackStack.Index, with env: Environment) throws {
-    if let callback = stack.pop(at: index) {
+    if let callback = mutex.locked({ stack.pop(at: index) }) {
       try callback(env)
     }
   }
 
   /// Register a callback to be called with the given arguments.
   func register(callback: @escaping Callback) {
-    write(stack.push(callback: callback))
+    mutex.locked {
+      write(stack.push(callback: callback))
+    }
   }
 
   private func write(_ index: CallbackStack.Index) {
-    lock(&mutex)
-    defer { unlock(&mutex) }
-
     if let data = "\(index)\n".data(using: String.Encoding.utf8) {
       do {
         if #available(macOS 10.15.4, *) {

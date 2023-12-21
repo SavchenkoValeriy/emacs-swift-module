@@ -54,11 +54,15 @@ public final class Environment {
   let raw: UnsafeMutablePointer<emacs_env>
   var pointee: emacs_env {
     get throws {
-      guard valid else {
-        throw EmacsError.lifetimeViolation
-      }
+      // We have to check thread model violation first because
+      // if we try using check for lifetime on another thread, it
+      // can potentially lead to a data race with `invalidate` called
+      // from the original thread.
       guard threadValid else {
         throw EmacsError.threadModelViolation
+      }
+      guard valid else {
+        throw EmacsError.lifetimeViolation
       }
       return raw.pointee
     }
