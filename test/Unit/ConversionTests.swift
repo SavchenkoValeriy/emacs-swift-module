@@ -1,4 +1,3 @@
-import EmacsMock
 @testable import EmacsSwiftModule
 import XCTest
 
