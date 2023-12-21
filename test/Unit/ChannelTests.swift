@@ -241,4 +241,67 @@ class ChannelTests: XCTestCase {
       XCTAssertEqual(calls.sorted(), [Int](0 ..< NUMBER_OF_TASKS_PER_CHANNEL))
     }
   }
+
+  func testNestedCallbacks() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let channel = try env.openChannel(name: "test")
+    let called = expectation(description: "Callback is called")
+
+    Task {
+      channel.withEnvironment {
+        _ in Task {
+          channel.withEnvironment {
+            _ in Task {
+              channel.withEnvironment {
+                _ in called.fulfill()
+              }
+            }
+          }
+        }
+      }
+    }
+
+    waitForExpectations(timeout: 3)
+  }
+
+  func testNormalHook() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let channel = try env.openChannel(name: "test")
+    let called = expectation(description: "Callback is called")
+
+    try env.defun("run-hooks") {
+      (hook: Symbol) in
+      XCTAssertEqual(hook.name, "normal-hook")
+      called.fulfill()
+    }
+
+    let callback: () -> Void = channel.hook("normal-hook")
+    callback()
+
+    waitForExpectations(timeout: 3)
+  }
+
+  func testAbnormalHook() throws {
+    let mock = EnvironmentMock()
+    let env = mock.environment
+
+    let channel = try env.openChannel(name: "test")
+    let called = expectation(description: "Callback is called")
+
+    try env.defun("run-hook-with-args") {
+      (hook: Symbol, arg: Int) in
+      XCTAssertEqual(hook.name, "abnormal-hook")
+      XCTAssertEqual(arg, 42)
+      called.fulfill()
+    }
+
+    let callback: (Int) -> Void = channel.hook("abnormal-hook")
+    callback(42)
+
+    waitForExpectations(timeout: 3)
+  }
 }
