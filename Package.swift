@@ -62,7 +62,7 @@ let package = Package(
       path: "test/Mock/C",
       publicHeadersPath: "include"
     ),
-    .target(
+    .testTarget(
       name: "EmacsMock",
       dependencies: ["EmacsModule", "EmacsSwiftModule", "EmacsEnvMock"],
       path: "test/Mock/Swift"
