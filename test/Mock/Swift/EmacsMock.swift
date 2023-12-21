@@ -132,11 +132,20 @@ public class EnvironmentMock {
   var raw = UnsafeMutablePointer<emacs_env>.allocate(capacity: 1)
   var data: [StoredValue] = []
   var symbols: [String: emacs_value] = [:]
+  var dataMutex = Lock()
   var buffers = [Buffer(name: "*scratch*")]
   var currentBufferIndex = 0
+  var bufferMutex = Lock()
   var searchResults: SearchResults = []
+  var searchResultsMutex = Lock()
+  var filterMutex = Lock()
+  var Nil: emacs_value {
+    intern("nil")
+  }
 
-  public var currentBuffer: Buffer { buffers[currentBufferIndex] }
+  public var currentBuffer: Buffer {
+    buffers[currentBufferIndex]
+  }
 
   func findBuffer(named bufferName: String) -> Int? {
     buffers.firstIndex { $0.name == bufferName }
@@ -146,27 +155,29 @@ public class EnvironmentMock {
   var signaled = false
   var thrown = false
 
-  public func interrupt() { interrupted = true }
-  public func signal() { signaled = true }
-  public func throwException() { thrown = true }
+  public func interrupt() { dataMutex.locked { interrupted = true } }
+  public func signal() { dataMutex.locked { signaled = true } }
+  public func throwException() { dataMutex.locked { thrown = true } }
 
   func tag(_ pointer: UnsafeMutablePointer<Box>) -> UnsafeMutablePointer<emacs_value_tag> {
-    let result = StoredValue(pointer)
-    data.append(result)
-    return result.pointer
+    dataMutex.locked {
+      let result = StoredValue(pointer)
+      data.append(result)
+      return result.pointer
+    }
   }
 
   func intern(_ name: String) -> emacs_value {
-    if let symbol = symbols[name] {
+    if let symbol = dataMutex.locked({ symbols[name] }) {
       return symbol
     }
 
-    return intern(name, with: data[0].pointer)
+    return intern(name, with: dataMutex.locked { data[0].pointer })
   }
 
   func intern(_ name: String, with value: emacs_value) -> emacs_value {
     let symbol = make(Reference(value))
-    symbols[name] = symbol
+    dataMutex.locked { symbols[name] = symbol }
     return symbol
   }
 
@@ -184,7 +195,7 @@ public class EnvironmentMock {
 
   func funcall(_ rawFunction: emacs_value, _ count: CLong, _ args: UnsafePointer<emacs_value?>) -> emacs_value {
     guard let function = extractFunction(rawFunction) else {
-      return intern("nil")
+      return Nil
     }
     return args.withMemoryRebound(to: emacs_value.self, capacity: count) {
       nonOptArgs in
@@ -203,7 +214,7 @@ public class EnvironmentMock {
       return make(cString)
     }
     signal()
-    return intern("nil")
+    return Nil
   }
 
   func make(_ str: UnsafePointer<CChar>, _ len: Int) -> emacs_value {
@@ -265,12 +276,12 @@ public class EnvironmentMock {
       let env = toMockEnv(raw!)
       if env.signaled {
         symbol!.pointee = env.intern("mock-signal")
-        data!.pointee = env.intern("nil")
+        data!.pointee = env.Nil
         return emacs_funcall_exit_signal
       }
       if env.thrown {
         symbol!.pointee = env.intern("mock-exception")
-        data!.pointee = env.intern("nil")
+        data!.pointee = env.Nil
         return emacs_funcall_exit_throw
       }
       return emacs_funcall_exit_return
@@ -299,7 +310,7 @@ public class EnvironmentMock {
     }
     env.is_not_nil = {
       raw, value in
-      UnsafeMutableRawPointer(toMockEnv(raw!).environment.Nil.raw!) != value!
+      toMockEnv(raw!).Nil != value!
     }
     env.make_integer = {
       raw, value in
@@ -332,7 +343,7 @@ public class EnvironmentMock {
       if let array: [emacs_value] = env.extract(value!) {
         return array[index]
       }
-      return env.intern("nil")
+      return env.Nil
     }
     env.vec_size = {
       raw, value in
@@ -363,7 +374,7 @@ public class EnvironmentMock {
             let env = toMockEnv(raw!)
             if min > args.count || max < args.count {
               env.signal()
-              return env.intern("nil")
+              return env.Nil
             }
             let rawPtr = UnsafeMutableRawPointer(argsPtr.baseAddress)
             let ptrToOpt = rawPtr?.bindMemory(to: emacs_value?.self, capacity: args.count)
@@ -406,6 +417,10 @@ public class EnvironmentMock {
 
   func bind(_ name: String, to function: @escaping Function) {
     _ = intern(name, with: make(FunctionData(function: function, payload: nil)))
+  }
+
+  func bindLocked(_ name: String, with mutex: Lock, to function: @escaping Function) {
+    bind(name) { [unowned mutex] args in mutex.locked { function(args) } }
   }
 
   deinit {

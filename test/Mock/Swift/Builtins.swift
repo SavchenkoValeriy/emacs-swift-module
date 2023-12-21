@@ -15,7 +15,7 @@ extension EnvironmentMock {
       [unowned self] args in
       if args.count != 2 {
         signal()
-        return intern("nil")
+        return Nil
       }
       return make(ConsCell(car: args[0], cdr: args[1]))
     }
@@ -25,7 +25,7 @@ extension EnvironmentMock {
         return cons.car
       } else {
         signal()
-        return intern("nil")
+        return Nil
       }
     }
     bind("cdr") {
@@ -34,12 +34,12 @@ extension EnvironmentMock {
         return cons.cdr
       } else {
         signal()
-        return intern("nil")
+        return Nil
       }
     }
     bind("list") {
       [unowned self] args in
-      var result: emacs_value = intern("nil")
+      var result: emacs_value = Nil
       for element in args.reversed() {
         result = make(ConsCell(car: element, cdr: result))
       }
@@ -52,25 +52,25 @@ extension EnvironmentMock {
       [unowned self] args in
       guard args.count == 1 else {
         signal()
-        return intern("nil")
+        return Nil
       }
       return args[0]
     }
-    bind("generate-new-buffer") {
+    bindLocked("generate-new-buffer", with: bufferMutex) {
       [unowned self] args in
       guard args.count == 1,
             let name: String = extract(args[0]) else {
         signal()
-        return intern("nil")
+        return Nil
       }
       buffers.append(Buffer(name: name))
       return args[0]
     }
-    bind("current-buffer") {
+    bindLocked("current-buffer", with: bufferMutex) {
       [unowned self] _ in
       make(currentBuffer.name)
     }
-    bind("set-buffer") {
+    bindLocked("set-buffer", with: bufferMutex) {
       [unowned self] args in
       if args.count == 1,
          let name: String = extract(args[0]),
@@ -79,13 +79,13 @@ extension EnvironmentMock {
       } else {
         signal()
       }
-      return intern("nil")
+      return Nil
     }
-    bind("point-max") {
+    bindLocked("point-max", with: bufferMutex) {
       [unowned self] _ in
       make(currentBuffer.contents.count + 1)
     }
-    bind("goto-char") {
+    bindLocked("goto-char", with: bufferMutex) {
       [unowned self] args in
       if args.count == 1,
          let position: Int = extract(args[0]) {
@@ -93,9 +93,9 @@ extension EnvironmentMock {
       } else {
         signal()
       }
-      return intern("nil")
+      return Nil
     }
-    bind("insert") {
+    bindLocked("insert", with: bufferMutex) {
       [unowned self] args in
       if args.count == 1,
          let text: String = extract(args[0]) {
@@ -104,9 +104,9 @@ extension EnvironmentMock {
       } else {
         signal()
       }
-      return intern("nil")
+      return Nil
     }
-    bind("delete-region") {
+    bindLocked("delete-region", with: bufferMutex) {
       [unowned self] args in
       if args.count == 2,
          let start: Int = extract(args[0]),
@@ -127,44 +127,54 @@ extension EnvironmentMock {
       } else {
         signal()
       }
-      return intern("nil")
+      return Nil
     }
   }
 
   private func initializeRegexBuiltins() {
-    bind("re-search-forward") {
+    bindLocked("re-search-forward", with: searchResultsMutex) {
       [unowned self] args in
       guard args.count >= 1,
             let pattern: String = extract(args[0]) else {
         signal()
-        return intern("nil")
+        return Nil
       }
-      searchResults = reSearchForward(pattern: pattern, in: currentBuffer.contents, from: currentBuffer.position)
+      searchResults = bufferMutex.locked {
+        reSearchForward(pattern: pattern,
+                        in: currentBuffer.contents,
+                        from: currentBuffer.position)
+      }
       if searchResults.isEmpty {
-        return intern("nil")
+        return Nil
       } else {
         return intern("t")
       }
     }
-    bind("match-string") {
+    bindLocked("match-string", with: searchResultsMutex) {
       [unowned self] args in
       guard args.count == 1,
             let index: Int = extract(args[0]),
             index < searchResults.count else {
         signal()
-        return intern("nil")
+        return Nil
       }
       return make(searchResults[index].match)
     }
-    bind("match-end") {
+    bindLocked("match-end", with: searchResultsMutex) {
       [unowned self] args in
       guard args.count == 1,
             let index: Int = extract(args[0]),
             index < searchResults.count else {
         signal()
-        return intern("nil")
+        return Nil
       }
-      return make(currentBuffer.contents.distance(from: currentBuffer.contents.startIndex, to: searchResults[index].range.upperBound))
+      return bufferMutex.locked {
+        make(
+          currentBuffer.contents.distance(
+            from: currentBuffer.contents.startIndex,
+            to: searchResults[index].range.upperBound
+          ))
+      }
     }
   }
 
@@ -179,7 +189,7 @@ extension EnvironmentMock {
         return make(pair.key, pair.key.count)
       } else {
         signal()
-        return intern("nil")
+        return Nil
       }
     }
     bind("fset") {
@@ -189,11 +199,11 @@ extension EnvironmentMock {
       } else {
         signal()
       }
-      return intern("nil")
+      return Nil
     }
     bind("define-error") {
       [unowned self] _ in
-      intern("nil")
+      Nil
     }
     bind("make-pipe-process") {
       [unowned self] args in
@@ -204,7 +214,7 @@ extension EnvironmentMock {
             let filter: FunctionData = extractFunction(args[7])
       else {
         signal()
-        return intern("nil")
+        return Nil
       }
       let pipe = Pipe()
 
@@ -214,7 +224,9 @@ extension EnvironmentMock {
           if !availableData.isEmpty {
             // Convert Data to String
             if let message = String(data: availableData, encoding: .utf8) {
-              _ = filter.function([intern("nil"), make(message)])
+              filterMutex.locked {
+                _ = filter.function([Nil, make(message)])
+              }
             }
           } else {
             // No more data, break the loop

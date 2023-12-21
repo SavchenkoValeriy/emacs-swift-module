@@ -236,7 +236,10 @@ class ChannelTests: XCTestCase {
     await fulfillment(of: expectations, timeout: 3)
     for i in 0 ..< NUMBER_OF_CHANNELS {
       let calls = await collector.calls[i]
-      XCTAssertEqual(calls, [Int](0 ..< NUMBER_OF_TASKS_PER_CHANNEL))
+      // We don't know the exact order in which Tasks will get executed and, thus,
+      // the order of indices in `calls`. We can, however, assert that all of them
+      // truly happened.
+      XCTAssertEqual(calls.sorted(), [Int](0 ..< NUMBER_OF_TASKS_PER_CHANNEL))
     }
   }
 }
