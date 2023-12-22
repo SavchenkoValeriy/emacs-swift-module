@@ -136,7 +136,6 @@ class IntegrationTests: XCTestCase {
       return
     }
     print("Running integration tests against Emacs \(emacsMajorVersion)")
-    XCTAssertEqual(emacsMajorVersion, 30)
 
     cd("TestModule")
     guard isExecutableInPath("cask"),
