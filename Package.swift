@@ -19,11 +19,6 @@ let package = Package(
     .plugin(
       name: "ModuleFactoryPlugin",
       targets: ["ModuleFactoryPlugin"]
-    ),
-    .library(
-      name: "TestModule",
-      type: .dynamic,
-      targets: ["TestModule"]
     )
   ],
   dependencies: [],
@@ -51,12 +46,6 @@ let package = Package(
       sources: ["ModuleInitializerInjector.swift"]
     ),
     .target(
-      name: "TestModule",
-      dependencies: ["EmacsSwiftModule"],
-      path: "test/TestModule",
-      plugins: ["ModuleFactoryPlugin"]
-    ),
-    .target(
       name: "EmacsEnvMock",
       dependencies: ["EmacsModule"],
       path: "test/Unit/Mock/C",
@@ -65,10 +54,12 @@ let package = Package(
     .testTarget(
       name: "EmacsSwiftModuleTests",
       dependencies: ["EmacsSwiftModule", "EmacsEnvMock"],
-      path: "test/Unit",
-      exclude: ["Mock/C"],
+      path: "test",
+      exclude: ["Unit/Mock/C", "Integration/TestModule"],
       swiftSettings: [
-        .define("LEAKS", .when(configuration: .debug))
+        .define("LEAKS", .when(configuration: .debug)),
+        .define("DEBUG", .when(configuration: .debug)),
+        .define("RELEASE", .when(configuration: .release))
       ]
     )
   ]
