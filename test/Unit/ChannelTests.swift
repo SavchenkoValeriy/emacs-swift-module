@@ -200,8 +200,6 @@ class ChannelTests: XCTestCase {
     let NUMBER_OF_CHANNELS = 5
     let NUMBER_OF_TASKS_PER_CHANNEL = 10
 
-    var expectations: [XCTestExpectation] = []
-
     actor CallsCollector {
       var calls: [[Int]]
 
@@ -216,23 +214,21 @@ class ChannelTests: XCTestCase {
 
     let collector = CallsCollector(size: NUMBER_OF_CHANNELS)
 
-    for i in 0 ..< NUMBER_OF_CHANNELS {
-      let channel = try env.openChannel(name: "test\(i)")
-      for j in 0 ..< NUMBER_OF_TASKS_PER_CHANNEL {
-        expectations.append(expectation(description: "Callback #\(j) is called for the channel #\(i)"))
-        let called = expectations.last!
-        Task {
-          _ = try await channel.withAsyncEnvironment {
-            env in
-            called.fulfill()
-            return env.Nil
+    try await withThrowingTaskGroup(of: Void.self) {
+      group in
+      for i in 0 ..< NUMBER_OF_CHANNELS {
+        let channel = try env.openChannel(name: "test\(i)")
+        for j in 0 ..< NUMBER_OF_TASKS_PER_CHANNEL {
+          group.addTask {
+            let result = try await channel.withAsyncEnvironment {
+              _ in j
+            }
+            await collector.registerCall(channel: i, task: result)
           }
-          await collector.registerCall(channel: i, task: j)
         }
       }
     }
 
-    await fulfillment(of: expectations, timeout: 3)
     for i in 0 ..< NUMBER_OF_CHANNELS {
       let calls = await collector.calls[i]
       // We don't know the exact order in which Tasks will get executed and, thus,
