@@ -110,11 +110,35 @@ func runCaskLoadPath() -> String? {
   }
 }
 
+func cp(at source: String, to dest: String) throws {
+  try FileManager.default.copyItem(at: URL(fileURLWithPath: source),
+                                   to: URL(fileURLWithPath: dest))
+}
+
 func runTests(_ version: Int, buildType: String, loadPath: String) -> Bool {
+  let dylib = "./.build/\(buildType)/libTestModule"
+  let ext: String
+  #if os(macOS)
+    if version < 28 {
+      do {
+        // Older Emacs versions expect modules to .so even on macOS
+        try cp(at: "\(dylib).dylib", to: "\(dylib).so")
+      } catch {
+        print("Couldn't copy module: \(error)")
+        return false
+      }
+      ext = "so"
+    } else {
+      ext = "dylib"
+    }
+  #else
+    ext = "so"
+  #endif
+
   let entry = "(ert-run-tests-batch-and-exit '(or (tag emacs-all) (tag emacs-\(version))))"
   let command = ["emacs", "-Q", "-batch", "-l", "ert",
                  "-l", "./test/swift-module-test.el",
-                 "-l", "./.build/\(buildType)/libTestModule.dylib",
+                 "-l", "\(dylib).\(ext)",
                  "-eval", entry]
   print("Command:\nEMACSLOADPATH=`cask load-path` \(command.joined(separator: " "))")
   return runCommand(command, with: ["EMACSLOADPATH": loadPath], redirect: false)
