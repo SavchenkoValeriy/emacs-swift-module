@@ -74,29 +74,30 @@ class DefunTests: XCTestCase {
   func testManyArgs() throws {
     #if swift(<5.9)
       throw XCTSkip("This test requires at least Swift 5.9")
+    #else
+
+      let mock = EnvironmentMock()
+      let env = mock.environment
+
+      try env.defun("many-args") {
+        (
+          a: Int,
+          b: Int,
+          c: Int,
+          d: Int,
+          e: Int,
+          f: Int,
+          g: Int,
+          h: Int,
+          i: Int,
+          j: Int
+        ) -> Int in
+        a + b + c + d + e + f + g + h + i + j
+      }
+
+      let result: Int = try env.funcall("many-args", with: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+      XCTAssertEqual(result, 55)
     #endif
-
-    let mock = EnvironmentMock()
-    let env = mock.environment
-
-    try env.defun("many-args") {
-      (
-        a: Int,
-        b: Int,
-        c: Int,
-        d: Int,
-        e: Int,
-        f: Int,
-        g: Int,
-        h: Int,
-        i: Int,
-        j: Int
-      ) -> Int in
-      a + b + c + d + e + f + g + h + i + j
-    }
-
-    let result: Int = try env.funcall("many-args", with: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-    XCTAssertEqual(result, 55)
   }
 
   func testVoidReturnType() throws {
