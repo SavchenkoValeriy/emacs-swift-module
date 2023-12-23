@@ -9,27 +9,22 @@ private func toMockEnv(_ raw: UnsafeMutablePointer<emacs_env>) -> EnvironmentMoc
 
 class StoredValue {
   public let pointer: UnsafeMutablePointer<emacs_value_tag>
-  public var deallocator: () -> Void
+  public let deallocator: () -> Void
 
-  convenience init(_ pointer: UnsafeMutablePointer<Box>) {
-    self.init()
-    setq(pointer)
-  }
-
-  required init() {
+  init(_ data: UnsafeMutablePointer<Box>) {
     pointer = UnsafeMutablePointer<emacs_value_tag>.allocate(capacity: 1)
-    pointer.initialize(to: emacs_value_tag(data: nil))
-    deallocator = {}
-  }
-
-  public func setq(_ data: UnsafeMutablePointer<Box>) {
-    deallocator()
-    pointer.update(repeating: emacs_value_tag(data: data), count: 1)
+    pointer.initialize(to: emacs_value_tag(data: data))
     deallocator = { [data] in
       data.pointee.finalize()
       data.deinitialize(count: 1)
       data.deallocate()
     }
+  }
+
+  init() {
+    pointer = UnsafeMutablePointer<emacs_value_tag>.allocate(capacity: 1)
+    pointer.initialize(to: emacs_value_tag(data: nil))
+    deallocator = {}
   }
 
   deinit {

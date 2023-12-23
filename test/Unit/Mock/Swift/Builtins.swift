@@ -238,7 +238,7 @@ extension EnvironmentMock {
             break
           }
           // Sleep to yield time to other tasks and avoid tight looping
-          usleep(1_000_000) // 0.01 second
+          usleep(1000)
         }
         group.leave()
       }
