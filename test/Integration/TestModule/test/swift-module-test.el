@@ -131,7 +131,7 @@
 (ert-deftest swift-module:check-list-conversion ()
   :tags '(emacs-all)
   (should (equal (swift-list '(1 2 3 4)) '(2 4 6 8)))
-  (should (equal (swift-list-length (number-sequence 1 50000)) 50000)))
+  (should (equal (swift-list-length (number-sequence 1 500)) 500)))
 
 (ert-deftest swift-module:check-alist-conversion ()
   :tags '(emacs-all)

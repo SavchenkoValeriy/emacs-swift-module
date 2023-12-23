@@ -218,9 +218,14 @@ extension EnvironmentMock {
       }
       let pipe = Pipe()
 
-      Task {
+      let group = filterGroup
+
+      filterQueue.async {
+        [unowned self] in
+        let readingEnd = pipe.fileHandleForReading
+        group.enter()
         while true {
-          let availableData = pipe.fileHandleForReading.availableData
+          let availableData = readingEnd.availableData
           if !availableData.isEmpty {
             // Convert Data to String
             if let message = String(data: availableData, encoding: .utf8) {
@@ -233,8 +238,9 @@ extension EnvironmentMock {
             break
           }
           // Sleep to yield time to other tasks and avoid tight looping
-          try? await Task.sleep(nanoseconds: 1000) // 0.01 second
+          usleep(1_000_000) // 0.01 second
         }
+        group.leave()
       }
 
       return make(pipe.fileHandleForWriting.fileDescriptor)

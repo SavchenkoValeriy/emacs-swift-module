@@ -138,7 +138,11 @@ public class EnvironmentMock {
   var bufferMutex = Lock()
   var searchResults: SearchResults = []
   var searchResultsMutex = Lock()
+
   var filterMutex = Lock()
+  let filterQueue = DispatchQueue(label: "filterQueue", attributes: .concurrent)
+  let filterGroup = DispatchGroup()
+
   var Nil: emacs_value {
     intern("nil")
   }
@@ -424,6 +428,11 @@ public class EnvironmentMock {
   }
 
   deinit {
+    // First we ensure that all channels captured by closures
+    // are deallocated.
+    data = []
+    // Then we wait for all pipes to get closed.
+    filterGroup.wait()
     raw.pointee.private_members.deallocate()
     raw.deallocate()
   }
