@@ -83,7 +83,7 @@ func runCaskInstall() -> Bool {
 }
 
 func runSwiftBuild(_ buildType: String) -> Bool {
-  runCommand(["swift", "build", "-c", buildType])
+  runCommand(["swift", "build", "-c", buildType], redirect: false)
 }
 
 func runCaskLoadPath() -> String? {
