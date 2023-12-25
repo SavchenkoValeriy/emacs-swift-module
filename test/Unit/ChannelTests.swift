@@ -2,9 +2,18 @@
 import XCTest
 
 class ChannelTests: XCTestCase {
+  var mock: EnvironmentMock!
+  var env: Environment { mock.environment }
+
+  override func setUp() {
+    mock = EnvironmentMock()
+  }
+
+  override func tearDown() {
+    mock = nil
+  }
+
   func testBufferOps() throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
     let bufferName = try env.funcall("generate-new-buffer", with: "test")
     try env.funcall("set-buffer", with: bufferName)
     try env.funcall("insert", with: "Hllo, World")
@@ -20,8 +29,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testBasicWithEnvironment() throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
     let channel = try env.openChannel(name: "test")
 
     let called = expectation(description: "Callback is called")
@@ -32,8 +39,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testOrderOfExecution() throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
     let channel = try env.openChannel(name: "test")
 
     var calls: [Int] = []
@@ -50,8 +55,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testInTask() throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
     let channel = try env.openChannel(name: "test")
 
     let called = expectation(description: "Callback is called")
@@ -64,8 +67,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testInThread() throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
     let channel = try env.openChannel(name: "test")
 
     let called = expectation(description: "Callback is called")
@@ -78,8 +79,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testUseEnvironment() throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
     let channel = try env.openChannel(name: "test")
     try env.defun("42") {
       42
@@ -95,8 +94,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testBufferSwitch() throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
     let currentBuffer: String = try env.funcall("generate-new-buffer", with: "test")
     try env.funcall("set-buffer", with: currentBuffer)
     try env.funcall("insert", with: "Hello, World")
@@ -115,9 +112,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testSwiftCallback() throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
-
     try env.defun("42") {
       42
     }
@@ -140,9 +134,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testLispCallback() throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
-
     let called = expectation(description: "Callback is called")
     var result = 0
 
@@ -164,9 +155,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testAsync() async throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
-
     try env.defun("func") {
       (x: Int, y: Int, z: Int) in x + y + z
     }
@@ -181,9 +169,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testAsyncException() async throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
-
     let channel = try env.openChannel(name: "test")
 
     let result: Int? = try? await channel.withAsyncEnvironment {
@@ -194,9 +179,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testMultipleParallelChannels() async throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
-
     let NUMBER_OF_CHANNELS = 5
     let NUMBER_OF_TASKS_PER_CHANNEL = 10
 
@@ -239,9 +221,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testNestedCallbacks() throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
-
     let channel = try env.openChannel(name: "test")
     let called = expectation(description: "Callback is called")
 
@@ -263,9 +242,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testNormalHook() throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
-
     let channel = try env.openChannel(name: "test")
     let called = expectation(description: "Callback is called")
 
@@ -282,9 +258,6 @@ class ChannelTests: XCTestCase {
   }
 
   func testAbnormalHook() throws {
-    let mock = EnvironmentMock()
-    let env = mock.environment
-
     let channel = try env.openChannel(name: "test")
     let called = expectation(description: "Callback is called")
 
