@@ -7,12 +7,6 @@ func isExecutableInPath(_ executable: String) -> Bool {
 }
 
 func findEmacsMajorVersion() -> Int? {
-  // Check if emacs is available in PATH
-  if !isExecutableInPath("emacs") {
-    print("Couldn't find Emacs")
-    return nil
-  }
-
   // Set up Process and Pipe to run emacs --version
   let process = Process()
   let pipe = Pipe()
@@ -154,18 +148,25 @@ func cd(_ relative: String) {
 }
 
 class IntegrationTests: XCTestCase {
-  func testModule() {
-    guard let emacsMajorVersion = findEmacsMajorVersion() else {
-      XCTFail("Couldn't find appropriate emacs")
-      return
+  func testModule() throws {
+    guard isExecutableInPath("emacs") else {
+      throw XCTSkip("Integration tests require Emacs")
+    }
+
+    guard isExecutableInPath("cask") else {
+      throw XCTSkip("Integration tests require Cask")
+    }
+
+    guard let emacsMajorVersion = findEmacsMajorVersion(),
+          emacsMajorVersion >= 25 else {
+      throw XCTSkip("Dynamic modules require Emacs version to be at least 25")
     }
     print("Running integration tests against Emacs \(emacsMajorVersion)")
 
     cd("TestModule")
-    guard isExecutableInPath("cask"),
-          runCaskInstall(),
+    guard runCaskInstall(),
           let loadPath = runCaskLoadPath() else {
-      XCTFail("Integration tests require Cask")
+      XCTFail("cask install failed")
       return
     }
 
