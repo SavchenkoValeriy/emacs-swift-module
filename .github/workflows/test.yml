@@ -18,7 +18,7 @@ on:
 
 
 jobs:
-  test:
+  swift-test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -44,8 +44,7 @@ jobs:
 
     env:
       EMACS_VERSION: ${{ matrix.emacs-version }}
-      BUILD_DIR: .build/${{ matrix.configuration }}
-      TEST_LIB: libTestModule.${{ matrix.emacs-version == 28.1 && matrix.os == 'macos-12' && 'dylib' || 'so' }}
+
     steps:
       - run: echo $LD_LIBRARY_PATH
       - run: find /usr/lib -name libstdc++.so.6
@@ -98,3 +97,38 @@ jobs:
         run: swift test -c ${{ matrix.configuration }}
         env:
           LD_LIBRARY_PATH: /tmp/libstdc++
+
+  xcodebuild-test:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Setup Emacs
+        uses: purcell/setup-emacs@master
+        with:
+          version: 29.1
+
+      - uses: actions/cache@v3
+        id: cache-cask-packages
+        with:
+          path: .cask
+          key: cache-cask-packages-000
+
+      - uses: actions/cache@v3
+        id: cache-cask-executable
+        with:
+          path: ~/.cask
+          key: cache-cask-executable-000
+
+      - name: Setup Cask
+        uses: cask/setup-cask@master
+        if: steps.cache-cask-executable.outputs.cache-hit != 'true'
+        with:
+          version: snapshot
+
+      - run: echo "$HOME/.cask/bin" >> $GITHUB_PATH
+
+      - name: Run tests via xcodebuild
+        run: xcodebuild -scheme EmacsSwiftModule-Package test -destination "platform=macOS"
