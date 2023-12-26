@@ -1,7 +1,65 @@
+//
+// Builtins.swift
+// Copyright (C) 2022-2023 Valeriy Savchenko
+//
+// This file is part of EmacsSwiftModule.
+//
+// EmacsSwiftModule is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 3 of the License, or (at your option)
+// any later version.
+//
+// EmacsSwiftModule is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+// or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
+//
 import EmacsModule
 @testable import EmacsSwiftModule
 import Foundation
 
+typealias SearchResults = [(range: Range<String.Index>, match: String)]
+
+func reSearchForward(pattern emacsPattern: String, in text: String, from startIndex: Int = 0) -> SearchResults {
+  // Translate Emacs-style regex pattern to ICU regex pattern
+  let icuPattern = emacsPattern
+    .replacingOccurrences(of: "\\(", with: "(")
+    .replacingOccurrences(of: "\\)", with: ")")
+    .replacingOccurrences(of: "[[:digit:]]", with: "\\d")
+
+  do {
+    let regex = try NSRegularExpression(pattern: icuPattern)
+    let startRangeIndex = text.index(text.startIndex, offsetBy: startIndex, limitedBy: text.endIndex) ?? text.endIndex
+    let searchRange = NSRange(startRangeIndex ..< text.endIndex, in: text)
+
+    if let match = regex.firstMatch(in: text, options: [], range: searchRange) {
+      var results = [(range: Range<String.Index>, match: String)]()
+
+      for i in 0 ..< match.numberOfRanges {
+        let range = match.range(at: i)
+        if let stringRange = Range(range, in: text) {
+          let matchString = String(text[stringRange])
+          results.append((stringRange, matchString))
+        }
+      }
+      return results
+    }
+  } catch {
+    print("Invalid regex: \(error)")
+  }
+
+  return []
+}
+
+// This module does not have a goal of reproducing every single builtin function
+// available in Emacs Lisp. That would've been an extremely tedious and pointless
+// work. Instead, we try to limit ourselves only to functions that we actually use
+// to provide basic Swift module APIs.
+//
+// If you ever find the need to implement a new function, please, go ahead.
 extension EnvironmentMock {
   func initializeBuiltins() {
     initializeListBuiltins()

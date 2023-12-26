@@ -1,3 +1,22 @@
+//
+// EmacsMock.swift
+// Copyright (C) 2022-2023 Valeriy Savchenko
+//
+// This file is part of EmacsSwiftModule.
+//
+// EmacsSwiftModule is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 3 of the License, or (at your option)
+// any later version.
+//
+// EmacsSwiftModule is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+// or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
+//
 import EmacsEnvMock
 import EmacsModule
 @testable import EmacsSwiftModule
@@ -5,79 +24,6 @@ import Foundation
 
 private func toMockEnv(_ raw: UnsafeMutablePointer<emacs_env>) -> EnvironmentMock {
   Unmanaged<EnvironmentMock>.fromOpaque(raw.pointee.private_members.pointee.owner).takeUnretainedValue()
-}
-
-class StoredValue {
-  public let pointer: UnsafeMutablePointer<emacs_value_tag>
-  public let deallocator: () -> Void
-
-  init(_ data: UnsafeMutablePointer<Box>) {
-    pointer = UnsafeMutablePointer<emacs_value_tag>.allocate(capacity: 1)
-    pointer.initialize(to: emacs_value_tag(data: data))
-    deallocator = { [data] in
-      data.pointee.finalize()
-      data.deinitialize(count: 1)
-      data.deallocate()
-    }
-  }
-
-  init() {
-    pointer = UnsafeMutablePointer<emacs_value_tag>.allocate(capacity: 1)
-    pointer.initialize(to: emacs_value_tag(data: nil))
-    deallocator = {}
-  }
-
-  deinit {
-    deallocator()
-    pointer.deallocate()
-  }
-}
-
-struct Box {
-  typealias Finalizer<T> = (T) -> Void
-  typealias AnyFinalizer = Finalizer<Any>
-
-  let type: Any.Type
-  let value: Any
-  var finalizer: AnyFinalizer?
-
-  init<T>(_ value: T, _ finalizer: Finalizer<T>? = nil) {
-    type = T.self
-    self.value = value
-    if let finalizer {
-      setFinalizer(finalizer)
-    } else {
-      self.finalizer = nil
-    }
-  }
-
-  mutating func setFinalizer<T>(_ finalizer: @escaping Finalizer<T>) {
-    self.finalizer = {
-      toFinalize in
-      finalizer(toFinalize as! T)
-    }
-  }
-
-  func finalize() {
-    if let finalizer {
-      finalizer(value)
-    }
-  }
-}
-
-class Reference {
-  var to: emacs_value
-
-  init(_ to: emacs_value) {
-    self.to = to
-  }
-}
-
-typealias Function = ([emacs_value]) -> emacs_value
-
-struct FunctionData {
-  let function: Function
-  let payload: RawOpaquePointer?
 }
 
 public class Buffer {
@@ -90,50 +36,29 @@ public class Buffer {
   }
 }
 
-typealias SearchResults = [(range: Range<String.Index>, match: String)]
-
-func reSearchForward(pattern emacsPattern: String, in text: String, from startIndex: Int = 0) -> SearchResults {
-  // Translate Emacs-style regex pattern to ICU regex pattern
-  let icuPattern = emacsPattern
-    .replacingOccurrences(of: "\\(", with: "(")
-    .replacingOccurrences(of: "\\)", with: ")")
-    .replacingOccurrences(of: "[[:digit:]]", with: "\\d")
-
-  do {
-    let regex = try NSRegularExpression(pattern: icuPattern)
-    let startRangeIndex = text.index(text.startIndex, offsetBy: startIndex, limitedBy: text.endIndex) ?? text.endIndex
-    let searchRange = NSRange(startRangeIndex ..< text.endIndex, in: text)
-
-    if let match = regex.firstMatch(in: text, options: [], range: searchRange) {
-      var results = [(range: Range<String.Index>, match: String)]()
-
-      for i in 0 ..< match.numberOfRanges {
-        let range = match.range(at: i)
-        if let stringRange = Range(range, in: text) {
-          let matchString = String(text[stringRange])
-          results.append((stringRange, matchString))
-        }
-      }
-      return results
-    }
-  } catch {
-    print("Invalid regex: \(error)")
-  }
-
-  return []
-}
-
 public class EnvironmentMock {
+  // Raw pointer to the object that we expose as the real Emacs environment pointer
   var raw = UnsafeMutablePointer<emacs_env>.allocate(capacity: 1)
+  // All environment-controlled values.
   var data: [StoredValue] = []
+  // The mapping from symbol name to its value.
   var symbols: [String: emacs_value] = [:]
+  // Lock to ensure exclusive access to data and symbols.
   var dataMutex = Lock()
+  // The list of open mock buffers.
   var buffers = [Buffer(name: "*scratch*")]
+  // The index of the currently selected buffer.
   var currentBufferIndex = 0
+  // Lock protecting from races over buffers and their states.
   var bufferMutex = Lock()
+  // Current search results (see `re-search-forward`).
   var searchResults: SearchResults = []
+  // Lock protecting search results from races.
   var searchResultsMutex = Lock()
 
+  // Filters are special threads running to call filter functions over pipes.
+  // This group of fields ensures that we call one filter at a time and that
+  // filters stop working before we kill this environment.
   var filterMutex = Lock()
   let filterQueue = DispatchQueue(label: "filterQueue", attributes: .concurrent)
   let filterGroup = DispatchGroup()
@@ -142,22 +67,31 @@ public class EnvironmentMock {
     intern("nil")
   }
 
+  // Currently selected mock buffer.
   public var currentBuffer: Buffer {
     buffers[currentBufferIndex]
   }
 
+  // Find buffer index for the buffer with the given name.
   func findBuffer(named bufferName: String) -> Int? {
     buffers.firstIndex { $0.name == bufferName }
   }
 
+  // Emacs has been interrupted, i.e. the user pressed C-g.
   var interrupted = false
+  // Emacs signaled an error.
   var signaled = false
+  // Emacs threw an exception.
   var thrown = false
 
+  // Interrupt Emacs.
   public func interrupt() { dataMutex.locked { interrupted = true } }
+  // Signal Emacs error.
   public func signal() { dataMutex.locked { signaled = true } }
+  // Throw Emacs exception.
   public func throwException() { dataMutex.locked { thrown = true } }
 
+  // tag the given pointer and persist it in the current environment.
   func tag(_ pointer: UnsafeMutablePointer<Box>) -> UnsafeMutablePointer<emacs_value_tag> {
     dataMutex.locked {
       let result = StoredValue(pointer)
@@ -166,6 +100,7 @@ public class EnvironmentMock {
     }
   }
 
+  // Intern the given name and return the corresponding symbol value.
   func intern(_ name: String) -> emacs_value {
     if let symbol = dataMutex.locked({ symbols[name] }) {
       return symbol
@@ -174,24 +109,29 @@ public class EnvironmentMock {
     return intern(name, with: dataMutex.locked { data[0].pointer })
   }
 
+  // Intern the given name with the given value and return the new symbol value.
   func intern(_ name: String, with value: emacs_value) -> emacs_value {
     let symbol = make(Reference(value))
     dataMutex.locked { symbols[name] = symbol }
     return symbol
   }
 
+  // Extract function data from the given value if possible
   func extractFunction(_ value: emacs_value) -> FunctionData? {
+    // It is either a reference to FunctionData...
     if let functionRef: Reference = extract(value, fatal: false),
        functionRef.to.pointee.data != nil,
        let function: FunctionData = extract(functionRef.to, fatal: false) {
       return function
     }
+    // ...or straight up FunctionData (if it's a lambda).
     if let function: FunctionData = extract(value) {
       return function
     }
     return nil
   }
 
+  // Replication of the environment API function doing `funcall`.
   func funcall(_ rawFunction: emacs_value, _ count: CLong, _ args: UnsafePointer<emacs_value?>) -> emacs_value {
     guard let function = extractFunction(rawFunction) else {
       return Nil
@@ -202,13 +142,19 @@ public class EnvironmentMock {
     }
   }
 
+  // Box the given value and associate it with the given finalizer (if non-nil).
+  // Lifetime of the new family of heap-allocated data is tied to the lifetime
+  // of this environment.
   func make<T>(_ from: T, _ finalizer: Box.Finalizer<T>? = nil) -> emacs_value {
     let pointer = UnsafeMutablePointer<Box>.allocate(capacity: 1)
     pointer.initialize(to: Box(from, finalizer))
     return tag(pointer)
   }
 
+  // make<T> override for String.
   func make(_ from: String, _: Box.Finalizer<String>? = nil) -> emacs_value {
+    // To make it consistent with all the use-cases and standard APIs, we should
+    // persist strings as C-string pointers.
     if let cString = from.cString(using: .utf8) {
       return make(cString)
     }
@@ -216,17 +162,24 @@ public class EnvironmentMock {
     return Nil
   }
 
+  // Replication of the `make_string` API.
   func make(_ str: UnsafePointer<CChar>, _ len: Int) -> emacs_value {
     let buffer = UnsafeBufferPointer(start: str, count: len + 1)
     var array = Array(buffer)
+    // To be a proper C-string, it should be NULL-terminated.
     array[len] = 0
+    // We box it simply as [CChar].
     return make(array)
   }
 
+  // Extract a pointer to the underlying box of the value.
   func box(of value: emacs_value) -> UnsafeMutablePointer<Box> {
+    // All emacs_values produced by the environment should have
+    // boxes under the hood.
     value.pointee.data.assumingMemoryBound(to: Box.self)
   }
 
+  // Extract the value of the given type from an opaque mock emacs_value.
   func extract<T>(_ value: emacs_value, fatal: Bool = true) -> T? {
     let box = box(of: value).pointee
     let result = box.value as? T
@@ -237,13 +190,16 @@ public class EnvironmentMock {
     return result
   }
 
+  // Override for extract<T> for String.
   func extract(_ value: emacs_value, fatal _: Bool = true) -> String? {
+    // We never store strings as String, but as [CChar].
     if let array: [CChar] = extract(value) {
       return String(cString: array)
     }
     return nil
   }
 
+  // Replication of the `copy_string_contents` API.
   func extract(_ value: emacs_value, _ buf: UnsafeMutablePointer<CChar>?, _ len: UnsafeMutablePointer<Int>) -> Bool {
     let array: [CChar] = extract(value) ?? []
     if buf == nil {
@@ -259,6 +215,7 @@ public class EnvironmentMock {
   public required init() {
     var env = emacs_env()
     env.size = MemoryLayout<emacs_env_29>.size
+
     env.non_local_exit_check = {
       raw in
       let env = toMockEnv(raw!)
@@ -414,10 +371,12 @@ public class EnvironmentMock {
     raw.initialize(from: &env, count: 1)
   }
 
+  // Bind the given closure under the given name.
   func bind(_ name: String, to function: @escaping Function) {
     _ = intern(name, with: make(FunctionData(function: function, payload: nil)))
   }
 
+  // Bind the given closure under the given name and lock the mutex.
   func bindLocked(_ name: String, with mutex: Lock, to function: @escaping Function) {
     bind(name) { [unowned mutex] args in mutex.locked { function(args) } }
   }
