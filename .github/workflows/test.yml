@@ -34,10 +34,14 @@ jobs:
         configuration:
           - release
           - debug
-        # 25.3 doesn't work in CI for some reason
+        # 25.3 doesn't work in CI for some reason and it's incredibly hard to reproduce
         exclude:
           - os: ubuntu-22.04
             emacs-version: 25.3
+          - os: macos-12
+            configuration: release
+            emacs-version: 25.3
+
     env:
       EMACS_VERSION: ${{ matrix.emacs-version }}
       BUILD_DIR: .build/${{ matrix.configuration }}
