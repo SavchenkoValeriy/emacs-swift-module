@@ -132,3 +132,18 @@ jobs:
 
       - name: Run tests via xcodebuild
         run: xcodebuild -scheme EmacsSwiftModule-Package test -destination "platform=macOS"
+
+  sanitize-test:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        sanitizer:
+          - thread
+          - address
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Run unit-tests with sanitizers
+        run: swift test -c debug --sanitize=${{ matrix.sanitizer }}
