@@ -11,7 +11,7 @@ repos:
     -   id: swiftlint
         args: [Source, test]
 -   repo: https://github.com/nicklockwood/SwiftFormat
-    rev: 0.53.4
+    rev: 0.53.5
     hooks:
     -   id: swiftformat
 -   repo: https://github.com/codespell-project/codespell
