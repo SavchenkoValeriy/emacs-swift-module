@@ -6,16 +6,16 @@ repos:
     -   id: end-of-file-fixer
     -   id: check-yaml
 -   repo: https://github.com/realm/SwiftLint
-    rev: 0.57.1
+    rev: 0.59.1
     hooks:
     -   id: swiftlint
         args: [Source, test]
 -   repo: https://github.com/nicklockwood/SwiftFormat
-    rev: 0.55.3
+    rev: 0.56.4
     hooks:
     -   id: swiftformat
 -   repo: https://github.com/codespell-project/codespell
-    rev: v2.3.0
+    rev: v2.4.1
     hooks:
     -   id: codespell
 
