@@ -199,7 +199,6 @@ class TestModule: Module {
       }
       try env.defun("swift-multiple-channels") {
         (env: Environment, x: Int, callback: PersistentEmacsValue) in
-
         let NUMBER_OF_CHANNELS = 5
         let NUMBER_OF_TASKS_PER_CHANNEL = 10
 
