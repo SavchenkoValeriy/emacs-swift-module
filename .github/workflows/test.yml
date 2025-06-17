@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - macos-12
+          - macos-latest
         # Temporarily disable Linux build and test because setup-swift doesn't work:
         #  https://github.com/swift-actions/setup-swift/issues/694
         #  - ubuntu-22.04
