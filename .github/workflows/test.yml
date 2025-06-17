@@ -40,9 +40,11 @@ jobs:
         exclude:
           - os: ubuntu-22.04
             emacs-version: 25.3
-          - os: macos-12
-            configuration: release
-            emacs-version: 25.3
+          - os: macos-latest
+            emacs-version:
+              - 25.3
+              - 26.3
+              - 27.2
 
     env:
       EMACS_VERSION: ${{ matrix.emacs-version }}
