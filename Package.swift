@@ -26,7 +26,13 @@ let package = Package(
     .target(
       name: "EmacsSwiftModule",
       dependencies: ["EmacsModule"],
-      path: "Source/Swift"
+      path: "Source/Swift",
+      swiftSettings: [
+        // It looks like it is a Swift compiler flag, that CMO
+        // leads to removal of some of the Emacs C definitions and
+        // linking errors as the result.
+        .unsafeFlags(["-disable-cmo"], .when(platforms: [.linux]))
+      ]
     ),
     .target(
       name: "EmacsModule",
