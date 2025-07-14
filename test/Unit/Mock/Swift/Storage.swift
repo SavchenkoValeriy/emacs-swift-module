@@ -23,8 +23,8 @@ import EmacsModule
 
 // Stored value allows us to expose pointers to boxes as emacs_values.
 class StoredValue {
-  public let pointer: UnsafeMutablePointer<emacs_value_tag>
-  public let deallocator: () -> Void
+  let pointer: UnsafeMutablePointer<emacs_value_tag>
+  let deallocator: () -> Void
 
   init(_ data: UnsafeMutablePointer<Box>) {
     pointer = UnsafeMutablePointer<emacs_value_tag>.allocate(capacity: 1)
