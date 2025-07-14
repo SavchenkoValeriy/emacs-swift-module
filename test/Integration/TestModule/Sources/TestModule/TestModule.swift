@@ -6,12 +6,12 @@ struct MyError: Error {
 }
 
 class MyClassA: OpaquelyEmacsConvertible {
-  public var x: Int = 42
-  public var y: String = "Hello"
+  var x: Int = 42
+  var y: String = "Hello"
 }
 
 class MyClassB: OpaquelyEmacsConvertible {
-  public var z: Double = 36.6
+  var z: Double = 36.6
 }
 
 func someAsyncTask(completion: () -> Void) async throws {
