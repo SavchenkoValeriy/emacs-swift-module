@@ -1,21 +1,21 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
     -   id: check-yaml
 -   repo: https://github.com/realm/SwiftLint
-    rev: 0.59.1
+    rev: 0.65.1
     hooks:
     -   id: swiftlint
         args: [Source, test]
 -   repo: https://github.com/nicklockwood/SwiftFormat
-    rev: 0.57.2
+    rev: 0.63.0
     hooks:
     -   id: swiftformat
 -   repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.3
     hooks:
     -   id: codespell
 
