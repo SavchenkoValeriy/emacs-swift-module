@@ -22,7 +22,9 @@ import XCTest
 
 class ChannelTests: XCTestCase {
   var mock: EnvironmentMock!
-  var env: Environment { mock.environment }
+  var env: Environment {
+    mock.environment
+  }
 
   override func setUp() {
     mock = EnvironmentMock()

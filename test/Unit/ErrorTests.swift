@@ -64,7 +64,7 @@ class ErrorTests: XCTestCase {
     XCTAssertFalse(called)
   }
 
-  func testInterruptedPredicate() throws {
+  func testInterruptedPredicate() {
     let mock = EnvironmentMock()
     let env = mock.environment
 
@@ -123,7 +123,7 @@ class ErrorTests: XCTestCase {
     XCTAssertFalse(called)
   }
 
-  func testSignalInErrorState() throws {
+  func testSignalInErrorState() {
     let mock = EnvironmentMock()
     let env = mock.environment
 
@@ -136,7 +136,7 @@ class ErrorTests: XCTestCase {
     XCTAssert(env.inErrorState())
   }
 
-  func testEmacsExceptionInErrorState() throws {
+  func testEmacsExceptionInErrorState() {
     let mock = EnvironmentMock()
     let env = mock.environment
 

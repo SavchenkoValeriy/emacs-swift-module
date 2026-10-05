@@ -38,7 +38,8 @@
     let tuple = (repeat (each element) as EmacsConvertible)
     return try withUnsafePointer(to: tuple) { tuplePtr in
       let start = UnsafeRawPointer(tuplePtr).assumingMemoryBound(
-        to: EmacsConvertible.self)
+        to: EmacsConvertible.self
+      )
       let buf = UnsafeBufferPointer(
         start: start, count: count(repeat (each T).self)
       )

@@ -1,22 +1,22 @@
-//
-// Channel+Hooks+Boilerplate.swift
-// Copyright (C) 2022 Valeriy Savchenko
-//
-// This file is part of EmacsSwiftModule.
-//
-// EmacsSwiftModule is free software: you can redistribute it and/or modify it
-// under the terms of the GNU General Public License as published by the Free
-// Software Foundation, either version 3 of the License, or (at your option)
-// any later version.
-//
-// EmacsSwiftModule is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-// or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-// more details.
-//
-// You should have received a copy of the GNU General Public License along with
-// EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
-//
+///
+/// Channel+Hooks+Boilerplate.swift
+/// Copyright (C) 2022 Valeriy Savchenko
+///
+/// This file is part of EmacsSwiftModule.
+///
+/// EmacsSwiftModule is free software: you can redistribute it and/or modify it
+/// under the terms of the GNU General Public License as published by the Free
+/// Software Foundation, either version 3 of the License, or (at your option)
+/// any later version.
+///
+/// EmacsSwiftModule is distributed in the hope that it will be useful, but
+/// WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+/// or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+/// more details.
+///
+/// You should have received a copy of the GNU General Public License along with
+/// EmacsSwiftModule. If not, see <https://www.gnu.org/licenses/>.
+///
 public extension Channel {
   /// Make a Swift callback out of an Emacs hook's name.
   ///
@@ -44,7 +44,7 @@ public extension Channel {
     /// - Returns: a callback that if called, will eventually run the hook.
     func hook<each T: EmacsConvertible>(_ hook: String)
       -> (repeat each T) -> Void {
-      { [self](arg: repeat each T) in
+      { [self] (arg: repeat each T) in
         register {
           env in
           try withTupleAsArray(repeat each arg) {

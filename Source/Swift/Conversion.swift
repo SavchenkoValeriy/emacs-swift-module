@@ -173,7 +173,8 @@ extension Dictionary: EmacsConvertible
     throws -> [Key: Value] {
     let raw = try List<ConsCell<Key, Value>>.convert(from: value, within: env)
     return Dictionary(
-      uniqueKeysWithValues: raw.map { cons in (cons.car, cons.cdr) })
+      uniqueKeysWithValues: raw.map { cons in (cons.car, cons.cdr) }
+    )
   }
 }
 
@@ -263,12 +264,13 @@ extension Environment {
     try pointee.is_not_nil(raw, value.raw)
   }
 
-  //
-  // Value factories
-  //
+  ///
+  /// Value factories
+  ///
   func make(_ from: String) throws -> EmacsValue {
     try EmacsValue(
-      from: check(pointee.make_string(raw, from, from.utf8.count)))
+      from: check(pointee.make_string(raw, from, from.utf8.count))
+    )
   }
 
   func make(_ from: Int) throws -> EmacsValue {
@@ -288,7 +290,8 @@ extension Environment {
     with finalizer: @escaping RawFinalizer = { _ in () }
   ) throws -> EmacsValue {
     try EmacsValue(
-      from: check(pointee.make_user_ptr(raw, finalizer, value)))
+      from: check(pointee.make_user_ptr(raw, finalizer, value))
+    )
   }
 
   func make(_ from: Data) throws -> EmacsValue {
@@ -300,15 +303,16 @@ extension Environment {
     }
   }
 
-  //
-  // Converter functions
-  //
+  ///
+  /// Converter functions
+  ///
   func toBytesArray(_ value: EmacsValue) throws -> [CChar] {
     var len = 0
     // The first call to `copy_string_contents` is needed to determine
     // the actual length of the string...
     _ = try check(
-      pointee.copy_string_contents(raw, value.raw, nil, &len))
+      pointee.copy_string_contents(raw, value.raw, nil, &len)
+    )
     // ...then allocate the buffer of the right size...
     var buf = [CChar](repeating: 0, count: len)
     // ...and use it again with that buffer to fill.
@@ -338,7 +342,8 @@ extension Environment {
 
     for i in 0 ..< size {
       result[i] = try EmacsValue(
-        from: check(pointee.vec_get(raw, value.raw, i)))
+        from: check(pointee.vec_get(raw, value.raw, i))
+      )
     }
 
     return result

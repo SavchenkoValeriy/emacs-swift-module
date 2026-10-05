@@ -69,7 +69,9 @@ public final class Environment {
   }
 
   let thread = Thread.current
-  var threadValid: Bool { thread == Thread.current }
+  var threadValid: Bool {
+    thread == Thread.current
+  }
 
   var valid = true
   /// Mark this environment as invalid
@@ -164,7 +166,8 @@ public final class Environment {
   ///  - Throws: ``EmacsError`` if something on the Emacs side goes wrong.
   public func retain(_ value: EmacsValue) throws -> EmacsValue {
     try EmacsValue(
-      from: check(raw.pointee.make_global_ref(raw, value.raw)))
+      from: check(raw.pointee.make_global_ref(raw, value.raw))
+    )
   }
 
   /// Release the given value.

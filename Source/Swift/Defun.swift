@@ -135,7 +135,8 @@ extension Environment {
       from: env.make_function(
         raw, function.arity, function.arity, actualFunction, docstring,
         wrappedPtr
-      ))
+      )
+    )
 
     // Only starting from Emacs 28 there are finalizers for functions.
     // For earlier versions, we have to live with the fact that there is

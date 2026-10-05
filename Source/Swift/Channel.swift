@@ -87,7 +87,7 @@ public class Channel {
   /// of all registered calls and their arguments.
   private var stack = CallbackStack()
 
-  // We need a lock to prevent races writing to the pipe.
+  /// We need a lock to prevent races writing to the pipe.
   private var mutex = Lock()
 
   fileprivate init(name: String) {
@@ -132,8 +132,8 @@ public class Channel {
     }
   }
 
-  // This is the function that makes everything happen on the Emacs side
-  // controlling the pipe process.
+  /// This is the function that makes everything happen on the Emacs side
+  /// controlling the pipe process.
   fileprivate func makeProcess(in env: Environment) throws -> EmacsValue {
     let bufferName: String = try env.funcall(
       "generate-new-buffer-name", with: " swift-channel-\(name)"
@@ -211,7 +211,8 @@ public extension Environment {
     // on the dark magic happening here.
     if version < .Emacs28 {
       throw EmacsError.unsupported(
-        what: "channels are only available for Emacs 28 and later")
+        what: "channels are only available for Emacs 28 and later"
+      )
     }
     let channel = Channel(name: name)
     let pipeFD = try pointee.open_channel(
