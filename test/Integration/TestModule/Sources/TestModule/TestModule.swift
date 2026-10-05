@@ -72,7 +72,8 @@ class TestModule: Module {
     let captured = MyClassA()
     try env.defun("swift-get-captured-a-x") { captured.x }
     try env.defun(
-      "swift-set-captured-a-x") { (x: Int) in captured.x = x }
+      "swift-set-captured-a-x"
+    ) { (x: Int) in captured.x = x }
     try env.defun("swift-typed-funcall") {
       (env: Environment, x: EmacsValue) throws -> String in
       try env.funcall("format", with: "%S", x)
@@ -130,14 +131,16 @@ class TestModule: Module {
           try await someAsyncTask(
             completion: channel.callback {
               (env: Environment) throws in try env.funcall(callback)
-            })
+            }
+          )
         }
       }
       try env.defun("swift-async-channel-with-result") {
         (callback: PersistentEmacsValue) in
         Task {
           try await someAsyncTaskWithResult(
-            completion: channel.callback(callback))
+            completion: channel.callback(callback)
+          )
         }
       }
       try env.defun("swift-nested-async-with-result") {
@@ -148,7 +151,8 @@ class TestModule: Module {
               _, x in
               let fun = channel.callback(callback) as (Int) -> Void
               fun(x)
-            })
+            }
+          )
         }
       }
       try env.defun("swift-async-lisp-callback") {
@@ -165,7 +169,8 @@ class TestModule: Module {
       try env.defun("swift-async-abnormal-hook") {
         Task {
           try await someAsyncTaskWithResult(
-            completion: channel.hook("abnormal-hook"))
+            completion: channel.hook("abnormal-hook")
+          )
         }
       }
       var persistentArray = [EmacsValue]()
@@ -238,4 +243,6 @@ class TestModule: Module {
   }
 }
 
-func createModule() -> Module { TestModule() }
+func createModule() -> Module {
+  TestModule()
+}

@@ -21,7 +21,7 @@ import EmacsEnvMock
 import EmacsModule
 @testable import EmacsSwiftModule
 
-// Stored value allows us to expose pointers to boxes as emacs_values.
+/// Stored value allows us to expose pointers to boxes as emacs_values.
 class StoredValue {
   let pointer: UnsafeMutablePointer<emacs_value_tag>
   let deallocator: () -> Void
@@ -48,7 +48,7 @@ class StoredValue {
   }
 }
 
-// Opaque box wrapping some stored value and its finalizer.
+/// Opaque box wrapping some stored value and its finalizer.
 struct Box {
   typealias Finalizer<T> = (T) -> Void
   typealias AnyFinalizer = Finalizer<Any>
@@ -81,7 +81,7 @@ struct Box {
   }
 }
 
-// A value that simply refers to a different value.
+/// A value that simply refers to a different value.
 class Reference {
   var to: emacs_value
 
@@ -90,10 +90,10 @@ class Reference {
   }
 }
 
-// Raw untyped function.
+/// Raw untyped function.
 typealias Function = ([emacs_value]) -> emacs_value
 
-// FunctionData stores all function-related data similar to how Emacs handles it.
+/// FunctionData stores all function-related data similar to how Emacs handles it.
 struct FunctionData {
   let function: Function
   let payload: RawOpaquePointer?

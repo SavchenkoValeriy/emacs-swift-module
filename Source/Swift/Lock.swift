@@ -28,14 +28,30 @@ final class Lock {
   // it has to be done this way.
   #if os(macOS)
     typealias Impl = os_unfair_lock_s
-    private func makeLock() -> Impl { os_unfair_lock() }
-    private func lock() { os_unfair_lock_lock(impl) }
-    private func unlock() { os_unfair_lock_unlock(impl) }
+    private func makeLock() -> Impl {
+      os_unfair_lock()
+    }
+
+    private func lock() {
+      os_unfair_lock_lock(impl)
+    }
+
+    private func unlock() {
+      os_unfair_lock_unlock(impl)
+    }
   #else
     typealias Impl = NSLock
-    private func makeLock() -> Impl { NSLock() }
-    private func lock() { impl.pointee.lock() }
-    private func unlock() { impl.pointee.unlock() }
+    private func makeLock() -> Impl {
+      NSLock()
+    }
+
+    private func lock() {
+      impl.pointee.lock()
+    }
+
+    private func unlock() {
+      impl.pointee.unlock()
+    }
   #endif
 
   private var impl: UnsafeMutablePointer<Impl>

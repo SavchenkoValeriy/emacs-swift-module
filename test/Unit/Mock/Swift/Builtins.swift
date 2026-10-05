@@ -54,12 +54,12 @@ func reSearchForward(pattern emacsPattern: String, in text: String, from startIn
   return []
 }
 
-// This module does not have a goal of reproducing every single builtin function
-// available in Emacs Lisp. That would've been an extremely tedious and pointless
-// work. Instead, we try to limit ourselves only to functions that we actually use
-// to provide basic Swift module APIs.
-//
-// If you ever find the need to implement a new function, please, go ahead.
+/// This module does not have a goal of reproducing every single builtin function
+/// available in Emacs Lisp. That would've been an extremely tedious and pointless
+/// work. Instead, we try to limit ourselves only to functions that we actually use
+/// to provide basic Swift module APIs.
+///
+/// If you ever find the need to implement a new function, please, go ahead.
 extension EnvironmentMock {
   func initializeBuiltins() {
     initializeListBuiltins()
@@ -231,7 +231,8 @@ extension EnvironmentMock {
           currentBuffer.contents.distance(
             from: currentBuffer.contents.startIndex,
             to: searchResults[index].range.upperBound
-          ))
+          )
+        )
       }
     }
   }

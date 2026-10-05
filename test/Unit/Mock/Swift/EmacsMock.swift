@@ -37,23 +37,23 @@ public class Buffer {
 }
 
 public class EnvironmentMock {
-  // Raw pointer to the object that we expose as the real Emacs environment pointer
+  /// Raw pointer to the object that we expose as the real Emacs environment pointer
   var raw = UnsafeMutablePointer<emacs_env>.allocate(capacity: 1)
-  // All environment-controlled values.
+  /// All environment-controlled values.
   var data: [StoredValue] = []
-  // The mapping from symbol name to its value.
+  /// The mapping from symbol name to its value.
   var symbols: [String: emacs_value] = [:]
-  // Lock to ensure exclusive access to data and symbols.
+  /// Lock to ensure exclusive access to data and symbols.
   var dataMutex = Lock()
-  // The list of open mock buffers.
+  /// The list of open mock buffers.
   var buffers = [Buffer(name: "*scratch*")]
-  // The index of the currently selected buffer.
+  /// The index of the currently selected buffer.
   var currentBufferIndex = 0
-  // Lock protecting from races over buffers and their states.
+  /// Lock protecting from races over buffers and their states.
   var bufferMutex = Lock()
-  // Current search results (see `re-search-forward`).
+  /// Current search results (see `re-search-forward`).
   var searchResults: SearchResults = []
-  // Lock protecting search results from races.
+  /// Lock protecting search results from races.
   var searchResultsMutex = Lock()
 
   // Filters are special threads running to call filter functions over pipes.
@@ -67,31 +67,39 @@ public class EnvironmentMock {
     intern("nil")
   }
 
-  // Currently selected mock buffer.
+  /// Currently selected mock buffer.
   public var currentBuffer: Buffer {
     buffers[currentBufferIndex]
   }
 
-  // Find buffer index for the buffer with the given name.
+  /// Find buffer index for the buffer with the given name.
   func findBuffer(named bufferName: String) -> Int? {
     buffers.firstIndex { $0.name == bufferName }
   }
 
-  // Emacs has been interrupted, i.e. the user pressed C-g.
+  /// Emacs has been interrupted, i.e. the user pressed C-g.
   var interrupted = false
-  // Emacs signaled an error.
+  /// Emacs signaled an error.
   var signaled = false
-  // Emacs threw an exception.
+  /// Emacs threw an exception.
   var thrown = false
 
-  // Interrupt Emacs.
-  public func interrupt() { dataMutex.locked { interrupted = true } }
-  // Signal Emacs error.
-  public func signal() { dataMutex.locked { signaled = true } }
-  // Throw Emacs exception.
-  public func throwException() { dataMutex.locked { thrown = true } }
+  /// Interrupt Emacs.
+  public func interrupt() {
+    dataMutex.locked { interrupted = true }
+  }
 
-  // tag the given pointer and persist it in the current environment.
+  /// Signal Emacs error.
+  public func signal() {
+    dataMutex.locked { signaled = true }
+  }
+
+  /// Throw Emacs exception.
+  public func throwException() {
+    dataMutex.locked { thrown = true }
+  }
+
+  /// tag the given pointer and persist it in the current environment.
   func tag(_ pointer: UnsafeMutablePointer<Box>) -> UnsafeMutablePointer<emacs_value_tag> {
     dataMutex.locked {
       let result = StoredValue(pointer)
@@ -100,7 +108,7 @@ public class EnvironmentMock {
     }
   }
 
-  // Intern the given name and return the corresponding symbol value.
+  /// Intern the given name and return the corresponding symbol value.
   func intern(_ name: String) -> emacs_value {
     if let symbol = dataMutex.locked({ symbols[name] }) {
       return symbol
@@ -109,14 +117,14 @@ public class EnvironmentMock {
     return intern(name, with: dataMutex.locked { data[0].pointer })
   }
 
-  // Intern the given name with the given value and return the new symbol value.
+  /// Intern the given name with the given value and return the new symbol value.
   func intern(_ name: String, with value: emacs_value) -> emacs_value {
     let symbol = make(Reference(value))
     dataMutex.locked { symbols[name] = symbol }
     return symbol
   }
 
-  // Extract function data from the given value if possible
+  /// Extract function data from the given value if possible
   func extractFunction(_ value: emacs_value) -> FunctionData? {
     // It is either a reference to FunctionData...
     if let functionRef: Reference = extract(value, fatal: false),
@@ -131,7 +139,7 @@ public class EnvironmentMock {
     return nil
   }
 
-  // Replication of the environment API function doing `funcall`.
+  /// Replication of the environment API function doing `funcall`.
   func funcall(_ rawFunction: emacs_value, _ count: CLong, _ args: UnsafePointer<emacs_value?>) -> emacs_value {
     guard let function = extractFunction(rawFunction) else {
       return Nil
@@ -142,16 +150,16 @@ public class EnvironmentMock {
     }
   }
 
-  // Box the given value and associate it with the given finalizer (if non-nil).
-  // Lifetime of the new family of heap-allocated data is tied to the lifetime
-  // of this environment.
+  /// Box the given value and associate it with the given finalizer (if non-nil).
+  /// Lifetime of the new family of heap-allocated data is tied to the lifetime
+  /// of this environment.
   func make<T>(_ from: T, _ finalizer: Box.Finalizer<T>? = nil) -> emacs_value {
     let pointer = UnsafeMutablePointer<Box>.allocate(capacity: 1)
     pointer.initialize(to: Box(from, finalizer))
     return tag(pointer)
   }
 
-  // make<T> override for String.
+  /// make<T> override for String.
   func make(_ from: String, _: Box.Finalizer<String>? = nil) -> emacs_value {
     // To make it consistent with all the use-cases and standard APIs, we should
     // persist strings as C-string pointers.
@@ -162,7 +170,7 @@ public class EnvironmentMock {
     return Nil
   }
 
-  // Replication of the `make_string` API.
+  /// Replication of the `make_string` API.
   func make(_ str: UnsafePointer<CChar>, _ len: Int) -> emacs_value {
     let buffer = UnsafeBufferPointer(start: str, count: len + 1)
     var array = Array(buffer)
@@ -172,14 +180,14 @@ public class EnvironmentMock {
     return make(array)
   }
 
-  // Extract a pointer to the underlying box of the value.
+  /// Extract a pointer to the underlying box of the value.
   func box(of value: emacs_value) -> UnsafeMutablePointer<Box> {
     // All emacs_values produced by the environment should have
     // boxes under the hood.
     value.pointee.data.assumingMemoryBound(to: Box.self)
   }
 
-  // Extract the value of the given type from an opaque mock emacs_value.
+  /// Extract the value of the given type from an opaque mock emacs_value.
   func extract<T>(_ value: emacs_value, fatal: Bool = true) -> T? {
     let box = box(of: value).pointee
     let result = box.value as? T
@@ -190,7 +198,7 @@ public class EnvironmentMock {
     return result
   }
 
-  // Override for extract<T> for String.
+  /// Override for extract<T> for String.
   func extract(_ value: emacs_value, fatal _: Bool = true) -> String? {
     // We never store strings as String, but as [CChar].
     if let array: [CChar] = extract(value) {
@@ -199,7 +207,7 @@ public class EnvironmentMock {
     return nil
   }
 
-  // Replication of the `copy_string_contents` API.
+  /// Replication of the `copy_string_contents` API.
   func extract(_ value: emacs_value, _ buf: UnsafeMutablePointer<CChar>?, _ len: UnsafeMutablePointer<Int>) -> Bool {
     let array: [CChar] = extract(value) ?? []
     if buf == nil {
@@ -371,12 +379,12 @@ public class EnvironmentMock {
     raw.initialize(from: &env, count: 1)
   }
 
-  // Bind the given closure under the given name.
+  /// Bind the given closure under the given name.
   func bind(_ name: String, to function: @escaping Function) {
     _ = intern(name, with: make(FunctionData(function: function, payload: nil)))
   }
 
-  // Bind the given closure under the given name and lock the mutex.
+  /// Bind the given closure under the given name and lock the mutex.
   func bindLocked(_ name: String, with mutex: Lock, to function: @escaping Function) {
     bind(name) { [unowned mutex] args in mutex.locked { function(args) } }
   }
